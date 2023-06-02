@@ -1,7 +1,7 @@
 package io.streamlined.bukkit;
 
 import io.streamlined.bukkit.configs.BaseConfig;
-import io.streamlined.bukkit.instances.InstanceManager;
+import io.streamlined.bukkit.instances.BaseManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -20,7 +20,7 @@ public class BukkitBase extends JavaPlugin implements IModifierEventable {
         modifierType = ModifierType.PLUGIN;
         this.identifier = identifier;
 
-        InstanceManager.init(this);
+        BaseManager.init(this);
 
         baseConfig = new BaseConfig();
     }

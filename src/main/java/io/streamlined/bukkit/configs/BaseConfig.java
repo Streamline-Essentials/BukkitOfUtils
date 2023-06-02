@@ -1,13 +1,11 @@
 package io.streamlined.bukkit.configs;
 
-import io.streamlined.bukkit.instances.InstanceManager;
+import io.streamlined.bukkit.instances.BaseManager;
 import tv.quaint.storage.resources.flat.simple.SimpleConfiguration;
-
-import java.io.File;
 
 public class BaseConfig extends SimpleConfiguration {
     public BaseConfig() {
-        super("base-config.yml", InstanceManager.getBaseInstance(), false);
+        super("base-config.yml", BaseManager.getBaseInstance(), false);
     }
 
     @Override
