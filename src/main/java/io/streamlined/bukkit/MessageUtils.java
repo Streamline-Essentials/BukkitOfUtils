@@ -1,10 +1,9 @@
 package io.streamlined.bukkit;
 
-import io.streamlined.bukkit.instances.InstanceManager;
+import io.streamlined.bukkit.instances.BaseManager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -12,7 +11,7 @@ public class MessageUtils {
     public static void doReplaceAndSend(String message, String  prefix) {
         message = message.replace("%newline%", "\n");
         for (String line : message.split("\n")) {
-            sendMessage(InstanceManager.getConsole(), prefix + line);
+            sendMessage(BaseManager.getConsole(), prefix + line);
         }
     }
 

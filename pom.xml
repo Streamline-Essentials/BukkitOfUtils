@@ -6,7 +6,7 @@
 
     <groupId>io.streamlined.bukkit</groupId>
     <artifactId>bukkitofutils</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
 
     <name>BukkitOfUtils</name>
 
@@ -93,8 +93,9 @@
     </build>
 
     <repositories>
+        <!-- This adds the Spigot Maven repository to the build -->
         <repository>
-            <id>spigotmc-repo</id>
+            <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
         <repository>
@@ -103,7 +104,35 @@
         </repository>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/</url>
+            <url>https://mvn.pkg.github.com/</url>
+        </repository>
+        <repository>
+            <id>glaremasters</id>
+            <url>https://repo.glaremasters.me/repository/concuncan/</url>
+        </repository>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>jcenter</id>
+            <url>https://jcenter.bintray.com/</url>
+        </repository>
+        <repository>
+            <id>jitpack</id>
+            <url>https://jitpack.io/</url>
+        </repository>
+        <repository>
+            <id>opencollab-releases</id>
+            <url>https://repo.opencollab.dev/maven-releases/</url>
+        </repository>
+        <repository>
+            <id>opencollab-snapshots</id>
+            <url>https://repo.opencollab.dev/maven-snapshots/</url>
+        </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
     </repositories>
 
@@ -119,6 +148,13 @@
             <groupId>com.github.server-utilities</groupId>
             <artifactId>thebase</artifactId>
             <version>1.5-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- ObliviateInvs -->
+        <dependency>
+            <groupId>com.github.hamza-cskn.obliviate-invs</groupId>
+            <artifactId>core</artifactId>
+            <version>4.1.12</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
