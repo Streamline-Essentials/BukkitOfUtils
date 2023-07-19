@@ -1,0 +1,51 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.1"
+//    id "maven-publish"
+}
+
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+group = 'com.github.streamline-essentials'
+//project.version = "1.5-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+    jcenter()
+    // JitPack
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url 'https://oss.sonatype.org/content/groups/public/' }
+    maven { url 'https://repo.glaremasters.me/repository/concuncan/' }
+    maven { url 'https://repo.papermc.io/repository/maven-public/' }
+    maven { url 'https://jcenter.bintray.com/' }
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://repo.opencollab.dev/maven-releases/' }
+    maven { url 'https://repo.opencollab.dev/maven-snapshots/' }
+    maven { url 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+}
+
+dependencies {
+    implementation("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
+
+    implementation("com.github.Server-Utilities:TheBase:1.6.0")
+    shadow("com.github.Server-Utilities:TheBase:1.6.0")
+    annotationProcessor("com.github.Server-Utilities:TheBase:1.6.0")
+
+    implementation("com.github.hamza-cskn.obliviate-invs:core:4.1.12")
+    compileOnly("com.github.hamza-cskn.obliviate-invs:core:4.1.12")
+    annotationProcessor("com.github.hamza-cskn.obliviate-invs:core:4.1.12")
+
+    implementation("org.projectlombok:lombok:1.18.24")
+    shadow("org.projectlombok:lombok:1.18.24")
+    annotationProcessor("org.projectlombok:lombok:1.18.24")
+}
+
+shadowJar {
+    relocate("tv.quaint.thebase", "io.streamlined.bukkit.lib.thebase")
+//    archiveFileName = "$archiveBaseName-$archiveVersion.$archiveExtension"
+    archiveName = "$baseName-$version.$extension"
+}
+
+artifacts {
+    archives shadowJar
+}
