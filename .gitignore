@@ -37,3 +37,9 @@ build/
 ### Mac OS ###
 .DS_Store
 /dependency-reduced-pom.xml
+/.idea/
+/.idea/
+/.idea/
+/.gradle/
+/.idea/
+/.gradle/
