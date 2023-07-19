@@ -87,10 +87,6 @@
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
         <repository>
-            <id>github</id>
-            <url>https://mvn.pkg.github.com/</url>
-        </repository>
-        <repository>
             <id>glaremasters</id>
             <url>https://repo.glaremasters.me/repository/concuncan/</url>
         </repository>
@@ -129,9 +125,9 @@
         </dependency>
         <!-- TheBase -->
         <dependency>
-            <groupId>com.github.server-utilities</groupId>
-            <artifactId>thebase</artifactId>
-            <version>1.5-SNAPSHOT</version>
+            <groupId>com.github.Server-Utilities</groupId>
+            <artifactId>TheBase</artifactId>
+            <version>1.6.0</version>
             <scope>compile</scope>
         </dependency>
         <!-- ObliviateInvs -->
