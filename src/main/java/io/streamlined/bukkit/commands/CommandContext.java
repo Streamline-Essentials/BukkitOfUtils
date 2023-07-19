@@ -24,7 +24,11 @@ public class CommandContext {
         this.args = getArgsFrom(args);
     }
 
-    public String getArg(int index) {
+    public CommandArgument getArg(int index) {
+        return args.stream().filter(arg -> arg.getIndex() == index).findFirst().orElse(new CommandArgument());
+    }
+
+    public String getArgString(int index) {
         return args.stream().filter(arg -> arg.getIndex() == index).findFirst().orElse(new CommandArgument()).getContent();
     }
 
