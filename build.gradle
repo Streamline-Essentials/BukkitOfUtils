@@ -27,9 +27,9 @@ repositories {
 dependencies {
     implementation("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
 
-    implementation("com.github.Server-Utilities:TheBase:1.6.0")
-    shadow("com.github.Server-Utilities:TheBase:1.6.0")
-    annotationProcessor("com.github.Server-Utilities:TheBase:1.6.0")
+    implementation("com.github.Server-Utilities:TheBase:master-SNAPSHOT")
+    shadow("com.github.Server-Utilities:TheBase:master-SNAPSHOT")
+    annotationProcessor("com.github.Server-Utilities:TheBase:master-SNAPSHOT")
 
     implementation("com.github.hamza-cskn.obliviate-invs:core:4.1.12")
     compileOnly("com.github.hamza-cskn.obliviate-invs:core:4.1.12")
