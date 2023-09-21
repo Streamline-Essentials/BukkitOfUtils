@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
+@Getter
 public class CommandArgument implements Comparable<CommandArgument> {
     public enum ContentType {
         USABLE_STRING,
@@ -16,11 +17,10 @@ public class CommandArgument implements Comparable<CommandArgument> {
         ;
     }
 
-    @Getter
     private final int index;
     @Setter
     private String content;
-    @Getter @Setter @Nullable
+    @Setter @Nullable
     private ContentType overrideType;
 
     public CommandArgument(int index, String content, @Nullable ContentType overrideType) {

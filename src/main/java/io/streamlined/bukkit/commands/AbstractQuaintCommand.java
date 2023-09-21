@@ -2,6 +2,7 @@ package io.streamlined.bukkit.commands;
 
 import io.streamlined.bukkit.MessageUtils;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -15,17 +16,35 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+@Getter
 public abstract class AbstractQuaintCommand implements TabExecutor {
-    @Getter
-    final String identifier;
+    @Setter
+    private String identifier;
+    @Setter
+    private JavaPlugin provider;
+    @Setter
+    private boolean registered;
 
     public AbstractQuaintCommand(String identifier, JavaPlugin provider) {
         this.identifier = identifier;
+        this.provider = provider;
 
+        register();
+    }
+
+    public boolean register() {
         try {
-            Objects.requireNonNull(provider.getCommand(identifier)).setExecutor(this);
+            Objects.requireNonNull(getProvider().getCommand(getIdentifier())).setExecutor(this);
+            return true;
         } catch (Exception e) {
             MessageUtils.logWarning("Failed to register command '" + identifier + "'! --> No command found in plugin.yml!");
+            return false;
+        }
+    }
+
+    public void registerAndSet() {
+        if (register()) {
+            setRegistered(true);
         }
     }
 
