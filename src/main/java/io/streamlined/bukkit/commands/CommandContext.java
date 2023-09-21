@@ -7,14 +7,15 @@ import org.bukkit.command.CommandSender;
 
 import java.util.concurrent.ConcurrentSkipListSet;
 
+@Getter
 public class CommandContext {
-    @Getter @Setter
+    @Setter
     private CommandSender sender;
-    @Getter @Setter
+    @Setter
     private Command command;
-    @Getter @Setter
+    @Setter
     private String label;
-    @Getter @Setter
+    @Setter
     private ConcurrentSkipListSet<CommandArgument> args;
 
     public CommandContext(CommandSender sender, Command command, String label, String... args) {
