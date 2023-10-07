@@ -30,7 +30,7 @@ public class Sender {
     }
 
     public Sender(CommandSender sender) {
-        this(sender.getName(), sender instanceof Player);
+        this(sender.getName(), Objects.equals(sender, Bukkit.getConsoleSender()));
     }
 
     public boolean isConsole() {
