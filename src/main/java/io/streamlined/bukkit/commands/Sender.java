@@ -11,7 +11,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tv.quaint.objects.AtomicString;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,21 +19,24 @@ public class Sender {
     private String uuid;
     private String name;
 
-    public Sender(String uuid, String name) {
+    private CommandSender commandSender;
+
+    public Sender(String uuid, String name, CommandSender sender) {
         this.uuid = uuid;
         this.name = name;
+        this.commandSender = sender;
     }
 
-    public Sender(String name, boolean isConsole) {
-        this(SenderUtils.formatUuid(name, isConsole), SenderUtils.formatName(name, isConsole));
+    public Sender(String name, CommandSender sender, boolean isConsole) {
+        this(SenderUtils.formatUuid(name, isConsole), SenderUtils.formatName(name, isConsole), sender);
     }
 
     public Sender(CommandSender sender) {
-        this(sender.getName(), Objects.equals(sender, Bukkit.getConsoleSender()));
+        this(sender.getName(), sender, Bukkit.getConsoleSender().equals(sender));
     }
 
     public boolean isConsole() {
-        return Objects.equals(uuid, BukkitBase.getBaseConfig().getConsoleUUID());
+        return Bukkit.getConsoleSender().equals(commandSender) || uuid.equals(BukkitBase.getBaseConfig().getConsoleUUID());
     }
 
     public boolean sendMessage(String message, boolean format) {
