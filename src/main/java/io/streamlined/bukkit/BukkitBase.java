@@ -7,7 +7,7 @@ import lombok.Setter;
 import org.bukkit.plugin.java.JavaPlugin;
 import tv.quaint.objects.handling.derived.IModifierEventable;
 
-public abstract class BukkitBase extends JavaPlugin implements IModifierEventable {
+public class BukkitBase extends JavaPlugin implements IModifierEventable {
     @Getter
     private final ModifierType modifierType;
     @Getter @Setter
@@ -23,15 +23,11 @@ public abstract class BukkitBase extends JavaPlugin implements IModifierEventabl
         onBaseConstruct();
     }
 
-    abstract public void onBaseConstruct();
-
-    abstract public void onBaseLoad();
-
-    abstract public void onBaseEnabling();
-
-    abstract public void onBaseEnabled();
-
-    abstract public void onBaseDisable();
+    public void onBaseConstruct() {}
+    public void onBaseLoad() {}
+    public void onBaseEnabling() {}
+    public void onBaseEnabled() {}
+    public void onBaseDisable() {}
 
     @Override
     public void onLoad() {
