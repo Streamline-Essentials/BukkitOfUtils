@@ -17,7 +17,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 @Getter
-public abstract class AbstractQuaintCommand implements TabExecutor {
+public abstract class ComplexCommand implements TabExecutor {
     @Setter
     private String identifier;
     @Setter
@@ -25,7 +25,7 @@ public abstract class AbstractQuaintCommand implements TabExecutor {
     @Setter
     private boolean registered;
 
-    public AbstractQuaintCommand(String identifier, JavaPlugin provider) {
+    public ComplexCommand(String identifier, JavaPlugin provider) {
         this.identifier = identifier;
         this.provider = provider;
 

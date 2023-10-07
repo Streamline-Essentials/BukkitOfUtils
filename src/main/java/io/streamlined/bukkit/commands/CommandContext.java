@@ -5,12 +5,13 @@ import lombok.Setter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
+import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 @Getter
 public class CommandContext {
     @Setter
-    private CommandSender sender;
+    private Sender sender;
     @Setter
     private Command command;
     @Setter
@@ -19,7 +20,7 @@ public class CommandContext {
     private ConcurrentSkipListSet<CommandArgument> args;
 
     public CommandContext(CommandSender sender, Command command, String label, String... args) {
-        this.sender = sender;
+        this.sender = new Sender(sender);
         this.command = command;
         this.label = label;
         this.args = getArgsFrom(args);
@@ -29,8 +30,93 @@ public class CommandContext {
         return args.stream().filter(arg -> arg.getIndex() == index).findFirst().orElse(new CommandArgument());
     }
 
+    @Deprecated
     public String getArgString(int index) {
+        return getStringArg(index);
+    }
+
+    public boolean isArgUsable(int index) {
+        return args.stream().anyMatch(arg -> arg.getIndex() == index);
+    }
+
+    public boolean isConsole() {
+        return sender.isConsole();
+    }
+
+    public boolean isPlayer() {
+        return ! isConsole();
+    }
+
+    public boolean sendMessage(String message, boolean format) {
+        return sender.sendMessage(message, format);
+    }
+
+    public boolean sendMessage(String message) {
+        return sender.sendMessage(message);
+    }
+
+    public int getArgCount() {
+        return args.size();
+    }
+
+    public String getStringArg(int index) {
         return args.stream().filter(arg -> arg.getIndex() == index).findFirst().orElse(new CommandArgument()).getContent();
+    }
+
+    public Optional<Integer> getIntArg(int index) {
+        try {
+            return Optional.of(Integer.parseInt(getArgString(index)));
+        } catch (NumberFormatException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Double> getDoubleArg(int index) {
+        try {
+            return Optional.of(Double.parseDouble(getArgString(index)));
+        } catch (NumberFormatException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Float> getFloatArg(int index) {
+        try {
+            return Optional.of(Float.parseFloat(getArgString(index)));
+        } catch (NumberFormatException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Long> getLongArg(int index) {
+        try {
+            return Optional.of(Long.parseLong(getArgString(index)));
+        } catch (NumberFormatException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Short> getShortArg(int index) {
+        try {
+            return Optional.of(Short.parseShort(getArgString(index)));
+        } catch (NumberFormatException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Byte> getByteArg(int index) {
+        try {
+            return Optional.of(Byte.parseByte(getArgString(index)));
+        } catch (NumberFormatException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Boolean> getBooleanArg(int index) {
+        try {
+            return Optional.of(Boolean.parseBoolean(getArgString(index)));
+        } catch (NumberFormatException ignored) {
+            return Optional.empty();
+        }
     }
 
     public static ConcurrentSkipListSet<CommandArgument> getArgsFrom(String... args) {

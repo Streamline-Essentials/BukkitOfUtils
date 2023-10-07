@@ -60,4 +60,16 @@ public class BaseConfig extends SimpleConfiguration {
 
         return getOrSetDefault("logging.debug.prefix", "&a[&3DEBUG&a] &d");
     }
+
+    public String getConsoleUUID() {
+        reloadResource();
+
+        return getOrSetDefault("console.uuid", "%");
+    }
+
+    public String getConsoleName() {
+        reloadResource();
+
+        return getOrSetDefault("console.name", "Console");
+    }
 }
