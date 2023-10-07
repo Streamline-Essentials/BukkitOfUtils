@@ -39,6 +39,10 @@ public class Sender {
         return Bukkit.getConsoleSender().equals(commandSender) || uuid.equals(BukkitBase.getBaseConfig().getConsoleUUID());
     }
 
+    public boolean isPlayer() {
+        return ! isConsole();
+    }
+
     public boolean sendMessage(String message, boolean format) {
         AtomicBoolean success = new AtomicBoolean(false);
         AtomicString finalMessage = new AtomicString(message);
