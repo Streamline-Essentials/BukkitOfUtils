@@ -29,7 +29,7 @@ public abstract class ComplexCommand implements TabExecutor {
         this.identifier = identifier;
         this.provider = provider;
 
-        register();
+        registerAndSet();
     }
 
     public boolean register() {
