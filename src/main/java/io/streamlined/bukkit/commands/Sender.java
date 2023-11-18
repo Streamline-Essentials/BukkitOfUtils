@@ -1,6 +1,6 @@
 package io.streamlined.bukkit.commands;
 
-import io.streamlined.bukkit.BukkitBase;
+import io.streamlined.bukkit.PluginBase;
 import io.streamlined.bukkit.MessageUtils;
 import io.streamlined.bukkit.utils.SenderUtils;
 import lombok.Getter;
@@ -36,7 +36,7 @@ public class Sender {
     }
 
     public boolean isConsole() {
-        return Bukkit.getConsoleSender().equals(commandSender) || uuid.equals(BukkitBase.getBaseConfig().getConsoleUUID());
+        return Bukkit.getConsoleSender().equals(commandSender) || uuid.equals(PluginBase.getBaseConfig().getConsoleUUID());
     }
 
     public boolean isPlayer() {
