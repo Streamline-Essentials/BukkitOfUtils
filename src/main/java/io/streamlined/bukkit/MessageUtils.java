@@ -16,27 +16,27 @@ public class MessageUtils {
     }
 
     public static void logInfo(String message) {
-        if (BukkitBase.getBaseConfig().getIsInfoLoggingEnabled()) return;
+        if (PluginBase.getBaseConfig().getIsInfoLoggingEnabled()) return;
 
-        doReplaceAndSend(message, BukkitBase.getBaseConfig().getIsInfoLoggingPrefix());
+        doReplaceAndSend(message, PluginBase.getBaseConfig().getIsInfoLoggingPrefix());
     }
 
     public static void logWarning(String message) {
-        if (BukkitBase.getBaseConfig().getIsWarnLoggingEnabled()) return;
+        if (PluginBase.getBaseConfig().getIsWarnLoggingEnabled()) return;
 
-        doReplaceAndSend(message, BukkitBase.getBaseConfig().getIsWarnLoggingPrefix());
+        doReplaceAndSend(message, PluginBase.getBaseConfig().getIsWarnLoggingPrefix());
     }
 
     public static void logSevere(String message) {
-        if (BukkitBase.getBaseConfig().getIsSevereLoggingEnabled()) return;
+        if (PluginBase.getBaseConfig().getIsSevereLoggingEnabled()) return;
 
-        doReplaceAndSend(message, BukkitBase.getBaseConfig().getIsSevereLoggingPrefix());
+        doReplaceAndSend(message, PluginBase.getBaseConfig().getIsSevereLoggingPrefix());
     }
 
     public static void logDebug(String message) {
-        if (BukkitBase.getBaseConfig().getIsDebugLoggingEnabled()) return;
+        if (PluginBase.getBaseConfig().getIsDebugLoggingEnabled()) return;
 
-        doReplaceAndSend(message, BukkitBase.getBaseConfig().getIsDebugLoggingPrefix());
+        doReplaceAndSend(message, PluginBase.getBaseConfig().getIsDebugLoggingPrefix());
     }
 
     public static void logInfo(StackTraceElement[] stackTraceElements) {

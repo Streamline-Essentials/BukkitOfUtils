@@ -1,13 +1,12 @@
 package io.streamlined.bukkit.instances;
 
-import io.streamlined.bukkit.BukkitBase;
+import io.streamlined.bukkit.PluginBase;
 import lombok.Getter;
 import lombok.Setter;
 import mc.obliviate.inventory.InventoryAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class BaseManager {
     @Getter @Setter
-    private static BukkitBase baseInstance;
+    private static PluginBase baseInstance;
 
     @Getter @Setter
     private static ConcurrentSkipListSet<BaseRunnable> loadedRunnables = new ConcurrentSkipListSet<>();
@@ -28,7 +27,7 @@ public class BaseManager {
     @Getter @Setter
     private static BukkitTask ticker;
 
-    public static void init(BukkitBase baseInstance) {
+    public static void init(PluginBase baseInstance) {
         setBaseInstance(baseInstance);
         new InventoryAPI(baseInstance).init();
 
