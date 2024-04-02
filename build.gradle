@@ -9,6 +9,11 @@ apply plugin: 'com.github.johnrengelman.shadow'
 group = 'com.github.streamline-essentials'
 //project.version = "1.5-SNAPSHOT"
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 repositories {
     mavenCentral()
     jcenter()
@@ -28,10 +33,10 @@ repositories {
 disableAutoTargetJvm()
 
 dependencies {
-    compileOnly("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
-    compileOnly("dev.folia:folia-api:1.19.4-R0.1-SNAPSHOT")
-            .exclude(group: 'org.spigotmc', module: 'spigot-api')
-            .exclude(module: 'bukkit')
+//    compileOnly("org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT")
+    compileOnly("dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT")
+//            .exclude(group: 'org.spigotmc', module: 'spigot-api')
+//            .exclude(module: 'bukkit')
 
     implementation("com.github.Server-Utilities:TheBase:master-SNAPSHOT")
     shadow("com.github.Server-Utilities:TheBase:master-SNAPSHOT")
