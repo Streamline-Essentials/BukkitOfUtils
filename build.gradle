@@ -52,7 +52,7 @@ dependencies {
 }
 
 shadowJar {
-    setArchiveFileName(project.name + "-" + project.version + ".jar")
+//    setArchiveFileName(project.name + "-" + project.version + ".jar")
 }
 
 artifacts {
