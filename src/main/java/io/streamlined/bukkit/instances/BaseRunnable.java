@@ -2,10 +2,13 @@ package io.streamlined.bukkit.instances;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable> {
     @Getter
@@ -25,7 +28,10 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
     @Getter @Setter
     private boolean asyncable;
 
-    public BaseRunnable(int delay, int period, boolean isAsyncable, boolean load) {
+    @Getter @Setter
+    private Function<BaseRunnable, Location> locationGetter;
+
+    public BaseRunnable(int delay, int period, boolean isAsyncable, boolean load, Function<BaseRunnable, Location> locationGetter) {
         startTime = new Date();
         this.index = BaseManager.getNextRunnableIndex();
 
@@ -34,19 +40,41 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
         this.warmup = delay;
         this.asyncable = isAsyncable;
 
+        this.locationGetter = locationGetter;
+
         if (load) load();
+    }
+
+    public BaseRunnable(int delay, int period, boolean isAsyncable, boolean load) {
+        this(delay, period, isAsyncable, load, getMainLocationGetter());
+    }
+
+    public static Function<BaseRunnable, Location> getMainLocationGetter() {
+        return runnable -> BaseManager.getMainWorld().getSpawnLocation();
     }
 
     public BaseRunnable(int delay, int period, boolean isAsyncable) {
         this(delay, period, isAsyncable, true);
     }
 
+    public BaseRunnable(int delay, int period, boolean isAsyncable, Function<BaseRunnable, Location> locationGetter) {
+        this(delay, period, isAsyncable, true, locationGetter);
+    }
+
     public BaseRunnable(int delay, int period) {
         this(delay, period, true, true);
     }
 
+    public BaseRunnable(int delay, int period, Function<BaseRunnable, Location> locationGetter) {
+        this(delay, period, true, true, locationGetter);
+    }
+
     public BaseRunnable(int period) {
         this(0, period, true, true);
+    }
+
+    public BaseRunnable(int period, Function<BaseRunnable, Location> locationGetter) {
+        this(0, period, true, true, locationGetter);
     }
 
     public BaseRunnable() {
@@ -77,11 +105,29 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
         }
 
         if (counter >= period) {
-            execute();
+            if (! isAsyncable()) executeSync();
+            else execute();
             counter = 0;
         }
 
         counter ++;
+    }
+
+    public void executeSync() {
+        try {
+            Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), this::execute);
+        } catch (Exception e) {
+//            e.printStackTrace(); // Don't print.
+            try {
+                FoliaManager.runTaskSync(getLocation(), this::execute);
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+    }
+
+    public Location getLocation() {
+        return locationGetter.apply(this);
     }
 
     public abstract void execute();

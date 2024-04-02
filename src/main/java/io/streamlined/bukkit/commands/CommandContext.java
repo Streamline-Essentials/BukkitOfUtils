@@ -1,9 +1,12 @@
 package io.streamlined.bukkit.commands;
 
+import io.streamlined.bukkit.PluginBase;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -11,14 +14,14 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @Getter @Setter
 public class CommandContext {
     private Sender sender;
-    private CommandSender masterSender;
+    private CommandSender commandSender;
     private Command command;
     private String label;
     private ConcurrentSkipListSet<CommandArgument> args;
 
     public CommandContext(CommandSender sender, Command command, String label, String... args) {
         this.sender = new Sender(sender);
-        this.masterSender = sender;
+        this.commandSender = sender;
         this.command = command;
         this.label = label;
         this.args = getArgsFrom(args);
@@ -31,6 +34,30 @@ public class CommandContext {
     @Deprecated
     public String getArgString(int index) {
         return getStringArg(index);
+    }
+
+    public Optional<Player> getPlayer() {
+        if (isPlayer()) return Optional.of((Player) commandSender);
+        else return Optional.empty();
+    }
+
+    public Player getPlayerOrNull() {
+        return getPlayer().orElse(null);
+    }
+
+    public Optional<CommandSender> getSenderArg(int argIndex) {
+        String playerName = getStringArg(argIndex);
+        if (playerName == null) return Optional.empty();
+
+        if (playerName.equals(PluginBase.getBaseConfig().getConsoleUUID())) {
+            return Optional.of(Bukkit.getConsoleSender());
+        }
+
+        return Optional.ofNullable(Bukkit.getPlayer(playerName));
+    }
+
+    public Optional<Player> getPlayerArg(int argIndex) {
+        return getSenderArg(argIndex).filter(sender -> sender instanceof Player).map(sender -> (Player) sender);
     }
 
     public boolean isArgUsable(int index) {

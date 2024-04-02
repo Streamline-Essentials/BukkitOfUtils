@@ -5,13 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 import mc.obliviate.inventory.InventoryAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,13 +23,24 @@ public class BaseManager {
     @Setter
     private static int nextRunnableIndex = 0;
     @Getter @Setter
-    private static BukkitTask ticker;
+    private static Timer ticker;
 
     public static void init(PluginBase baseInstance) {
         setBaseInstance(baseInstance);
         new InventoryAPI(baseInstance).init();
 
-        ticker = Bukkit.getScheduler().runTaskTimer(baseInstance, BaseManager::tickAllRunnables, 0, 1);
+        ticker = new Timer();
+
+        ticker.scheduleAtFixedRate(BaseManager.getMainTimerTask(), 0L, 50L);
+    }
+
+    public static World getMainWorld() {
+        World world = Bukkit.getWorlds().get(0);
+        if (world == null) {
+            throw new NullPointerException("Main world is null.");
+        } else {
+            return world;
+        }
     }
 
     public static CommandSender getConsole() {
@@ -134,6 +143,15 @@ public class BaseManager {
     public static void tickAllRunnables() {
         tickAllRunnablesAsync();
         tickAllRunnablesOnlySync();
+    }
+
+    public static TimerTask getMainTimerTask() {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                tickAllRunnables();
+            }
+        };
     }
 
     public void schedule(Runnable runnable, int delay, int period, boolean isAsyncable) {
