@@ -1,8 +1,8 @@
 package io.streamlined.bukkit.instances;
 
 import io.streamlined.bukkit.PluginBase;
-import lombok.Getter;
 import lombok.Setter;
+import lombok.Getter;
 import mc.obliviate.inventory.InventoryAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.World;

@@ -5,6 +5,7 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: 'com.github.johnrengelman.shadow'
+apply from: rootDir.toString() + '/dependencies.gradle'
 
 group = 'com.github.streamline-essentials'
 //project.version = "1.5-SNAPSHOT"
@@ -33,22 +34,21 @@ repositories {
 disableAutoTargetJvm()
 
 dependencies {
+    // MC
 //    compileOnly("org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT")
-    compileOnly("dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT")
+//    annotationProcessor(shadow(implementation(compileOnly("dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT"))))
 //            .exclude(group: 'org.spigotmc', module: 'spigot-api')
 //            .exclude(module: 'bukkit')
 
-    implementation("com.github.Server-Utilities:TheBase:master-SNAPSHOT")
-    shadow("com.github.Server-Utilities:TheBase:master-SNAPSHOT")
-    annotationProcessor("com.github.Server-Utilities:TheBase:master-SNAPSHOT")
+    // Defaults.
+    compileOnly(files(FILES))
+    annotationProcessor(ANNO)
+    implementation(IMPL)
+    compileOnly(COMP_ONLY)
+    shadow(SHADOW)
 
-    implementation("com.github.hamza-cskn.obliviate-invs:core:4.1.12")
-    compileOnly("com.github.hamza-cskn.obliviate-invs:core:4.1.12")
-    annotationProcessor("com.github.hamza-cskn.obliviate-invs:core:4.1.12")
-
-    implementation("org.projectlombok:lombok:1.18.24")
-    shadow("org.projectlombok:lombok:1.18.24")
-    annotationProcessor("org.projectlombok:lombok:1.18.24")
+    // Other Plugins
+//    compileOnly(OTHER_PLUGINS)
 }
 
 shadowJar {
