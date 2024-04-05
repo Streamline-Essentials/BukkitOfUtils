@@ -36,6 +36,7 @@ public class BaseManager {
         ticker = new Timer(50, action -> {
             tickAllRunnables();
         });
+        ticker.setRepeats(true);
         ticker.start();
     }
 
@@ -133,30 +134,8 @@ public class BaseManager {
         getLoadedRunnables().forEach(BaseRunnable::runAsync);
     }
 
-    public static void tickAllRunnablesSync() {
-        getLoadedRunnables().forEach(BaseRunnable::run);
-    }
-
-    public static void tickAllRunnablesOnlySync() {
-        for (BaseRunnable runnable : getLoadedRunnables()) {
-            if (runnable.isAsyncable()) continue;
-
-            runnable.runOnlySync();
-        }
-    }
-
     public static void tickAllRunnables() {
-        tickAllRunnablesAsync();
-        tickAllRunnablesOnlySync();
-    }
-
-    public static TimerTask getMainTimerTask() {
-        return new TimerTask() {
-            @Override
-            public void run() {
-                tickAllRunnables();
-            }
-        };
+        getLoadedRunnables().forEach(BaseRunnable::run);
     }
 
     public void schedule(Runnable runnable, int delay, int period, boolean isAsyncable) {
