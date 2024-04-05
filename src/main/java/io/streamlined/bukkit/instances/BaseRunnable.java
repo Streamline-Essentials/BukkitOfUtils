@@ -82,15 +82,7 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
     }
 
     public void runAsync() {
-        if (! asyncable) return;
-
         CompletableFuture.runAsync(this);
-    }
-
-    public void runOnlySync() {
-        if (asyncable) return;
-
-        this.run();
     }
 
     @Override
@@ -105,8 +97,8 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
         }
 
         if (counter >= period) {
-            if (! isAsyncable()) executeSync();
-            else execute();
+            if (isAsyncable()) execute();
+            else executeSync();
             counter = 0;
         }
 
