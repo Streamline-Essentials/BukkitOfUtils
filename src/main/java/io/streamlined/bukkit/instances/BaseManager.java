@@ -9,7 +9,11 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import javax.swing.Timer;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,9 +33,10 @@ public class BaseManager {
         setBaseInstance(baseInstance);
         new InventoryAPI(baseInstance).init();
 
-        ticker = new Timer();
-
-        ticker.scheduleAtFixedRate(BaseManager.getMainTimerTask(), 0L, 50L);
+        ticker = new Timer(50, action -> {
+            tickAllRunnables();
+        });
+        ticker.start();
     }
 
     public static World getMainWorld() {
