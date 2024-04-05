@@ -97,12 +97,20 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
         }
 
         if (counter >= period) {
-            if (isAsyncable()) execute();
-            else executeSync();
+            try {
+                executeSwitch();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             counter = 0;
         }
 
         counter ++;
+    }
+
+    public void executeSwitch() {
+        if (isAsyncable()) execute();
+        else executeSync();
     }
 
     public void executeSync() {
@@ -120,6 +128,19 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
     public Location getLocation() {
         return locationGetter.apply(this);
+    }
+
+    public void executeFurther(Runnable runnable, Location location) {
+        try {
+            Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), runnable);
+        } catch (Exception e) {
+//            e.printStackTrace(); // Don't print.
+            try {
+                FoliaManager.runTaskSync(location, runnable);
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
     }
 
     public abstract void execute();
