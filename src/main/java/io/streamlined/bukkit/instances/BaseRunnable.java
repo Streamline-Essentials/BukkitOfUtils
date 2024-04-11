@@ -10,25 +10,24 @@ import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+@Getter
 public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable> {
-    @Getter
     private final Date startTime;
-    @Getter
     private final int index;
-    @Getter @Setter
+    @Setter
     private int delay;
-    @Getter @Setter
+    @Setter
     private int period;
-    @Getter @Setter
+    @Setter
     private int warmup;
-    @Getter @Setter
+    @Setter
     private int counter;
-    @Getter @Setter
+    @Setter
     private int ticksLived;
-    @Getter @Setter
+    @Setter
     private boolean asyncable;
 
-    @Getter @Setter
+    @Setter
     private Function<BaseRunnable, Location> locationGetter;
 
     public BaseRunnable(int delay, int period, boolean isAsyncable, boolean load, Function<BaseRunnable, Location> locationGetter) {
