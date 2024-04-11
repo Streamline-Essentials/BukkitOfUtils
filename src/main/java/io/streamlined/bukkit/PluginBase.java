@@ -56,6 +56,7 @@ public class PluginBase extends JavaPlugin implements IModifierEventable {
     @Override
     public void onDisable() {
         onBaseDisable();
+        BaseManager.stop();
     }
 
     @Override

@@ -40,6 +40,10 @@ public class BaseManager {
         ticker.start();
     }
 
+    public static void stop() {
+        ticker.stop();
+    }
+
     public static World getMainWorld() {
         World world = Bukkit.getWorlds().get(0);
         if (world == null) {
