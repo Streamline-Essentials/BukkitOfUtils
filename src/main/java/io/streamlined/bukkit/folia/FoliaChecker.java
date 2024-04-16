@@ -21,4 +21,12 @@ public class FoliaChecker {
             return whenFalse.get();
         }
     }
+
+    public static void validate(Runnable whenTrue, Runnable whenFalse) {
+        if (isFolia()) {
+            whenTrue.run();
+        } else {
+            whenFalse.run();
+        }
+    }
 }
