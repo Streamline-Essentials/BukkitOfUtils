@@ -10,4 +10,15 @@ public class FoliaManager {
 
         regionScheduler.execute(BaseManager.getBaseInstance(), location, runnable);
     }
+
+    public static boolean isFolia() {
+        try {
+            RegionScheduler regionScheduler = Bukkit.getRegionScheduler();
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
