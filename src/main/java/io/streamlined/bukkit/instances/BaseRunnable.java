@@ -101,8 +101,6 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
     public abstract ConcurrentSkipListSet<LocationalTask<?>> execute();
 
-    public abstract <T> SingleSet<Function<T, Location>, Runnable> executeWhenFolia();
-
     public void load() {
         BaseManager.loadRunnable(this);
     }
