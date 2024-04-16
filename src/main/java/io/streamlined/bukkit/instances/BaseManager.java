@@ -145,19 +145,19 @@ public class BaseManager {
         getLoadedRunnables().forEach(BaseRunnable::run);
     }
 
-    public void schedule(Runnable runnable, Function<Void, SingleSet<Location, Runnable>> foliaGetter, int delay, int period, boolean isAsyncable) {
-        new RBaseRunnable(runnable, foliaGetter, delay, period, isAsyncable);
+    public void schedule(Runnable runnable, int delay, int period, boolean isAsyncable) {
+        new RBaseRunnable(runnable, delay, period, isAsyncable);
     }
 
-    public void schedule(Runnable runnable, Function<Void, SingleSet<Location, Runnable>> foliaGetter, int delay, int period) {
-        new RBaseRunnable(runnable, foliaGetter, delay, period, true);
+    public void schedule(Runnable runnable, int delay, int period) {
+        new RBaseRunnable(runnable, delay, period, true);
     }
 
-    public void schedule(Runnable runnable, Function<Void, SingleSet<Location, Runnable>> foliaGetter, int delay, boolean isAsyncable) {
-        new RDelayedRunnable(runnable, foliaGetter, delay, isAsyncable);
+    public void schedule(Runnable runnable, int delay, boolean isAsyncable) {
+        new RDelayedRunnable(runnable, delay, isAsyncable);
     }
 
-    public void schedule(Runnable runnable, Function<Void, SingleSet<Location, Runnable>> foliaGetter, int delay) {
-        new RDelayedRunnable(runnable, foliaGetter, delay, true);
+    public void schedule(Runnable runnable, int delay) {
+        new RDelayedRunnable(runnable, delay, true);
     }
 }
