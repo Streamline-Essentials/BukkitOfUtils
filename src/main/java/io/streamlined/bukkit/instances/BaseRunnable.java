@@ -1,15 +1,16 @@
 package io.streamlined.bukkit.instances;
 
 import io.streamlined.bukkit.folia.FoliaChecker;
+import io.streamlined.bukkit.folia.LocationalTask;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import tv.quaint.objects.SingleSet;
 
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 
 @Getter
@@ -27,55 +28,30 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
     @Setter
     private int ticksLived;
     @Setter
-    private boolean asyncable;
+    private boolean runSync;
 
-    @Setter
-    private Function<BaseRunnable, Location> locationGetter;
-
-    public BaseRunnable(int delay, int period, boolean isAsyncable, boolean load, Function<BaseRunnable, Location> locationGetter) {
+    public BaseRunnable(int delay, int period, boolean isAsyncable, boolean load) {
         startTime = new Date();
         this.index = BaseManager.getNextRunnableIndex();
 
         this.delay = delay;
         this.period = period;
         this.warmup = delay;
-        this.asyncable = isAsyncable;
-
-        this.locationGetter = locationGetter;
+        this.runSync = isAsyncable;
 
         if (load) load();
-    }
-
-    public BaseRunnable(int delay, int period, boolean isAsyncable, boolean load) {
-        this(delay, period, isAsyncable, load, getMainLocationGetter());
-    }
-
-    public static Function<BaseRunnable, Location> getMainLocationGetter() {
-        return runnable -> BaseManager.getMainWorld().getSpawnLocation();
     }
 
     public BaseRunnable(int delay, int period, boolean isAsyncable) {
         this(delay, period, isAsyncable, true);
     }
 
-    public BaseRunnable(int delay, int period, boolean isAsyncable, Function<BaseRunnable, Location> locationGetter) {
-        this(delay, period, isAsyncable, true, locationGetter);
-    }
-
     public BaseRunnable(int delay, int period) {
         this(delay, period, true, true);
     }
 
-    public BaseRunnable(int delay, int period, Function<BaseRunnable, Location> locationGetter) {
-        this(delay, period, true, true, locationGetter);
-    }
-
     public BaseRunnable(int period) {
         this(0, period, true, true);
-    }
-
-    public BaseRunnable(int period, Function<BaseRunnable, Location> locationGetter) {
-        this(0, period, true, true, locationGetter);
     }
 
     public BaseRunnable() {
@@ -99,7 +75,7 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
         if (counter >= period) {
             try {
-                executeSwitch();
+                executeNow();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -109,46 +85,23 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
         counter ++;
     }
 
-    public void executeSwitch() {
-        if (isAsyncable()) executeWithChecks();
-        else executeSyncWithChecks();
+    public void executeNow() {
+        ConcurrentSkipListSet<LocationalTask<?>> set = execute();
+
+        set.forEach(LocationalTask::execute);
     }
 
-    public void executeSyncWithChecks() {
-        FoliaChecker.validate(() -> {
-            SingleSet<Location, Runnable> set = executeWhenFolia();
-
-            FoliaManager.runTaskSync(set.getKey(), set.getValue());
-
-            return null;
-        }, () -> {
-            Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), this::execute);
-
-            return null;
-        });
+    public <T> LocationalTask<T> buildTask() {
+        return new LocationalTask<>(this::execute, getMainLocationizer(), null, ! isRunSync());
     }
 
-    public Location getLocation() {
-        return locationGetter.apply(this);
+    public <T> Function<T, Location> getMainLocationizer() {
+        return t -> BaseManager.getMainWorld().getSpawnLocation();
     }
 
-    public abstract void execute();
+    public abstract ConcurrentSkipListSet<LocationalTask<?>> execute();
 
-    public abstract SingleSet<Location, Runnable> executeWhenFolia();
-
-    public void executeWithChecks() {
-        FoliaChecker.validate(() -> {
-            SingleSet<Location, Runnable> set = executeWhenFolia();
-
-            FoliaManager.runTaskSync(set.getKey(), set.getValue());
-
-            return null;
-        }, () -> {
-            execute();
-
-            return null;
-        });
-    }
+    public abstract <T> SingleSet<Function<T, Location>, Runnable> executeWhenFolia();
 
     public void load() {
         BaseManager.loadRunnable(this);
