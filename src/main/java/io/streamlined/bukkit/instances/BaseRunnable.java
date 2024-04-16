@@ -1,10 +1,12 @@
 package io.streamlined.bukkit.instances;
 
+import io.streamlined.bukkit.folia.FoliaChecker;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
+import tv.quaint.objects.SingleSet;
 
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
@@ -108,41 +110,45 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
     }
 
     public void executeSwitch() {
-        if (isAsyncable()) execute();
-        else executeSync();
+        if (isAsyncable()) executeWithChecks();
+        else executeSyncWithChecks();
     }
 
-    public void executeSync() {
-        try {
+    public void executeSyncWithChecks() {
+        FoliaChecker.validate(() -> {
+            SingleSet<Location, Runnable> set = executeWhenFolia();
+
+            FoliaManager.runTaskSync(set.getKey(), set.getValue());
+
+            return null;
+        }, () -> {
             Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), this::execute);
-        } catch (Exception e) {
-//            e.printStackTrace(); // Don't print.
-            try {
-                FoliaManager.runTaskSync(getLocation(), this::execute);
-            } catch (Exception e2) {
-                e2.printStackTrace();
-            }
-        }
+
+            return null;
+        });
     }
 
     public Location getLocation() {
         return locationGetter.apply(this);
     }
 
-    public void executeFurther(Runnable runnable, Location location) {
-        try {
-            Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), runnable);
-        } catch (Exception e) {
-//            e.printStackTrace(); // Don't print.
-            try {
-                FoliaManager.runTaskSync(location, runnable);
-            } catch (Exception e2) {
-                e2.printStackTrace();
-            }
-        }
-    }
-
     public abstract void execute();
+
+    public abstract SingleSet<Location, Runnable> executeWhenFolia();
+
+    public void executeWithChecks() {
+        FoliaChecker.validate(() -> {
+            SingleSet<Location, Runnable> set = executeWhenFolia();
+
+            FoliaManager.runTaskSync(set.getKey(), set.getValue());
+
+            return null;
+        }, () -> {
+            execute();
+
+            return null;
+        });
+    }
 
     public void load() {
         BaseManager.loadRunnable(this);
