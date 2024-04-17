@@ -30,28 +30,28 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
     @Setter
     private boolean runSync;
 
-    public BaseRunnable(int delay, int period, boolean isAsyncable, boolean load) {
+    public BaseRunnable(int delay, int period, boolean runSync, boolean load) {
         startTime = new Date();
         this.index = BaseManager.getNextRunnableIndex();
 
         this.delay = delay;
         this.period = period;
         this.warmup = delay;
-        this.runSync = isAsyncable;
+        this.runSync = runSync;
 
         if (load) load();
     }
 
-    public BaseRunnable(int delay, int period, boolean isAsyncable) {
-        this(delay, period, isAsyncable, true);
+    public BaseRunnable(int delay, int period, boolean runSync) {
+        this(delay, period, runSync, true);
     }
 
     public BaseRunnable(int delay, int period) {
-        this(delay, period, true, true);
+        this(delay, period, false, true);
     }
 
     public BaseRunnable(int period) {
-        this(0, period, true, true);
+        this(0, period, false, true);
     }
 
     public BaseRunnable() {
