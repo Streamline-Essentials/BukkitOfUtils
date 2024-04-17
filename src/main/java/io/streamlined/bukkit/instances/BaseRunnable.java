@@ -4,13 +4,14 @@ import io.streamlined.bukkit.folia.FoliaChecker;
 import io.streamlined.bukkit.folia.LocationalTask;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
-import tv.quaint.objects.SingleSet;
 
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 @Getter
@@ -86,9 +87,25 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
     }
 
     public void executeNow() {
-        ConcurrentSkipListSet<LocationalTask<?>> set = execute();
+        AtomicReference<ConcurrentSkipListSet<LocationalTask<?>>> set = new AtomicReference<>(new ConcurrentSkipListSet<>());
+        if (isRunSync()) {
+            try {
+                FoliaChecker.validate(() -> {
+                    set.set(execute());
+                }, () -> {
+                    Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), () -> {
+                        set.set(execute());
+                    });
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+        } else {
+            runAsync();
+        }
 
-        set.forEach(LocationalTask::execute);
+        set.get().forEach(LocationalTask::execute);
     }
 
     public <T> LocationalTask<T> buildTask() {
