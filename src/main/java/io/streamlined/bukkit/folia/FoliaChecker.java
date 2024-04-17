@@ -24,7 +24,11 @@ public class FoliaChecker {
 
     public static void validate(Runnable whenTrue, Runnable whenFalse) {
         if (isFolia()) {
-            whenTrue.run();
+            try {
+                whenTrue.run();
+            } catch (IllegalStateException e) {
+                whenFalse.run();
+            }
         } else {
             whenFalse.run();
         }
