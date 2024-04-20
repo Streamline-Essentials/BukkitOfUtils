@@ -1,8 +1,10 @@
 package io.streamlined.bukkit.folia;
 
-import io.streamlined.bukkit.instances.FoliaManager;
+import io.streamlined.bukkit.instances.BaseManager;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 
-import java.util.function.Supplier;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FoliaChecker {
     public static boolean isFolia() {
@@ -14,27 +16,61 @@ public class FoliaChecker {
         }
     }
 
-    public static <R> R validate(Supplier<R> whenTrue, Supplier<R> whenFalse) {
-        if (isFolia()) {
-            try {
-                return whenTrue.get();
-            } catch (IllegalStateException e) {
-                return whenFalse.get();
+    public static <R> R execute(LocationTask<R> locationTask, boolean runSync) {
+        try {
+            if (runSync) {
+                return runTaskSync(locationTask);
+            } else {
+                return locationTask.getSupplier().get();
             }
-        } else {
-            return whenFalse.get();
+        } catch (UnsupportedOperationException e) {
+            return FoliaManager.runTaskSync(locationTask);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
-    public static void validate(Runnable whenTrue, Runnable whenFalse) {
+    public static void validate(LocationTask<Void> locationTask, boolean runSync) {
+        try {
+            execute(locationTask, runSync);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static <R> R runTaskSync(LocationTask<R> locationTask) {
         if (isFolia()) {
             try {
-                whenTrue.run();
-            } catch (IllegalStateException e) {
-                whenFalse.run();
+                AtomicReference<R> result = new AtomicReference<>();
+                Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), () -> {
+                    result.set(locationTask.getSupplier().get());
+                });
+                return result.get();
+            } catch (UnsupportedOperationException e) {
+                return FoliaManager.runTaskSync(locationTask);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
             }
         } else {
-            whenFalse.run();
+            try {
+                AtomicReference<R> result = new AtomicReference<>();
+                Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), () -> {
+                    result.set(locationTask.getSupplier().get());
+                });
+                return result.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }
+    }
+
+    public static void runTaskSync(Location location, Runnable runnable) {
+        runTaskSync(new LocationTask<>(() -> {
+            runnable.run();
+            return null;
+        }, location, true));
     }
 }

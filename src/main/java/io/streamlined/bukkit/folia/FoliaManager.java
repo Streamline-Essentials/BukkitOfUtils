@@ -1,15 +1,30 @@
-package io.streamlined.bukkit.instances;
+package io.streamlined.bukkit.folia;
 
 import io.papermc.paper.plugin.configuration.PluginMeta;
 import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
+import io.streamlined.bukkit.instances.BaseManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class FoliaManager {
-    public static void runTaskSync(Location location, Runnable runnable) {
+    public static <R> R runTaskSync(LocationTask<R> locationTask) {
         RegionScheduler regionScheduler = Bukkit.getRegionScheduler();
 
-        regionScheduler.execute(BaseManager.getBaseInstance(), location, runnable);
+        AtomicReference<R> result = new AtomicReference<>();
+        regionScheduler.execute(BaseManager.getBaseInstance(), locationTask.getLocation(), () -> {
+            result.set(locationTask.getSupplier().get());
+        });
+
+        return result.get();
+    }
+
+    public static void runTaskSync(Location location, Runnable runnable) {
+        runTaskSync(new LocationTask<>(() -> {
+            runnable.run();
+            return null;
+        }, location, true));
     }
 
     public static boolean isFolia() {

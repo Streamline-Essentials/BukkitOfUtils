@@ -1,7 +1,7 @@
 package io.streamlined.bukkit.instances;
 
 import io.streamlined.bukkit.folia.FoliaChecker;
-import io.streamlined.bukkit.folia.LocationalTask;
+import io.streamlined.bukkit.folia.LocationTask;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -76,7 +76,7 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
         if (counter >= period) {
             try {
-                executeNow();
+                buildAndExecute();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -86,34 +86,21 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
         counter ++;
     }
 
-    public void executeNow() {
-        AtomicReference<ConcurrentSkipListSet<LocationalTask<?>>> set = new AtomicReference<>(new ConcurrentSkipListSet<>());
-
+    public void buildAndExecute() {
         try {
-            FoliaChecker.validate(() -> {
-                set.set(execute());
-            }, () -> {
-                Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), () -> {
-                    set.set(execute());
-                });
-            });
+            buildTasks().forEach(this::execute);
         } catch (Exception e) {
             e.printStackTrace();
-            return;
         }
-
-        set.get().forEach(LocationalTask::execute);
     }
 
-    public <T> LocationalTask<T> buildTask() {
-        return new LocationalTask<>(this::execute, getMainLocationizer(), null, ! isRunSync());
-    }
+    public abstract ConcurrentSkipListSet<LocationTask<?>> buildTasks();
+
+    public abstract void execute(LocationTask<?> task);
 
     public <T> Function<T, Location> getMainLocationizer() {
         return t -> BaseManager.getMainWorld().getSpawnLocation();
     }
-
-    public abstract ConcurrentSkipListSet<LocationalTask<?>> execute();
 
     public void load() {
         BaseManager.loadRunnable(this);
