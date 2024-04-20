@@ -31,13 +31,17 @@ public class LocationalTask<T> implements Comparable<LocationalTask<T>> {
     }
 
     public void execute() {
-        FoliaChecker.validate(this::executeWhenFolia, () -> {
-            if (runSync) {
-                Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), runnable);
-            } else {
-                runnable.run();
-            }
-        });
+        try {
+            FoliaChecker.validate(this::executeWhenFolia, () -> {
+                if (runSync) {
+                    Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), runnable);
+                } else {
+                    runnable.run();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void executeWhenFolia() {

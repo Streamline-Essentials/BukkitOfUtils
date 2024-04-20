@@ -88,21 +88,18 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
     public void executeNow() {
         AtomicReference<ConcurrentSkipListSet<LocationalTask<?>>> set = new AtomicReference<>(new ConcurrentSkipListSet<>());
-        if (isRunSync()) {
-            try {
-                FoliaChecker.validate(() -> {
+
+        try {
+            FoliaChecker.validate(() -> {
+                set.set(execute());
+            }, () -> {
+                Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), () -> {
                     set.set(execute());
-                }, () -> {
-                    Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), () -> {
-                        set.set(execute());
-                    });
                 });
-            } catch (Exception e) {
-                e.printStackTrace();
-                return;
-            }
-        } else {
-            runAsync();
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
         }
 
         set.get().forEach(LocationalTask::execute);
