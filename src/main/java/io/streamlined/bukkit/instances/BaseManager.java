@@ -37,11 +37,18 @@ public class BaseManager {
         setBaseInstance(baseInstance);
         new InventoryAPI(baseInstance).init();
 
-        ticker = new Timer(50, action -> {
-            tickAllRunnables();
-        });
-        ticker.setRepeats(true);
+        ticker = new Timer(50, e -> tick());
         ticker.start();
+    }
+
+    public static void tick() {
+        loadedRunnables.forEach(runnable -> {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public static void stop() {
