@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 @Getter
@@ -88,7 +87,23 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
     public void buildAndExecute() {
         try {
-            buildTasks().forEach(this::execute);
+            ConcurrentSkipListSet<LocationTask<?>> tasks = new ConcurrentSkipListSet<>();
+
+            if (isRunSync()) {
+                if (FoliaChecker.isPossiblyFolia()) {
+                    FoliaChecker.runTaskSync(getLocation(), () -> {
+                        tasks.addAll(buildTasks());
+                    });
+                } else {
+                    Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), () -> {
+                        tasks.addAll(buildTasks());
+                    });
+                }
+            } else {
+                tasks.addAll(buildTasks());
+            }
+
+            tasks.forEach(this::execute);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -98,8 +113,8 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
     public abstract void execute(LocationTask<?> task);
 
-    public <T> Function<T, Location> getMainLocationizer() {
-        return t -> BaseManager.getMainWorld().getSpawnLocation();
+    public Location getLocation() {
+        return BaseManager.getMainWorld().getSpawnLocation();
     }
 
     public void load() {
