@@ -32,7 +32,11 @@ public class FoliaManager {
             RegionScheduler regionScheduler = Bukkit.getRegionScheduler();
 
             PluginMeta pluginMeta = BaseManager.getBaseInstance().getPluginMeta();
-            boolean bool = pluginMeta.isFoliaSupported();
+            try {
+                boolean bool = pluginMeta.isFoliaSupported();
+            } catch (NoSuchMethodError e) {
+                return false;
+            }
 
             return true;
         } catch (Exception e) {

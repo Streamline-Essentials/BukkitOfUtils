@@ -76,7 +76,7 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
         if (counter >= period) {
             try {
                 buildAndExecute();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
             counter = 0;
@@ -104,7 +104,7 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
             }
 
             tasks.forEach(this::execute);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }

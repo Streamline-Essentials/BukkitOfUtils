@@ -45,7 +45,7 @@ public class BaseManager {
         loadedRunnables.forEach(runnable -> {
             try {
                 runnable.run();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
         });
