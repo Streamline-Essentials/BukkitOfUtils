@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FoliaChecker {
     public static boolean isPossiblyFolia() {
         try {
-            return FoliaManager.isFolia();
+            return FoliaManager.isPossiblyFolia();
         } catch (Exception e) {
 //            e.printStackTrace();
             return false;

@@ -27,7 +27,7 @@ public class FoliaManager {
         }, location, true));
     }
 
-    public static boolean isFolia() {
+    public static boolean isPossiblyFolia() {
         try {
             RegionScheduler regionScheduler = Bukkit.getRegionScheduler();
 
