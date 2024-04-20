@@ -16,7 +16,11 @@ public class FoliaChecker {
 
     public static <R> R validate(Supplier<R> whenTrue, Supplier<R> whenFalse) {
         if (isFolia()) {
-            return whenTrue.get();
+            try {
+                whenTrue.get();
+            } catch (IllegalStateException e) {
+                whenFalse.get();
+            }
         } else {
             return whenFalse.get();
         }
