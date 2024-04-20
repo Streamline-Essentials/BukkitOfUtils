@@ -7,7 +7,7 @@ import org.bukkit.Location;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FoliaChecker {
-    public static boolean isFolia() {
+    public static boolean isPossiblyFolia() {
         try {
             return FoliaManager.isFolia();
         } catch (Exception e) {
@@ -40,7 +40,7 @@ public class FoliaChecker {
     }
 
     public static <R> R runTaskSync(LocationTask<R> locationTask) {
-        if (isFolia()) {
+        if (isPossiblyFolia()) {
             try {
                 AtomicReference<R> result = new AtomicReference<>();
                 Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), () -> {
