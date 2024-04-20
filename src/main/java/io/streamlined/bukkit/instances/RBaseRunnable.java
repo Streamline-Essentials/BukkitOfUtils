@@ -1,27 +1,29 @@
 package io.streamlined.bukkit.instances;
 
-import io.streamlined.bukkit.folia.LocationalTask;
+import io.streamlined.bukkit.folia.LocationTask;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Location;
-import tv.quaint.objects.SingleSet;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.function.Function;
 
 @Setter
 @Getter
 public class RBaseRunnable extends BaseRunnable {
-    private Runnable runnable;
+    private ConcurrentSkipListSet<LocationTask<?>> tasks;
 
-    public RBaseRunnable(Runnable runnable, int delay, int period, boolean runSync) {
+    public RBaseRunnable(ConcurrentSkipListSet<LocationTask<?>> tasks, int delay, int period, boolean runSync) {
         super(delay, period, runSync);
-        this.runnable = runnable;
+        this.tasks = tasks;
     }
 
     @Override
-    public ConcurrentSkipListSet<LocationalTask<?>> execute() {
-        return new ConcurrentSkipListSet<>(List.of(new LocationalTask<>(runnable, getMainLocationizer(), null, isRunSync())));
+    public ConcurrentSkipListSet<LocationTask<?>> buildTasks() {
+        return tasks;
+    }
+
+    @Override
+    public void execute(LocationTask<?> task) {
+        task.execute();
     }
 }

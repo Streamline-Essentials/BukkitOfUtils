@@ -1,8 +1,6 @@
 package io.streamlined.bukkit.instances;
 
-import io.streamlined.bukkit.folia.LocationalTask;
-
-import java.util.concurrent.ConcurrentSkipListSet;
+import io.streamlined.bukkit.folia.LocationTask;
 
 public abstract class DelayedRunnable extends BaseRunnable {
     public DelayedRunnable(int delay, boolean isAsyncable) {
@@ -10,12 +8,10 @@ public abstract class DelayedRunnable extends BaseRunnable {
     }
 
     @Override
-    public ConcurrentSkipListSet<LocationalTask<?>> execute() {
-        ConcurrentSkipListSet<LocationalTask<?>> r = onlyOnce();
+    public void execute(LocationTask<?> task) {
+        onlyOnce(task);
         cancel();
-
-        return r;
     }
 
-    public abstract ConcurrentSkipListSet<LocationalTask<?>> onlyOnce();
+    public abstract void onlyOnce(LocationTask<?> task);
 }

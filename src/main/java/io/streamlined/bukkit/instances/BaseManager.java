@@ -1,6 +1,7 @@
 package io.streamlined.bukkit.instances;
 
 import io.streamlined.bukkit.PluginBase;
+import io.streamlined.bukkit.folia.LocationTask;
 import lombok.Setter;
 import lombok.Getter;
 import mc.obliviate.inventory.InventoryAPI;
@@ -145,19 +146,19 @@ public class BaseManager {
         getLoadedRunnables().forEach(BaseRunnable::run);
     }
 
-    public void schedule(Runnable runnable, int delay, int period, boolean isAsyncable) {
-        new RBaseRunnable(runnable, delay, period, isAsyncable);
+    public void schedule(ConcurrentSkipListSet<LocationTask<?>> tasks, int delay, int period, boolean isAsyncable) {
+        new RBaseRunnable(tasks, delay, period, isAsyncable);
     }
 
-    public void schedule(Runnable runnable, int delay, int period) {
-        new RBaseRunnable(runnable, delay, period, true);
+    public void schedule(ConcurrentSkipListSet<LocationTask<?>> tasks, int delay, int period) {
+        new RBaseRunnable(tasks, delay, period, true);
     }
 
-    public void schedule(Runnable runnable, int delay, boolean isAsyncable) {
-        new RDelayedRunnable(runnable, delay, isAsyncable);
+    public void schedule(ConcurrentSkipListSet<LocationTask<?>> tasks, int delay, boolean isAsyncable) {
+        new RDelayedRunnable(tasks, delay, isAsyncable);
     }
 
-    public void schedule(Runnable runnable, int delay) {
-        new RDelayedRunnable(runnable, delay, true);
+    public void schedule(ConcurrentSkipListSet<LocationTask<?>> tasks, int delay) {
+        new RDelayedRunnable(tasks, delay, true);
     }
 }
