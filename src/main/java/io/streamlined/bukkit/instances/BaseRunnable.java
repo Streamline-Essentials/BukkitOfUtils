@@ -1,7 +1,5 @@
 package io.streamlined.bukkit.instances;
 
-import io.streamlined.bukkit.folia.FoliaChecker;
-import io.streamlined.bukkit.folia.LocationTask;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -10,8 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.function.Function;
 
 @Getter
 public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable> {
@@ -75,7 +71,7 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
         if (counter >= period) {
             try {
-                buildAndExecute();
+                checkAndExecute(isRunSync());
             } catch (Throwable e) {
                 e.printStackTrace();
             }
@@ -85,33 +81,31 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
         counter ++;
     }
 
-    public void buildAndExecute() {
-        try {
-            ConcurrentSkipListSet<LocationTask<?>> tasks = new ConcurrentSkipListSet<>();
+    public void checkAndExecute(boolean runSync) {
+        checkAndExecute(runSync, 0);
+    }
 
-            if (isRunSync()) {
-                if (FoliaChecker.isPossiblyFolia()) {
-                    FoliaChecker.runTaskSync(getLocation(), () -> {
-                        tasks.addAll(buildTasks());
-                    });
-                } else {
-                    Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), () -> {
-                        tasks.addAll(buildTasks());
-                    });
-                }
-            } else {
-                tasks.addAll(buildTasks());
+    public void checkAndExecute(boolean runSync, int tries) {
+        if (runSync) {
+            try {
+                Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), this::execute);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                if (tries >= 1) return;
+                checkAndExecute(false, tries + 1);
             }
-
-            tasks.forEach(this::execute);
-        } catch (Throwable e) {
-            e.printStackTrace();
+        } else {
+            try {
+                execute();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                if (tries >= 1) return;
+                checkAndExecute(true, tries + 1);
+            }
         }
     }
 
-    public abstract ConcurrentSkipListSet<LocationTask<?>> buildTasks();
-
-    public abstract void execute(LocationTask<?> task);
+    public abstract void execute();
 
     public Location getLocation() {
         return BaseManager.getMainWorld().getSpawnLocation();

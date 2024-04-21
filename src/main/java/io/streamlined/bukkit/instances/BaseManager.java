@@ -1,26 +1,21 @@
 package io.streamlined.bukkit.instances;
 
 import io.streamlined.bukkit.PluginBase;
-import io.streamlined.bukkit.folia.LocationTask;
 import lombok.Setter;
 import lombok.Getter;
 import mc.obliviate.inventory.InventoryAPI;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import tv.quaint.objects.SingleSet;
 
 import javax.swing.Timer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 public class BaseManager {
     @Getter @Setter
@@ -42,9 +37,19 @@ public class BaseManager {
     }
 
     public static void tick() {
-        loadedRunnables.forEach(runnable -> {
+        getLoadedRunnables().forEach(runnable -> {
             try {
                 runnable.run();
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public static void tickAsync() {
+        getLoadedRunnables().forEach(runnable -> {
+            try {
+                runnable.runAsync();
             } catch (Throwable e) {
                 e.printStackTrace();
             }
@@ -145,27 +150,19 @@ public class BaseManager {
         return index;
     }
 
-    public static void tickAllRunnablesAsync() {
-        getLoadedRunnables().forEach(BaseRunnable::runAsync);
+    public void schedule(Runnable runnable, int delay, int period, boolean isAsyncable) {
+        new RBaseRunnable(runnable, delay, period, isAsyncable);
     }
 
-    public static void tickAllRunnables() {
-        getLoadedRunnables().forEach(BaseRunnable::run);
+    public void schedule(Runnable runnable, int delay, int period) {
+        new RBaseRunnable(runnable, delay, period, true);
     }
 
-    public void schedule(ConcurrentSkipListSet<LocationTask<?>> tasks, int delay, int period, boolean isAsyncable) {
-        new RBaseRunnable(tasks, delay, period, isAsyncable);
+    public void schedule(Runnable runnable, int delay, boolean isAsyncable) {
+        new RDelayedRunnable(runnable, delay, isAsyncable);
     }
 
-    public void schedule(ConcurrentSkipListSet<LocationTask<?>> tasks, int delay, int period) {
-        new RBaseRunnable(tasks, delay, period, true);
-    }
-
-    public void schedule(ConcurrentSkipListSet<LocationTask<?>> tasks, int delay, boolean isAsyncable) {
-        new RDelayedRunnable(tasks, delay, isAsyncable);
-    }
-
-    public void schedule(ConcurrentSkipListSet<LocationTask<?>> tasks, int delay) {
-        new RDelayedRunnable(tasks, delay, true);
+    public void schedule(Runnable runnable, int delay) {
+        new RDelayedRunnable(runnable, delay, true);
     }
 }

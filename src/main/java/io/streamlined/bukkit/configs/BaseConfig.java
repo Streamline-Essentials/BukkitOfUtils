@@ -10,7 +10,16 @@ public class BaseConfig extends SimpleConfiguration {
 
     @Override
     public void init() {
-
+        getIsInfoLoggingEnabled();
+        getIsInfoLoggingPrefix();
+        getIsWarnLoggingEnabled();
+        getIsWarnLoggingPrefix();
+        getIsSevereLoggingEnabled();
+        getIsSevereLoggingPrefix();
+        getIsDebugLoggingEnabled();
+        getIsDebugLoggingPrefix();
+        getConsoleUUID();
+        getConsoleName();
     }
 
     public boolean getIsInfoLoggingEnabled() {
