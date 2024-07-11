@@ -1,41 +1,66 @@
 package io.streamlined.bukkit.instances;
 
+import io.streamlined.bukkit.scheduler.MainScheduler;
+import io.streamlined.bukkit.scheduler.SchedulableTask;
+import io.streamlined.bukkit.scheduler.ScheduleType;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Getter
+@Setter
 public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable> {
     private final Date startTime;
     private final int index;
-    @Setter
     private int delay;
-    @Setter
     private int period;
-    @Setter
     private int warmup;
-    @Setter
     private int counter;
-    @Setter
     private int ticksLived;
-    @Setter
     private boolean runSync;
+    private Date lastExecution;
 
-    public BaseRunnable(int delay, int period, boolean runSync, boolean load) {
+    @Nullable
+    private Location runAt;
+    @Nullable
+    private Entity entity;
+
+    public BaseRunnable(int delay, int period, boolean runSync, boolean load, @Nullable Location runAt, @Nullable Entity entity) {
         startTime = new Date();
-        this.index = BaseManager.getNextRunnableIndex();
+        this.index = MainScheduler.getNextRunnableIndex();
 
         this.delay = delay;
         this.period = period;
         this.warmup = delay;
         this.runSync = runSync;
 
+        this.runAt = runAt;
+        this.entity = entity;
+
         if (load) load();
+    }
+
+    public BaseRunnable(int delay, int period, boolean runSync, boolean load) {
+        this(delay, period, runSync, load, null, null);
+    }
+
+    public BaseRunnable(int delay, int period, boolean runSync, @Nullable Location runAt, @Nullable Entity entity) {
+        this(delay, period, runSync, true, runAt, entity);
+    }
+
+    public BaseRunnable(int delay, int period, boolean runSync, boolean load, Entity entity) {
+        this(delay, period, runSync, load, null, entity);
+    }
+
+    public BaseRunnable(int delay, int period, boolean runSync, boolean load, @Nullable Location runAt) {
+        this(delay, period, runSync, load, runAt, null);
     }
 
     public BaseRunnable(int delay, int period, boolean runSync) {
@@ -52,6 +77,22 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
     public BaseRunnable() {
         this(1);
+    }
+
+    public ScheduleType getType() {
+        return ScheduleType.getType(getEntity(), getRunAt());
+    }
+
+    public boolean isLocationBased() {
+        return getType() == ScheduleType.LOCATION;
+    }
+
+    public boolean isSenderBased() {
+        return getType() == ScheduleType.ENTITY;
+    }
+
+    public boolean isGlobal() {
+        return getType() == ScheduleType.GLOBAL;
     }
 
     public void runAsync() {
@@ -71,7 +112,7 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
         if (counter >= period) {
             try {
-                checkAndExecute(isRunSync());
+                forwardExecution();
             } catch (Throwable e) {
                 e.printStackTrace();
             }
@@ -81,42 +122,24 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
         counter ++;
     }
 
-    public void checkAndExecute(boolean runSync) {
-        checkAndExecute(runSync, 0);
+    public void forwardExecution() {
+        this.lastExecution = new Date();
+
+        wrapExecution().run();
     }
 
-    public void checkAndExecute(boolean runSync, int tries) {
-        if (runSync) {
-            try {
-                Bukkit.getScheduler().runTask(BaseManager.getBaseInstance(), this::execute);
-            } catch (Throwable e) {
-                e.printStackTrace();
-                if (tries >= 1) return;
-                checkAndExecute(false, tries + 1);
-            }
-        } else {
-            try {
-                execute();
-            } catch (Throwable e) {
-                e.printStackTrace();
-                if (tries >= 1) return;
-                checkAndExecute(true, tries + 1);
-            }
-        }
+    public SchedulableTask wrapExecution() {
+        return new SchedulableTask(0, TimeUnit.MILLISECONDS, ! isRunSync(), this::execute, getRunAt(), getEntity());
     }
 
     public abstract void execute();
 
-    public Location getLocation() {
-        return BaseManager.getMainWorld().getSpawnLocation();
-    }
-
     public void load() {
-        BaseManager.loadRunnable(this);
+        MainScheduler.loadRunnable(this);
     }
 
     public void unload() {
-        BaseManager.unloadRunnable(this);
+        MainScheduler.unloadRunnable(this);
     }
 
     public void cancel() {
