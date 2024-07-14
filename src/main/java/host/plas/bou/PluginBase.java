@@ -1,6 +1,5 @@
 package host.plas.bou;
 
-import com.github.Anon8281.universalScheduler.UniversalScheduler;
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import host.plas.bou.configs.BaseConfig;
 import host.plas.bou.instances.BaseManager;
@@ -16,9 +15,6 @@ public class PluginBase extends JavaPlugin implements IModifierEventable {
 
     @Getter @Setter
     private static BaseConfig baseConfig;
-
-    @Getter @Setter
-    private static PluginBase baseInstance;
 
     @Getter @Setter
     private static TaskScheduler scheduler;
@@ -48,8 +44,6 @@ public class PluginBase extends JavaPlugin implements IModifierEventable {
     @Override
     public void onEnable() {
         onBaseEnabling();
-
-        baseInstance = this;
 
         BaseManager.init(this);
 
