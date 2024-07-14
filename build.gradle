@@ -53,6 +53,8 @@ dependencies {
 
 shadowJar {
 //    setArchiveFileName(project.name + "-" + project.version + ".jar")
+
+    relocate 'com.github.Anon8281.universalScheduler', 'host.plas.bou.libs.universalScheduler'
 }
 
 artifacts {

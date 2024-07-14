@@ -1,6 +1,6 @@
-package io.streamlined.bukkit.configs;
+package host.plas.bou.configs;
 
-import io.streamlined.bukkit.instances.BaseManager;
+import host.plas.bou.instances.BaseManager;
 import tv.quaint.storage.resources.flat.simple.SimpleConfiguration;
 
 public class BaseConfig extends SimpleConfiguration {

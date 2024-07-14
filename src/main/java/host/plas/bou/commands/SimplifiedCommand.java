@@ -1,4 +1,4 @@
-package io.streamlined.bukkit.commands;
+package host.plas.bou.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

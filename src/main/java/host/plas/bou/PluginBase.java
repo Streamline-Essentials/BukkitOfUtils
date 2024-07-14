@@ -1,7 +1,9 @@
-package io.streamlined.bukkit;
+package host.plas.bou;
 
-import io.streamlined.bukkit.configs.BaseConfig;
-import io.streamlined.bukkit.instances.BaseManager;
+import com.github.Anon8281.universalScheduler.UniversalScheduler;
+import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
+import host.plas.bou.configs.BaseConfig;
+import host.plas.bou.instances.BaseManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,6 +19,9 @@ public class PluginBase extends JavaPlugin implements IModifierEventable {
 
     @Getter @Setter
     private static PluginBase baseInstance;
+
+    @Getter @Setter
+    private static TaskScheduler scheduler;
 
     @Override
     public String getIdentifier() {
@@ -45,6 +50,8 @@ public class PluginBase extends JavaPlugin implements IModifierEventable {
         onBaseEnabling();
 
         baseInstance = this;
+
+        scheduler = UniversalScheduler.getScheduler(this);
 
         BaseManager.init(this);
 

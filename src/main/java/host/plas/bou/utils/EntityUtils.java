@@ -1,8 +1,7 @@
-package io.streamlined.bukkit.utils;
+package host.plas.bou.utils;
 
-import io.streamlined.bukkit.MessageUtils;
-import io.streamlined.bukkit.scheduler.FoliaBridge;
-import io.streamlined.bukkit.scheduler.MainScheduler;
+import host.plas.bou.MessageUtils;
+import host.plas.bou.scheduling.TaskManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -12,15 +11,14 @@ import java.util.function.Predicate;
 
 public class EntityUtils {
     public static ConcurrentSkipListMap<String, Entity> pollEntities() {
-        if (MainScheduler.isFoliaServer()) {
-            return FoliaBridge.pollEntities();
-        }
         ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
 
         try {
-            Bukkit.getWorlds().forEach(world -> {
-                world.getEntities().forEach(entity -> {
-                    entities.put(entity.getUniqueId().toString(), entity);
+            TaskManager.getScheduler().runTask(() -> {
+                Bukkit.getWorlds().forEach(world -> {
+                    world.getEntities().forEach(entity -> {
+                        entities.put(entity.getUniqueId().toString(), entity);
+                    });
                 });
             });
         } catch (Exception e) {
@@ -45,9 +43,6 @@ public class EntityUtils {
     }
 
     public static ConcurrentSkipListMap<String, LivingEntity> pollLivingEntities() {
-        if (MainScheduler.isFoliaServer()) {
-            return FoliaBridge.pollLivingEntities();
-        }
         ConcurrentSkipListMap<String, LivingEntity> entities = new ConcurrentSkipListMap<>();
 
         try {

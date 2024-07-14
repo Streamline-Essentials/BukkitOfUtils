@@ -1,6 +1,6 @@
-package io.streamlined.bukkit;
+package host.plas.bou;
 
-import io.streamlined.bukkit.instances.BaseManager;
+import host.plas.bou.instances.BaseManager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 
