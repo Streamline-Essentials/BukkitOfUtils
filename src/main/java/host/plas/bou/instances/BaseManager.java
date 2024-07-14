@@ -17,12 +17,13 @@ import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class BaseManager {
-    public static PluginBase getBaseInstance() {
-        return PluginBase.getBaseInstance();
-    }
+    @Getter @Setter
+    private static PluginBase baseInstance;
 
     public static void init(PluginBase baseInstance) {
-        PluginBase.setBaseConfig(new BaseConfig());
+        setBaseInstance(baseInstance);
+
+        PluginBase.setBaseConfig(new BaseConfig(baseInstance));
 
         PluginBase.setScheduler(UniversalScheduler.getScheduler(getBaseInstance()));
 
