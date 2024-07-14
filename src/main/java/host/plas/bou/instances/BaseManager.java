@@ -1,6 +1,8 @@
 package host.plas.bou.instances;
 
+import com.github.Anon8281.universalScheduler.UniversalScheduler;
 import host.plas.bou.PluginBase;
+import host.plas.bou.configs.BaseConfig;
 import host.plas.bou.scheduling.TaskManager;
 import lombok.Setter;
 import lombok.Getter;
@@ -15,11 +17,15 @@ import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class BaseManager {
-    @Getter @Setter
-    private static PluginBase baseInstance;
+    public static PluginBase getBaseInstance() {
+        return PluginBase.getBaseInstance();
+    }
 
     public static void init(PluginBase baseInstance) {
-        setBaseInstance(baseInstance);
+        PluginBase.setBaseConfig(new BaseConfig());
+
+        PluginBase.setScheduler(UniversalScheduler.getScheduler(getBaseInstance()));
+
         new InventoryAPI(baseInstance).init();
 
         TaskManager.init();
