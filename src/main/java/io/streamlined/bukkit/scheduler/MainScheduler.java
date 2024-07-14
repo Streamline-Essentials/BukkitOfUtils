@@ -88,14 +88,18 @@ public class MainScheduler {
     private static int nextRunnableIndex = 0;
     @Getter @Setter
     private static Timer ticker;
+    @Getter @Setter
+    private static int millisPerTick = 1;
 
     public static void init() {
-        ticker = new Timer(1, e -> tick());
+        ticker = new Timer(millisPerTick, e -> tick());
         ticker.start();
     }
 
     public static void tick() {
         getLoadedRunnables().forEach(runnable -> {
+            if (! runnable.pollStandardWaiting()) return;
+
             try {
                 runnable.run();
             } catch (Throwable e) {
@@ -106,6 +110,8 @@ public class MainScheduler {
 
     public static void tickAsync() {
         getLoadedRunnables().forEach(runnable -> {
+            if (! runnable.pollStandardWaiting()) return;
+
             try {
                 runnable.runAsync();
             } catch (Throwable e) {
