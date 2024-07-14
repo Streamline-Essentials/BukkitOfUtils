@@ -1,7 +1,7 @@
-package io.streamlined.bukkit.instances;
+package host.plas.bou.instances;
 
-import io.streamlined.bukkit.PluginBase;
-import io.streamlined.bukkit.scheduler.MainScheduler;
+import host.plas.bou.PluginBase;
+import host.plas.bou.scheduling.TaskManager;
 import lombok.Setter;
 import lombok.Getter;
 import mc.obliviate.inventory.InventoryAPI;
@@ -10,13 +10,9 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import javax.swing.Timer;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class BaseManager {
     @Getter @Setter
@@ -26,11 +22,11 @@ public class BaseManager {
         setBaseInstance(baseInstance);
         new InventoryAPI(baseInstance).init();
 
-        MainScheduler.init();
+        TaskManager.init();
     }
 
     public static void stop() {
-        MainScheduler.stop();
+        TaskManager.stop();
     }
 
     public static World getMainWorld() {

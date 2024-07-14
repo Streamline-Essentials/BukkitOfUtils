@@ -1,4 +1,4 @@
-package io.streamlined.bukkit.commands;
+package host.plas.bou.commands;
 
 import lombok.Getter;
 import lombok.Setter;

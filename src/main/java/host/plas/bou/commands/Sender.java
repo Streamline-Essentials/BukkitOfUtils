@@ -1,8 +1,8 @@
-package io.streamlined.bukkit.commands;
+package host.plas.bou.commands;
 
-import io.streamlined.bukkit.PluginBase;
-import io.streamlined.bukkit.MessageUtils;
-import io.streamlined.bukkit.utils.SenderUtils;
+import host.plas.bou.MessageUtils;
+import host.plas.bou.PluginBase;
+import host.plas.bou.utils.SenderUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;

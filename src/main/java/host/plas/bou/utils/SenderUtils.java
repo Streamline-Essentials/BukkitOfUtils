@@ -1,6 +1,6 @@
-package io.streamlined.bukkit.utils;
+package host.plas.bou.utils;
 
-import io.streamlined.bukkit.PluginBase;
+import host.plas.bou.PluginBase;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 

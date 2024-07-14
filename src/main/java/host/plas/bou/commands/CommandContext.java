@@ -1,6 +1,6 @@
-package io.streamlined.bukkit.commands;
+package host.plas.bou.commands;
 
-import io.streamlined.bukkit.PluginBase;
+import host.plas.bou.PluginBase;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
