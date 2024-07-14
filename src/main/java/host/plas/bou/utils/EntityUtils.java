@@ -1,11 +1,13 @@
 package host.plas.bou.utils;
 
 import host.plas.bou.MessageUtils;
+import host.plas.bou.instances.BaseManager;
 import host.plas.bou.scheduling.TaskManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Predicate;
 
@@ -16,9 +18,13 @@ public class EntityUtils {
         try {
             TaskManager.getScheduler().runTask(() -> {
                 Bukkit.getWorlds().forEach(world -> {
-                    world.getEntities().forEach(entity -> {
-                        TaskManager.getScheduler().runTask(entity, () -> {
-                            entities.put(entity.getUniqueId().toString(), entity);
+                    Arrays.stream(world.getLoadedChunks()).forEach(chunk -> {
+                        TaskManager.getScheduler().runTask(world, chunk.getX(), chunk.getZ(), () -> {
+                            Arrays.stream(chunk.getEntities()).forEach(entity -> {
+                                TaskManager.getScheduler().runTask(entity, () -> {
+                                    entities.put(entity.getUniqueId().toString(), entity);
+                                });
+                            });
                         });
                     });
                 });
