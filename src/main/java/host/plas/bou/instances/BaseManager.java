@@ -2,6 +2,7 @@ package host.plas.bou.instances;
 
 import com.github.Anon8281.universalScheduler.UniversalScheduler;
 import host.plas.bou.PluginBase;
+import host.plas.bou.utils.EntityUtils;
 import host.plas.bou.configs.BaseConfig;
 import host.plas.bou.scheduling.TaskManager;
 import lombok.Setter;
@@ -30,6 +31,8 @@ public class BaseManager {
         new InventoryAPI(baseInstance).init();
 
         TaskManager.init();
+
+        EntityUtils.init();
     }
 
     public static void stop() {
@@ -46,7 +49,7 @@ public class BaseManager {
     }
 
     public static CommandSender getConsole() {
-        return getBaseInstance().getServer().getConsoleSender();
+        return Bukkit.getConsoleSender();
     }
 
     public static List<Player> getOnlinePlayers() {
