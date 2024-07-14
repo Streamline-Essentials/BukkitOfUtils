@@ -17,7 +17,9 @@ public class EntityUtils {
             TaskManager.getScheduler().runTask(() -> {
                 Bukkit.getWorlds().forEach(world -> {
                     world.getEntities().forEach(entity -> {
-                        entities.put(entity.getUniqueId().toString(), entity);
+                        TaskManager.getScheduler().runTask(entity, () -> {
+                            entities.put(entity.getUniqueId().toString(), entity);
+                        });
                     });
                 });
             });
