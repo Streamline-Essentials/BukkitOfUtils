@@ -91,17 +91,21 @@ public class FoliaBridge {
     public static ConcurrentSkipListMap<String, Entity> pollEntities() {
         ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
 
-        Bukkit.getWorlds().forEach(world -> {
-            RegionScheduler scheduler = Bukkit.getRegionScheduler();
+        try {
+            Bukkit.getWorlds().forEach(world -> {
+                RegionScheduler scheduler = Bukkit.getRegionScheduler();
 
-            Arrays.asList(world.getLoadedChunks()).forEach(chunk -> {
-                scheduler.execute(BaseManager.getBaseInstance(), world, chunk.getX(), chunk.getZ(), () -> {
-                    Arrays.asList(chunk.getEntities()).forEach(entity -> {
-                        entities.put(entity.getUniqueId().toString(), entity);
+                Arrays.asList(world.getLoadedChunks()).forEach(chunk -> {
+                    scheduler.execute(BaseManager.getBaseInstance(), world, chunk.getX(), chunk.getZ(), () -> {
+                        Arrays.asList(chunk.getEntities()).forEach(entity -> {
+                            entities.put(entity.getUniqueId().toString(), entity);
+                        });
                     });
                 });
             });
-        });
+        } catch (Exception e) {
+            MessageUtils.logWarning("An error occurred while polling entities.", e);
+        }
 
         return entities;
     }
@@ -109,9 +113,13 @@ public class FoliaBridge {
     public static ConcurrentSkipListMap<String, LivingEntity> pollLivingEntities() {
         ConcurrentSkipListMap<String, LivingEntity> entities = new ConcurrentSkipListMap<>();
 
-        pollEntities().values().stream().filter(entity -> entity instanceof LivingEntity).forEach(entity -> {
-            entities.put(entity.getUniqueId().toString(), (LivingEntity) entity);
-        });
+        try {
+            pollEntities().values().stream().filter(entity -> entity instanceof LivingEntity).forEach(entity -> {
+                entities.put(entity.getUniqueId().toString(), (LivingEntity) entity);
+            });
+        } catch (Exception e) {
+            MessageUtils.logWarning("An error occurred while polling living entities.", e);
+        }
 
         return entities;
     }
@@ -119,9 +127,13 @@ public class FoliaBridge {
     public static ConcurrentSkipListMap<String, Entity> pollEntities(Predicate<Entity> predicate) {
         ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
 
-        pollEntities().values().stream().filter(predicate).forEach(entity -> {
-            entities.put(entity.getUniqueId().toString(), entity);
-        });
+        try {
+            pollEntities().values().stream().filter(predicate).forEach(entity -> {
+                entities.put(entity.getUniqueId().toString(), entity);
+            });
+        } catch (Exception e) {
+            MessageUtils.logWarning("An error occurred while polling entities.", e);
+        }
 
         return entities;
     }
@@ -129,9 +141,13 @@ public class FoliaBridge {
     public static ConcurrentSkipListMap<String, LivingEntity> pollLivingEntities(Predicate<LivingEntity> predicate) {
         ConcurrentSkipListMap<String, LivingEntity> entities = new ConcurrentSkipListMap<>();
 
-        pollLivingEntities().values().stream().filter(predicate).forEach(entity -> {
-            entities.put(entity.getUniqueId().toString(), entity);
-        });
+        try {
+            pollLivingEntities().values().stream().filter(predicate).forEach(entity -> {
+                entities.put(entity.getUniqueId().toString(), entity);
+            });
+        } catch (Exception e) {
+            MessageUtils.logWarning("An error occurred while polling living entities.", e);
+        }
 
         return entities;
     }
