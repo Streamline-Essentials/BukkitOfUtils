@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @Setter
 public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable> {
+    public static final int STANDARD_TICK_DELAY = 50;
+
     private final Date startTime;
     private final int index;
     private int delay;
@@ -26,6 +28,9 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
     private int ticksLived;
     private boolean runSync;
     private Date lastExecution;
+
+    private boolean standardTick;
+    private long standardWaitingTicks;
 
     @Nullable
     private Location runAt;
@@ -43,6 +48,9 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
         this.runAt = runAt;
         this.entity = entity;
+
+        this.standardTick = true;
+        this.standardWaitingTicks = 0;
 
         if (load) load();
     }
@@ -97,6 +105,23 @@ public abstract class BaseRunnable implements Runnable, Comparable<BaseRunnable>
 
     public void runAsync() {
         CompletableFuture.runAsync(this);
+    }
+
+    public boolean pollStandardWaiting() {
+        if (! standardTick) return true;
+
+        if (standardWaitingTicks <= 0) {
+            standardWaitingTicks = findNewStandardWaitingTicks();
+
+            return true;
+        }
+
+        standardWaitingTicks --;
+        return false;
+    }
+
+    public int findNewStandardWaitingTicks() {
+        return ( STANDARD_TICK_DELAY / MainScheduler.getMillisPerTick() ) - 1;
     }
 
     @Override
