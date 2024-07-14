@@ -51,11 +51,11 @@ public class PluginBase extends JavaPlugin implements IModifierEventable {
 
         baseInstance = this;
 
+        baseConfig = new BaseConfig();
+
         scheduler = UniversalScheduler.getScheduler(this);
 
         BaseManager.init(this);
-
-        baseConfig = new BaseConfig();
 
         onBaseEnabled();
     }
