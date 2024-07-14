@@ -41,7 +41,8 @@ dependencies {
 //            .exclude(module: 'bukkit')
 
     // Defaults.
-    compileOnly(files(FILES))
+//    compileOnly(files(FILES))
+    shadow(implementation(compileOnly(files(SH_FILES))))
     annotationProcessor(ANNO)
     implementation(IMPL)
     compileOnly(COMP_ONLY)

@@ -8,7 +8,7 @@ ext {
             'mysql:mysql-connector-java:5.1.6',
             'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
             'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
-            'com.github.Anon8281:UniversalScheduler:0.1.6',
+//            'com.github.Anon8281:UniversalScheduler:0.1.6',
     ]
     SHADOW = [
             'com.github.server-utilities:TheBase:master-SNAPSHOT',
@@ -18,7 +18,7 @@ ext {
             'org.xerial:sqlite-jdbc:3.45.1.0',
             'mysql:mysql-connector-java:5.1.6',
             'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
-            'com.github.Anon8281:UniversalScheduler:0.1.6',
+//            'com.github.Anon8281:UniversalScheduler:0.1.6',
     ]
     ANNO = [
             'com.github.server-utilities:TheBase:master-SNAPSHOT',
@@ -26,7 +26,7 @@ ext {
             'org.projectlombok:lombok:1.18.30',
             'commons-codec:commons-codec:1.5',
             'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
-            'com.github.Anon8281:UniversalScheduler:0.1.6',
+//            'com.github.Anon8281:UniversalScheduler:0.1.6',
     ]
     COMP_ONLY = [
             'com.github.server-utilities:TheBase:master-SNAPSHOT',
@@ -35,9 +35,9 @@ ext {
             'commons-codec:commons-codec:1.5',
             'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
             'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
-            'com.github.Anon8281:UniversalScheduler:0.1.6',
+//            'com.github.Anon8281:UniversalScheduler:0.1.6',
     ]
-    FILES = [
-//            rootProject.rootDir.getPath().toString() + 'impl/sqlite-jdbc.jar'
+    SH_FILES = [
+            'implement/UniversalScheduler.jar',
     ]
 }
