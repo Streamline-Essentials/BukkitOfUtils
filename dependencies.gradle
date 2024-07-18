@@ -1,43 +1,32 @@
 ext {
     IMPL = [
             'com.github.server-utilities:TheBase:master-SNAPSHOT',
-            'org.pf4j:pf4j:3.10.0',
             'org.projectlombok:lombok:1.18.30',
             'commons-codec:commons-codec:1.5',
             'org.xerial:sqlite-jdbc:3.45.1.0',
             'mysql:mysql-connector-java:5.1.6',
-            'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
             'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
-//            'com.github.Anon8281:UniversalScheduler:0.1.6',
+            'com.github.Streamline-Essentials:UniversalScheduler:main-SNAPSHOT',
     ]
     SHADOW = [
             'com.github.server-utilities:TheBase:master-SNAPSHOT',
-            'org.pf4j:pf4j:3.10.0',
             'org.projectlombok:lombok:1.18.30',
             'commons-codec:commons-codec:1.5',
             'org.xerial:sqlite-jdbc:3.45.1.0',
             'mysql:mysql-connector-java:5.1.6',
             'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
-//            'com.github.Anon8281:UniversalScheduler:0.1.6',
+            'com.github.Streamline-Essentials:UniversalScheduler:main-SNAPSHOT',
     ]
     ANNO = [
             'com.github.server-utilities:TheBase:master-SNAPSHOT',
-            'org.pf4j:pf4j:3.10.0',
             'org.projectlombok:lombok:1.18.30',
-            'commons-codec:commons-codec:1.5',
             'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
 //            'com.github.Anon8281:UniversalScheduler:0.1.6',
     ]
     COMP_ONLY = [
-            'com.github.server-utilities:TheBase:master-SNAPSHOT',
-            'org.pf4j:pf4j:3.10.0',
-            'org.projectlombok:lombok:1.18.30',
-            'commons-codec:commons-codec:1.5',
             'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
-            'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
-//            'com.github.Anon8281:UniversalScheduler:0.1.6',
     ]
-    SH_FILES = [
-            'implement/UniversalScheduler.jar',
-    ]
+//    SH_FILES = [
+//            'implement/UniversalScheduler.jar',
+//    ]
 }
