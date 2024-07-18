@@ -34,12 +34,6 @@ repositories {
 disableAutoTargetJvm()
 
 dependencies {
-    // MC
-//    compileOnly("org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT")
-//    annotationProcessor(shadow(implementation(compileOnly("dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT"))))
-//            .exclude(group: 'org.spigotmc', module: 'spigot-api')
-//            .exclude(module: 'bukkit')
-
     // Defaults.
 //    compileOnly(files(FILES))
     shadow(implementation(compileOnly(files(SH_FILES))))

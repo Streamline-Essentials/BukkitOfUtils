@@ -41,3 +41,4 @@ build/
 dependency-reduced-pom.xml
 .idea/
 .gradle/
+/.fastRequest/config/fastRequestCurrentProjectConfig.json
