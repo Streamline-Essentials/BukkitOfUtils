@@ -36,7 +36,6 @@ disableAutoTargetJvm()
 dependencies {
     // Defaults.
 //    compileOnly(files(FILES))
-//    shadow(implementation(compileOnly(files(SH_FILES))))
     annotationProcessor(ANNO)
     implementation(IMPL)
     compileOnly(COMP_ONLY)
@@ -49,7 +48,7 @@ dependencies {
 shadowJar {
 //    setArchiveFileName(project.name + "-" + project.version + ".jar")
 
-    relocate 'com.github.Anon8281.universalScheduler', 'host.plas.bou.libs.universalScheduler'
+    relocate('com.github.Anon8281.universalScheduler', 'net.streamline.libs.universalScheduler')
 }
 
 artifacts {

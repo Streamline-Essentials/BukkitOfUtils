@@ -21,12 +21,8 @@ ext {
             'com.github.server-utilities:TheBase:master-SNAPSHOT',
             'org.projectlombok:lombok:1.18.30',
             'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
-//            'com.github.Anon8281:UniversalScheduler:0.1.6',
     ]
     COMP_ONLY = [
             'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
     ]
-//    SH_FILES = [
-//            'implement/UniversalScheduler.jar',
-//    ]
 }
