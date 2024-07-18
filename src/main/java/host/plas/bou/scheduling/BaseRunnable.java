@@ -13,6 +13,7 @@ public abstract class BaseRunnable implements Runnable {
     private long currentTickCount;
     private long period;
     private int index;
+    private boolean paused;
 
     /**
      * Constructor for all Streamline API-ed Runnables.
@@ -25,11 +26,14 @@ public abstract class BaseRunnable implements Runnable {
         this.currentTickCount = delay * -1;
         this.period = period;
         this.index = TaskManager.getNextIndex();
+        this.paused = false;
 
         TaskManager.start(this);
     }
 
     public void tick() {
+        if (this.paused) return;
+
         if (this.currentTickCount >= this.period) {
             this.currentTickCount = 0;
             try {
@@ -48,5 +52,13 @@ public abstract class BaseRunnable implements Runnable {
 
     public boolean isCancelled() {
         return ! TaskManager.getCurrentRunnables().containsKey(this.index);
+    }
+
+    public void pause() {
+        this.paused = true;
+    }
+
+    public void resume() {
+        this.paused = false;
     }
 }

@@ -57,23 +57,55 @@ public class EntityUtils {
 
     public static void pollEntities() {
         try {
-            for (World world : Bukkit.getWorlds()) {
-                for (Chunk chunk : world.getLoadedChunks()) {
-                    if (! chunk.isEntitiesLoaded()) continue;
-                    TaskManager.getScheduler().runTask(world, chunk.getX(), chunk.getZ(), () -> {
-                        Arrays.stream(chunk.getEntities()).forEach(EntityUtils::cacheEntity);
-                    });
+            if (ClassHelper.isFolia()) {
+                for (World world : Bukkit.getWorlds()) {
+                    for (Chunk chunk : world.getLoadedChunks()) {
+                        if (!chunk.isEntitiesLoaded()) continue;
+                        TaskManager.getScheduler().runTask(world, chunk.getX(), chunk.getZ(), () -> {
+                            Arrays.stream(chunk.getEntities()).forEach(EntityUtils::cacheEntity);
+                        });
+                    }
                 }
+            } else {
+                Bukkit.getWorlds().forEach(world -> {
+                    world.getEntities().forEach(EntityUtils::cacheEntity);
+                });
             }
         } catch (Exception e) {
             MessageUtils.logWarning("An error occurred while polling entities.", e);
         }
     }
 
-    public static ConcurrentSkipListMap<String, Entity> getCachedEntities(Predicate<Entity> predicate) {
+    public static ConcurrentSkipListMap<String, Entity> getEntitiesBukkit() {
         ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
 
         try {
+            Bukkit.getWorlds().forEach(world -> {
+                world.getEntities().forEach(entity -> {
+                    entities.put(entity.getUniqueId().toString(), entity);
+                });
+            });
+        } catch (Exception e) {
+            MessageUtils.logWarning("An error occurred while polling entities.", e);
+        }
+
+        return entities;
+    }
+
+    public static ConcurrentSkipListMap<String, Entity> getEntities(Predicate<Entity> predicate) {
+        ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
+
+        try {
+            if (! ClassHelper.isFolia()) {
+                getEntitiesBukkit().forEach((s, entity) -> {
+                    if (predicate.test(entity)) {
+                        entities.put(entity.getUniqueId().toString(), entity);
+                    }
+                });
+
+                return entities;
+            }
+
             return CompletableFuture.supplyAsync(() -> {
                 MyScheduledTask task = TaskManager.getScheduler().runTask(() -> {
                     getCachedEntities().forEach((s, entity) -> {
@@ -118,6 +150,16 @@ public class EntityUtils {
         ConcurrentSkipListMap<String, LivingEntity> entities = new ConcurrentSkipListMap<>();
 
         try {
+            if (! ClassHelper.isFolia()) {
+                getEntitiesBukkit().forEach((s, entity) -> {
+                    if (entity instanceof LivingEntity) {
+                        entities.put(entity.getUniqueId().toString(), (LivingEntity) entity);
+                    }
+                });
+
+                return entities;
+            }
+
             return CompletableFuture.supplyAsync(() -> {
                 MyScheduledTask task = TaskManager.getScheduler().runTask(() -> {
                     getCachedEntities().forEach((s, entity) -> {
@@ -162,6 +204,16 @@ public class EntityUtils {
         ConcurrentSkipListMap<String, LivingEntity> entities = new ConcurrentSkipListMap<>();
 
         try {
+            if (! ClassHelper.isFolia()) {
+                getLivingEntities().forEach((s, entity) -> {
+                    if (predicate.test(entity)) {
+                        entities.put(entity.getUniqueId().toString(), entity);
+                    }
+                });
+
+                return entities;
+            }
+
             return CompletableFuture.supplyAsync(() -> {
                 MyScheduledTask task = TaskManager.getScheduler().runTask(() -> {
                     getLivingEntities().forEach((s, entity) -> {
@@ -209,7 +261,8 @@ public class EntityUtils {
 
         @Override
         public void run() {
-            tickCache();
+            if (ClassHelper.isFolia()) tickCache();
+            else pause();
         }
     }
 }
