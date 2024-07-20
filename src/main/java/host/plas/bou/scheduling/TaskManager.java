@@ -3,7 +3,6 @@ package host.plas.bou.scheduling;
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import host.plas.bou.MessageUtils;
 import host.plas.bou.PluginBase;
-import host.plas.bou.instances.BaseManager;
 import lombok.Getter;
 import lombok.Setter;
 
