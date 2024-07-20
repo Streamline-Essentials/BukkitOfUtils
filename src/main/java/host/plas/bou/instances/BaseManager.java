@@ -15,11 +15,31 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class BaseManager {
     @Getter @Setter
+    private static ConcurrentSkipListMap<String, PluginBase> loadedPlugins = new ConcurrentSkipListMap<>();
+
+    @Getter @Setter
     private static PluginBase baseInstance;
+
+    public static void registerPlugin(PluginBase plugin) {
+        loadedPlugins.put(plugin.getName(), plugin);
+    }
+
+    public static void unregisterPlugin(PluginBase plugin) {
+        loadedPlugins.remove(plugin.getName());
+    }
+
+    public static Optional<PluginBase> getPlugin(String name) {
+        return loadedPlugins.values().stream().filter(plugin -> plugin.getName().equalsIgnoreCase(name)).findFirst();
+    }
+
+    public static boolean isPluginLoaded(String name) {
+        return getPlugin(name).isPresent();
+    }
 
     public static void init(PluginBase baseInstance) {
         setBaseInstance(baseInstance);
@@ -33,6 +53,12 @@ public class BaseManager {
         TaskManager.init();
 
         EntityUtils.init();
+    }
+
+    public static void otherInit(PluginBase baseInstance) {
+        registerPlugin(baseInstance);
+
+        new InventoryAPI(baseInstance).init();
     }
 
     public static void stop() {
