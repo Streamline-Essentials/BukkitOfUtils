@@ -45,7 +45,7 @@ public class PluginBase extends JavaPlugin implements IModifierEventable {
     public void onEnable() {
         onBaseEnabling();
 
-        BaseManager.init(this);
+        if (! (this instanceof BukkitOfUtils)) BaseManager.init(this);
 
         onBaseEnabled();
     }

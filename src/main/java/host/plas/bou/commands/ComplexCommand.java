@@ -16,13 +16,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+@Setter
 @Getter
 public abstract class ComplexCommand implements TabExecutor {
-    @Setter
     private String identifier;
-    @Setter
     private JavaPlugin provider;
-    @Setter
     private boolean registered;
 
     public ComplexCommand(String identifier, JavaPlugin provider) {

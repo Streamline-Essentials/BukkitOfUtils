@@ -1,18 +1,22 @@
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.1"
-//    id "maven-publish"
+    id "io.freefair.lombok" version "8.6"
 }
 
 apply plugin: 'java'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply from: rootDir.toString() + '/dependencies.gradle'
 
-group = 'com.github.streamline-essentials'
-//project.version = "1.5-SNAPSHOT"
+group = properties['group']
+version = properties['version']
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_11
+java.targetCompatibility = JavaVersion.VERSION_11
+
+ext {
+    pluginMain = properties['plugin.main'] == 'default' ?
+            "${project.group}.${project.name.toLowerCase()}.${project.name}" :
+            properties['plugin.main']
 }
 
 repositories {
@@ -43,6 +47,25 @@ dependencies {
 
     // Other Plugins
 //    compileOnly(OTHER_PLUGINS)
+}
+
+processResources {
+    // Debugging: Print values
+    doFirst {
+        println "Version: ${project.version}, Name: ${project.name}, Main: ${project.ext.pluginMain}"
+    }
+
+    inputs.property('name', "${project.name}")
+    inputs.property('version', "${project.version}")
+    inputs.property('main', "${project.ext.pluginMain}")
+
+    filesMatching('**/plugin.yml') {
+        expand (
+                'name': "${project.name}",
+                'version': "${project.version}",
+                'main': "${project.ext.pluginMain}",
+        )
+    }
 }
 
 shadowJar {

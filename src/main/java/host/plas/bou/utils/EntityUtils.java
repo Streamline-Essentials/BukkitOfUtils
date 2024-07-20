@@ -34,7 +34,9 @@ public class EntityUtils {
     public static void tickCache() {
         getCachedEntities().forEach((s, entity) -> {
             TaskManager.getScheduler().runTask(entity, () -> {
-                if (! entity.isValid()) {
+                if (entity.isDead()) {
+                    cachedEntities.remove(entity.getUniqueId().toString());
+                } else if (! entity.isValid()) {
                     cachedEntities.remove(entity.getUniqueId().toString());
                 }
             });

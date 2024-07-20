@@ -1,0 +1,16 @@
+console:
+  name: Console
+  uuid: '%'
+logging:
+  warn:
+    enabled: true
+    prefix: '&a[&3WARN&a] &e'
+  debug:
+    enabled: true
+    prefix: '&a[&3DEBUG&a] &d'
+  info:
+    enabled: true
+    prefix: '&a[&3INFO&a] &r'
+  severe:
+    enabled: true
+    prefix: '&a[&3SEVERE&a] &c'

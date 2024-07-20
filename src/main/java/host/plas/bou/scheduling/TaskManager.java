@@ -60,7 +60,7 @@ public class TaskManager {
 
     public static void stop() {
         timer.stop();
-        currentRunnables.clear();
+        currentRunnables.forEach((index, runnable) -> runnable.cancel());
 
         MessageUtils.logInfo("&cTaskManager &fis now stopped!");
     }
