@@ -81,10 +81,9 @@ processResources {
 shadowJar {
     archiveClassifier.set('')
 
-    buildDir = "target/"
     archiveFileName = "${project.name}-${project.version}.jar"
 
-    relocate('com.github.Anon8281.universalScheduler', 'net.streamline.libs.universalScheduler')
+    relocate('com.github.Anon8281.universalScheduler', 'host.plas.bou.libs.universalScheduler')
 }
 
 artifacts {
