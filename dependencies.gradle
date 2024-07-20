@@ -16,4 +16,9 @@ ext {
     COMP_ONLY = [
             'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
     ]
+    FILES = [
+    ]
+    OTHER_PLUGINS = [
+//            'me.clip:placeholderapi:2.11.5', // Not in the BukkitOfUtils project...
+    ]
 }

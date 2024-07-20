@@ -1,10 +1,9 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.1"
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2' // for shadowing
     id "io.freefair.lombok" version "8.6"
 }
 
-apply plugin: 'java'
-apply plugin: 'com.github.johnrengelman.shadow'
 apply from: rootDir.toString() + '/dependencies.gradle'
 
 group = properties['group']
@@ -21,32 +20,43 @@ ext {
 
 repositories {
     mavenCentral()
-    jcenter()
-    // JitPack
-    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
-    maven { url 'https://oss.sonatype.org/content/groups/public/' }
-    maven { url 'https://repo.glaremasters.me/repository/concuncan/' }
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+
+        // As of Gradle 5.1, you can limit this to only those
+        // dependencies you expect from it
+        content {
+            includeGroup 'org.bukkit'
+            includeGroup 'org.spigotmc'
+        }
+    }
+    maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url = 'https://oss.sonatype.org/content/repositories/central' }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    maven { url "https://jitpack.io" }
+    maven {
+        name = "placeholderapi"
+        url = "https://repo.extendedclip.com/content/repositories/placeholderapi/"
+    }
     maven { url 'https://repo.papermc.io/repository/maven-snapshots/' }
     maven { url 'https://repo.papermc.io/repository/maven-public/' }
-    maven { url 'https://jcenter.bintray.com/' }
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://repo.opencollab.dev/maven-releases/' }
-    maven { url 'https://repo.opencollab.dev/maven-snapshots/' }
-    maven { url 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
 }
 
 disableAutoTargetJvm()
 
 dependencies {
     // Defaults.
-//    compileOnly(files(FILES))
+    compileOnly(files(FILES))
     annotationProcessor(ANNO)
     implementation(IMPL)
     compileOnly(COMP_ONLY)
     shadow(SHADOW)
 
     // Other Plugins
-//    compileOnly(OTHER_PLUGINS)
+    compileOnly(OTHER_PLUGINS)
 }
 
 processResources {
@@ -69,7 +79,10 @@ processResources {
 }
 
 shadowJar {
-    setArchiveFileName(project.name + "-" + project.version + ".jar")
+    archiveClassifier.set('')
+
+    buildDir = "target/"
+    archiveFileName = "${project.name}-${project.version}.jar"
 
     relocate('com.github.Anon8281.universalScheduler', 'net.streamline.libs.universalScheduler')
 }
@@ -79,6 +92,6 @@ artifacts {
 }
 
 wrapper {
-    gradleVersion = '8.7'
+    gradleVersion = '8.9'
     distributionType = Wrapper.DistributionType.ALL
 }
