@@ -36,7 +36,7 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
-    maven { url "https://jitpack.io" }
+    maven { url = 'https://jitpack.io' }
     maven {
         name = "placeholderapi"
         url = "https://repo.extendedclip.com/content/repositories/placeholderapi/"
