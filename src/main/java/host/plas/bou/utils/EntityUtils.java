@@ -1,6 +1,7 @@
 package host.plas.bou.utils;
 
-import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
+import com.github.benmanes.caffeine.cache.AsyncCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import host.plas.bou.MessageUtils;
 import host.plas.bou.scheduling.BaseRunnable;
 import host.plas.bou.scheduling.TaskManager;
@@ -12,37 +13,46 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class EntityUtils {
     @Getter @Setter
     private static ConcurrentSkipListMap<String, Entity> cachedEntities = new ConcurrentSkipListMap<>();
 
+    @Getter @Setter
+    private static EntityLookupTimer lookupTimer;
+
     public static void init() {
-        new EntityLookupTimer();
+        if (ClassHelper.isFolia()) lookupTimer = new EntityLookupTimer();
+    }
+
+    public static void cacheEntityAlreadyInSync(Entity entity) {
+        if (! entity.isValid()) return;
+        if (cachedEntities.containsKey(entity.getUniqueId().toString())) return;
+
+        cachedEntities.put(entity.getUniqueId().toString(), entity);
     }
 
     public static void cacheEntity(Entity entity) {
-        TaskManager.getScheduler().runTask(entity, () -> {
-            cachedEntities.put(entity.getUniqueId().toString(), entity);
-        });
+        cacheEntity(entity, true);
+    }
+
+    public static void cacheEntity(Entity entity, boolean isInSync) {
+        if (isInSync) {
+            cacheEntityAlreadyInSync(entity);
+        } else {
+            TaskManager.getScheduler().runTask(entity, () -> cacheEntityAlreadyInSync(entity));
+        }
     }
 
     public static void tickCache() {
-        getCachedEntities().forEach((s, entity) -> {
-            TaskManager.getScheduler().runTask(entity, () -> {
-                if (entity.isDead()) {
-                    cachedEntities.remove(entity.getUniqueId().toString());
-                } else if (! entity.isValid()) {
-                    cachedEntities.remove(entity.getUniqueId().toString());
-                }
-            });
-        });
-
-        pollEntities();
+        clearCache();
+        collectEntities();
     }
 
     public static int totalEntities(World world) {
@@ -57,12 +67,16 @@ public class EntityUtils {
         return total;
     }
 
-    public static void pollEntities() {
+    public static void clearCache() {
+        cachedEntities.clear();
+    }
+
+    public static void collectEntities() {
         try {
             if (ClassHelper.isFolia()) {
                 for (World world : Bukkit.getWorlds()) {
                     for (Chunk chunk : world.getLoadedChunks()) {
-                        if (!chunk.isEntitiesLoaded()) continue;
+                        if (! chunk.isEntitiesLoaded()) continue;
                         TaskManager.getScheduler().runTask(world, chunk.getX(), chunk.getZ(), () -> {
                             Arrays.stream(chunk.getEntities()).forEach(EntityUtils::cacheEntity);
                         });
@@ -94,166 +108,93 @@ public class EntityUtils {
         return entities;
     }
 
-    public static ConcurrentSkipListMap<String, Entity> getEntities(Predicate<Entity> predicate) {
-        ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
+    public static ConcurrentSkipListMap<String, Entity> getEntitiesHard() {
+        if (ClassHelper.isFolia()) {
+            return getCachedEntities();
+        } else {
+            return getEntitiesBukkit();
+        }
+    }
+
+    public static CompletableFuture<ConcurrentSkipListMap<String, Entity>> getEntitiesAsync() {
+        return getCachedEntitiesCache().getIfPresent(0L);
+    }
+
+    public static ConcurrentSkipListMap<String, Entity> getEntities() {
+        return getEntitiesAsync().join();
+    }
+
+    @Getter @Setter
+    private static AsyncCache<Long, ConcurrentSkipListMap<String, Entity>> cachedEntitiesCache =
+            Caffeine.newBuilder()
+                    .expireAfterWrite(Duration.ofMillis(100))
+                    .buildAsync(loader -> getEntitiesHard());
+
+    @Getter @Setter
+    private static AsyncCache<String, ConcurrentSkipListMap<String, Entity>> cachedPredicates =
+            Caffeine.newBuilder()
+                    .expireAfterWrite(Duration.ofMillis(100))
+                    .buildAsync();
+
+    public static final String LIVING_ENTITIES = "main-living";
+
+    public static void collectEntities(String key, Predicate<Entity> predicate) {
+        ConcurrentSkipListMap<String, Entity> toTest = getEntities();
 
         try {
-            if (! ClassHelper.isFolia()) {
-                getEntitiesBukkit().forEach((s, entity) -> {
+            toTest.forEach((s, entity) -> {
+                TaskManager.getScheduler().runTask(entity, () -> {
+                    ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
                     if (predicate.test(entity)) {
                         entities.put(entity.getUniqueId().toString(), entity);
                     }
+
+                    cachedPredicates.put(key, CompletableFuture.completedFuture(entities));
                 });
-
-                return entities;
-            }
-
-            return CompletableFuture.supplyAsync(() -> {
-                MyScheduledTask task = TaskManager.getScheduler().runTask(() -> {
-                    getCachedEntities().forEach((s, entity) -> {
-                        CompletableFuture.supplyAsync(() -> {
-                            MyScheduledTask task2 = TaskManager.getScheduler().runTask(entity, () -> {
-                                if (predicate.test(entity)) {
-                                    entities.put(entity.getUniqueId().toString(), entity);
-                                }
-                            });
-
-                            while (task2.isCurrentlyRunning()) {
-                                try {
-                                    Thread.sleep(1);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            return null;
-                        }).join();
-                    });
-                });
-
-                while (task.isCurrentlyRunning()) {
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                return entities;
-            }).join();
+            });
         } catch (Exception e) {
             MessageUtils.logWarning("An error occurred while polling entities.", e);
         }
-
-        return entities;
     }
 
-    public static ConcurrentSkipListMap<String, LivingEntity> getLivingEntities() {
-        ConcurrentSkipListMap<String, LivingEntity> entities = new ConcurrentSkipListMap<>();
-
-        try {
-            if (! ClassHelper.isFolia()) {
-                getEntitiesBukkit().forEach((s, entity) -> {
-                    if (entity instanceof LivingEntity) {
-                        entities.put(entity.getUniqueId().toString(), (LivingEntity) entity);
-                    }
-                });
-
-                return entities;
-            }
-
-            return CompletableFuture.supplyAsync(() -> {
-                MyScheduledTask task = TaskManager.getScheduler().runTask(() -> {
-                    getCachedEntities().forEach((s, entity) -> {
-                        CompletableFuture.supplyAsync(() -> {
-                            MyScheduledTask task2 = TaskManager.getScheduler().runTask(entity, () -> {
-                                if (entity instanceof LivingEntity) {
-                                    entities.put(entity.getUniqueId().toString(), (LivingEntity) entity);
-                                }
-                            });
-
-                            while (task2.isCurrentlyRunning()) {
-                                try {
-                                    Thread.sleep(1);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            return null;
-                        }).join();
-                    });
-                });
-
-                while (task.isCurrentlyRunning()) {
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                return entities;
-            }).join();
-        } catch (Exception e) {
-            MessageUtils.logWarning("An error occurred while polling living entities.", e);
-        }
-
-        return entities;
+    public static void collectLivingEntities() {
+        collectEntities(LIVING_ENTITIES, entity -> entity instanceof LivingEntity);
     }
 
-    public static ConcurrentSkipListMap<String, LivingEntity> getLivingEntities(Predicate<LivingEntity> predicate) {
-        ConcurrentSkipListMap<String, LivingEntity> entities = new ConcurrentSkipListMap<>();
+    public static void collectLivingEntities(String key, Predicate<LivingEntity> predicate) {
+        collectEntities(key, entity -> entity instanceof LivingEntity && predicate.test((LivingEntity) entity));
+    }
 
-        try {
-            if (! ClassHelper.isFolia()) {
-                getLivingEntities().forEach((s, entity) -> {
-                    if (predicate.test(entity)) {
-                        entities.put(entity.getUniqueId().toString(), entity);
-                    }
-                });
+    public static CompletableFuture<ConcurrentSkipListMap<String, Entity>> getEntitiesAsync(String key) {
+        return cachedPredicates.get(key, k -> new ConcurrentSkipListMap<>());
+    }
 
-                return entities;
-            }
+    public static ConcurrentSkipListMap<String, Entity> getEntities(String key) {
+        return getEntitiesAsync(key).join();
+    }
 
-            return CompletableFuture.supplyAsync(() -> {
-                MyScheduledTask task = TaskManager.getScheduler().runTask(() -> {
-                    getLivingEntities().forEach((s, entity) -> {
-                        CompletableFuture.supplyAsync(() -> {
-                            MyScheduledTask task2 = TaskManager.getScheduler().runTask(entity, () -> {
-                                if (predicate.test(entity)) {
-                                    entities.put(entity.getUniqueId().toString(), entity);
-                                }
-                            });
+    public static CompletableFuture<ConcurrentSkipListMap<String, Entity>> getLivingEntitiesAsync() {
+        return getEntitiesAsync(LIVING_ENTITIES);
+    }
 
-                            while (task2.isCurrentlyRunning()) {
-                                try {
-                                    Thread.sleep(1);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
+    public static ConcurrentSkipListMap<String, Entity> getLivingEntities() {
+        return getLivingEntitiesAsync().join();
+    }
 
-                            return null;
-                        }).join();
-                    });
-                });
+    public static void collectEntitiesThenDo(Consumer<Entity> consumer) {
+        getEntities().forEach((s, entity) -> {
+            TaskManager.getScheduler().runTask(entity, () -> consumer.accept(entity));
+        });
+    }
 
-                while (task.isCurrentlyRunning()) {
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+    public static void collectLivingEntitiesThenDo(Consumer<LivingEntity> consumer) {
+        getEntities().forEach((s, entity) -> {
+            TaskManager.getScheduler().runTask(entity, () -> {
+                if (entity instanceof LivingEntity) {
+                    consumer.accept((LivingEntity) entity);
                 }
-
-                return entities;
-            }).join();
-        } catch (Exception e) {
-            MessageUtils.logWarning("An error occurred while polling living entities.", e);
-        }
-
-        return entities;
+            });
+        });
     }
 
     public static class EntityLookupTimer extends BaseRunnable {
