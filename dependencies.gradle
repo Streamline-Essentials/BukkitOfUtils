@@ -2,12 +2,14 @@ ext {
     IMPL = [
             'com.github.server-utilities:TheBase:master-SNAPSHOT',
             'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
-            'com.github.Streamline-Essentials:UniversalScheduler:main-SNAPSHOT',
+            'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
+            'com.github.ben-manes.caffeine:caffeine:3.1.8',
     ]
     SHADOW = [
             'com.github.server-utilities:TheBase:master-SNAPSHOT',
             'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
-            'com.github.Streamline-Essentials:UniversalScheduler:main-SNAPSHOT',
+            'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
+            'com.github.ben-manes.caffeine:caffeine:3.1.8',
     ]
     ANNO = [
             'com.github.server-utilities:TheBase:master-SNAPSHOT',
