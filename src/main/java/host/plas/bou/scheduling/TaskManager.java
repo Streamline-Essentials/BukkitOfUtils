@@ -1,10 +1,15 @@
 package host.plas.bou.scheduling;
 
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
+import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
 import host.plas.bou.MessageUtils;
 import host.plas.bou.PluginBase;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
 
 import javax.swing.*;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -66,5 +71,109 @@ public class TaskManager {
 
     public static TaskScheduler getScheduler() {
         return PluginBase.getScheduler();
+    }
+
+    public static CompletableTask schedule(Runnable runnable) {
+        return new CompletableTask(new InjectedRunnable(runnable));
+    }
+
+    public static CompletableTask schedule(Runnable runnable, long delay) {
+        return new CompletableTask(new InjectedRunnable(runnable), delay);
+    }
+
+    public static CompletableTask schedule(Runnable runnable, long delay, long period) {
+        return new CompletableTask(new InjectedRunnable(runnable), delay, period);
+    }
+
+    public static CompletableTask schedule(Entity entity, Runnable runnable) {
+        return new CompletableTask(entity, new InjectedRunnable(runnable));
+    }
+
+    public static CompletableTask schedule(Entity entity, Runnable runnable, long delay) {
+        return new CompletableTask(entity, new InjectedRunnable(runnable), delay);
+    }
+
+    public static CompletableTask schedule(Entity entity, Runnable runnable, long delay, long period) {
+        return new CompletableTask(entity, new InjectedRunnable(runnable), delay, period);
+    }
+
+    public static CompletableTask schedule(World world, int x, int z, Runnable runnable) {
+        return new CompletableTask(world, x, z, new InjectedRunnable(runnable));
+    }
+
+    public static CompletableTask schedule(Chunk chunk, Runnable runnable) {
+        return new CompletableTask(chunk, new InjectedRunnable(runnable));
+    }
+
+    public static CompletableTask schedule(World world, int x, int z, Runnable runnable, long delay) {
+        return new CompletableTask(world, x, z, new InjectedRunnable(runnable), delay);
+    }
+
+    public static CompletableTask schedule(Chunk chunk, Runnable runnable, long delay) {
+        return new CompletableTask(chunk, new InjectedRunnable(runnable), delay);
+    }
+
+    public static CompletableTask schedule(World world, int x, int z, Runnable runnable, long delay, long period) {
+        return new CompletableTask(world, x, z, new InjectedRunnable(runnable), delay, period);
+    }
+
+    public static CompletableTask schedule(Chunk chunk, Runnable runnable, long delay, long period) {
+        return new CompletableTask(chunk, new InjectedRunnable(runnable), delay, period);
+    }
+
+    public static CompletableTask schedule(Entity entityToTeleport, Location location) {
+        return new CompletableTask(entityToTeleport, location);
+    }
+
+    public static MyScheduledTask runTask(Runnable runnable) {
+        return getScheduler().runTask(runnable);
+    }
+
+    public static MyScheduledTask runTaskLater(Runnable runnable, long delay) {
+        return getScheduler().runTaskLater(runnable, delay);
+    }
+
+    public static MyScheduledTask runTaskTimer(Runnable runnable, long delay, long period) {
+        return getScheduler().runTaskTimer(runnable, delay, period);
+    }
+
+    public static MyScheduledTask runTask(Entity entity, Runnable runnable) {
+        return getScheduler().runTask(entity, runnable);
+    }
+
+    public static MyScheduledTask runTaskLater(Entity entity, Runnable runnable, long delay) {
+        return getScheduler().runTaskLater(entity, runnable, delay);
+    }
+
+    public static MyScheduledTask runTaskTimer(Entity entity, Runnable runnable, long delay, long period) {
+        return getScheduler().runTaskTimer(entity, runnable, delay, period);
+    }
+
+    public static MyScheduledTask runTask(World world, int x, int z, Runnable runnable) {
+        return getScheduler().runTask(world, x, z, runnable);
+    }
+
+    public static MyScheduledTask runTask(Chunk chunk, Runnable runnable) {
+        return runTask(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable);
+    }
+
+    public static MyScheduledTask runTaskLater(World world, int x, int z, Runnable runnable, long delay) {
+        return getScheduler().runTaskLater(world, x, z, runnable, delay);
+    }
+
+    public static MyScheduledTask runTaskLater(Chunk chunk, Runnable runnable, long delay) {
+        return runTaskLater(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable, delay);
+    }
+
+    public static MyScheduledTask runTaskTimer(World world, int x, int z, Runnable runnable, long delay, long period) {
+        return getScheduler().runTaskTimer(world, x, z, runnable, delay, period);
+    }
+
+    public static MyScheduledTask runTaskTimer(Chunk chunk, Runnable runnable, long delay, long period) {
+        return runTaskTimer(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable, delay, period);
+    }
+
+    public static MyScheduledTask teleport(Entity entityToTeleport, Location location) {
+        return getScheduler().teleport(entityToTeleport, location);
     }
 }

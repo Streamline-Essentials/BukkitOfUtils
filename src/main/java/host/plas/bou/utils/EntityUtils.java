@@ -1,7 +1,5 @@
 package host.plas.bou.utils;
 
-import com.github.benmanes.caffeine.cache.AsyncCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import host.plas.bou.MessageUtils;
 import host.plas.bou.scheduling.BaseRunnable;
 import host.plas.bou.scheduling.TaskManager;
@@ -13,12 +11,9 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
-import java.time.Duration;
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 public class EntityUtils {
     @Getter @Setter
@@ -38,16 +33,16 @@ public class EntityUtils {
         cachedEntities.put(entity.getUniqueId().toString(), entity);
     }
 
-    public static void cacheEntity(Entity entity) {
-        cacheEntity(entity, true);
-    }
-
     public static void cacheEntity(Entity entity, boolean isInSync) {
-        if (isInSync) {
+        if (isInSync || ! ClassHelper.isFolia()) {
             cacheEntityAlreadyInSync(entity);
         } else {
             TaskManager.getScheduler().runTask(entity, () -> cacheEntityAlreadyInSync(entity));
         }
+    }
+
+    public static void cacheEntity(Entity entity) {
+        cacheEntity(entity, false);
     }
 
     public static void tickCache() {
@@ -77,15 +72,14 @@ public class EntityUtils {
                 for (World world : Bukkit.getWorlds()) {
                     for (Chunk chunk : world.getLoadedChunks()) {
                         if (! chunk.isEntitiesLoaded()) continue;
-                        TaskManager.getScheduler().runTask(world, chunk.getX(), chunk.getZ(), () -> {
+
+                        TaskManager.runTask(chunk, () -> {
                             Arrays.stream(chunk.getEntities()).forEach(EntityUtils::cacheEntity);
                         });
                     }
                 }
             } else {
-                Bukkit.getWorlds().forEach(world -> {
-                    world.getEntities().forEach(EntityUtils::cacheEntity);
-                });
+                getCachedEntities().putAll(getEntitiesBukkit());
             }
         } catch (Exception e) {
             MessageUtils.logWarning("An error occurred while polling entities.", e);
@@ -108,7 +102,7 @@ public class EntityUtils {
         return entities;
     }
 
-    public static ConcurrentSkipListMap<String, Entity> getEntitiesHard() {
+    public static ConcurrentSkipListMap<String, Entity> getEntities() {
         if (ClassHelper.isFolia()) {
             return getCachedEntities();
         } else {
@@ -116,80 +110,15 @@ public class EntityUtils {
         }
     }
 
-    public static CompletableFuture<ConcurrentSkipListMap<String, Entity>> getEntitiesAsync() {
-        return getCachedEntitiesCache().getIfPresent(0L);
-    }
-
-    public static ConcurrentSkipListMap<String, Entity> getEntities() {
-        return getEntitiesAsync().join();
-    }
-
-    @Getter @Setter
-    private static AsyncCache<Long, ConcurrentSkipListMap<String, Entity>> cachedEntitiesCache =
-            Caffeine.newBuilder()
-                    .expireAfterWrite(Duration.ofMillis(100))
-                    .buildAsync(loader -> getEntitiesHard());
-
-    @Getter @Setter
-    private static AsyncCache<String, ConcurrentSkipListMap<String, Entity>> cachedPredicates =
-            Caffeine.newBuilder()
-                    .expireAfterWrite(Duration.ofMillis(100))
-                    .buildAsync();
-
-    public static final String LIVING_ENTITIES = "main-living";
-
-    public static void collectEntities(String key, Predicate<Entity> predicate) {
-        ConcurrentSkipListMap<String, Entity> toTest = getEntities();
-
-        try {
-            toTest.forEach((s, entity) -> {
-                TaskManager.getScheduler().runTask(entity, () -> {
-                    ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
-                    if (predicate.test(entity)) {
-                        entities.put(entity.getUniqueId().toString(), entity);
-                    }
-
-                    cachedPredicates.put(key, CompletableFuture.completedFuture(entities));
-                });
-            });
-        } catch (Exception e) {
-            MessageUtils.logWarning("An error occurred while polling entities.", e);
-        }
-    }
-
-    public static void collectLivingEntities() {
-        collectEntities(LIVING_ENTITIES, entity -> entity instanceof LivingEntity);
-    }
-
-    public static void collectLivingEntities(String key, Predicate<LivingEntity> predicate) {
-        collectEntities(key, entity -> entity instanceof LivingEntity && predicate.test((LivingEntity) entity));
-    }
-
-    public static CompletableFuture<ConcurrentSkipListMap<String, Entity>> getEntitiesAsync(String key) {
-        return cachedPredicates.get(key, k -> new ConcurrentSkipListMap<>());
-    }
-
-    public static ConcurrentSkipListMap<String, Entity> getEntities(String key) {
-        return getEntitiesAsync(key).join();
-    }
-
-    public static CompletableFuture<ConcurrentSkipListMap<String, Entity>> getLivingEntitiesAsync() {
-        return getEntitiesAsync(LIVING_ENTITIES);
-    }
-
-    public static ConcurrentSkipListMap<String, Entity> getLivingEntities() {
-        return getLivingEntitiesAsync().join();
-    }
-
     public static void collectEntitiesThenDo(Consumer<Entity> consumer) {
         getEntities().forEach((s, entity) -> {
-            TaskManager.getScheduler().runTask(entity, () -> consumer.accept(entity));
+            TaskManager.runTask(entity, () -> consumer.accept(entity));
         });
     }
 
     public static void collectLivingEntitiesThenDo(Consumer<LivingEntity> consumer) {
         getEntities().forEach((s, entity) -> {
-            TaskManager.getScheduler().runTask(entity, () -> {
+            TaskManager.runTask(entity, () -> {
                 if (entity instanceof LivingEntity) {
                     consumer.accept((LivingEntity) entity);
                 }
@@ -199,7 +128,7 @@ public class EntityUtils {
 
     public static class EntityLookupTimer extends BaseRunnable {
         public EntityLookupTimer() {
-            super(0, 1);
+            super(0, 20);
         }
 
         @Override
