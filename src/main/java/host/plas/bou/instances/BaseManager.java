@@ -2,6 +2,7 @@ package host.plas.bou.instances;
 
 import com.github.Anon8281.universalScheduler.UniversalScheduler;
 import host.plas.bou.BetterPlugin;
+import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.utils.EntityUtils;
 import host.plas.bou.configs.BaseConfig;
 import host.plas.bou.scheduling.TaskManager;
@@ -20,14 +21,17 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 public class BaseManager {
     @Getter @Setter
-    private static BetterPlugin baseInstance;
+    private static BukkitOfUtils baseInstance;
 
-    public static void init(BetterPlugin baseInstance) {
+    @Getter @Setter
+    private static BaseConfig baseConfig;
+
+    public static void init(BukkitOfUtils baseInstance) {
         setBaseInstance(baseInstance);
 
-        BetterPlugin.setBaseConfig(new BaseConfig(baseInstance));
+        setBaseConfig(new BaseConfig(baseInstance));
 
-        BetterPlugin.setScheduler(UniversalScheduler.getScheduler(getBaseInstance()));
+        BetterPlugin.setScheduler(UniversalScheduler.getScheduler(baseInstance));
 
         new InventoryAPI(baseInstance).init();
 
