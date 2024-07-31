@@ -1,6 +1,6 @@
 package host.plas.bou.utils;
 
-import host.plas.bou.PluginBase;
+import host.plas.bou.BetterPlugin;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.NamespacedKey;
@@ -11,9 +11,9 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 public class PluginUtils {
     @Getter @Setter
-    private static ConcurrentSkipListSet<PluginBase> loadedBOUPlugins = new ConcurrentSkipListSet<>();
+    private static ConcurrentSkipListSet<BetterPlugin> loadedBOUPlugins = new ConcurrentSkipListSet<>();
 
-    public static boolean registerPlugin(PluginBase plugin) {
+    public static boolean registerPlugin(BetterPlugin plugin) {
         if (isPluginRegistered(plugin.getIdentifier())) {
             unregisterPlugin(plugin);
         }
@@ -21,13 +21,13 @@ public class PluginUtils {
         return getLoadedBOUPlugins().add(plugin);
     }
 
-    public static boolean unregisterPlugin(PluginBase plugin) {
+    public static boolean unregisterPlugin(BetterPlugin plugin) {
         if (! isPluginRegistered(plugin.getIdentifier())) return false;
 
         return getLoadedBOUPlugins().removeIf(loadedPlugin -> loadedPlugin.getIdentifier().equals(plugin.getIdentifier()));
     }
 
-    public static Optional<PluginBase> getPlugin(String identifier) {
+    public static Optional<BetterPlugin> getPlugin(String identifier) {
         return getLoadedBOUPlugins().stream().filter(plugin -> plugin.getName().equals(identifier)).findFirst();
     }
 
@@ -35,7 +35,7 @@ public class PluginUtils {
         return getPlugin(identifier).isPresent();
     }
 
-    public static NamespacedKey getPluginKey(PluginBase plugin, String key) {
+    public static NamespacedKey getPluginKey(BetterPlugin plugin, String key) {
         return getPluginKey((JavaPlugin) plugin, key);
     }
 

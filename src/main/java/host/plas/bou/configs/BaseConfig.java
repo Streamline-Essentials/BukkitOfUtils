@@ -1,12 +1,11 @@
 package host.plas.bou.configs;
 
-import host.plas.bou.PluginBase;
-import host.plas.bou.instances.BaseManager;
+import host.plas.bou.BetterPlugin;
 import tv.quaint.storage.resources.flat.simple.SimpleConfiguration;
 
 public class BaseConfig extends SimpleConfiguration {
-    public BaseConfig(PluginBase pluginBase) {
-        super("base-config.yml", pluginBase, false);
+    public BaseConfig(BetterPlugin betterPlugin) {
+        super("base-config.yml", betterPlugin, false);
     }
 
     @Override

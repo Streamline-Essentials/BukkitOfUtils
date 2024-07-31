@@ -3,7 +3,7 @@ package host.plas.bou.scheduling;
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
 import host.plas.bou.MessageUtils;
-import host.plas.bou.PluginBase;
+import host.plas.bou.BetterPlugin;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Chunk;
@@ -70,7 +70,7 @@ public class TaskManager {
     }
 
     public static TaskScheduler getScheduler() {
-        return PluginBase.getScheduler();
+        return BetterPlugin.getScheduler();
     }
 
     public static CompletableTask schedule(Runnable runnable) {

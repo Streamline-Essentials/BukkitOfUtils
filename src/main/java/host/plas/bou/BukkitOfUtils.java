@@ -4,7 +4,7 @@ import host.plas.bou.instances.BaseManager;
 import lombok.Getter;
 import lombok.Setter;
 
-public class BukkitOfUtils extends PluginBase {
+public class BukkitOfUtils extends BetterPlugin {
     @Getter @Setter
     private static BukkitOfUtils instance;
 

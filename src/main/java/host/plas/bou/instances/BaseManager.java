@@ -1,7 +1,7 @@
 package host.plas.bou.instances;
 
 import com.github.Anon8281.universalScheduler.UniversalScheduler;
-import host.plas.bou.PluginBase;
+import host.plas.bou.BetterPlugin;
 import host.plas.bou.utils.EntityUtils;
 import host.plas.bou.configs.BaseConfig;
 import host.plas.bou.scheduling.TaskManager;
@@ -16,19 +16,18 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class BaseManager {
     @Getter @Setter
-    private static PluginBase baseInstance;
+    private static BetterPlugin baseInstance;
 
-    public static void init(PluginBase baseInstance) {
+    public static void init(BetterPlugin baseInstance) {
         setBaseInstance(baseInstance);
 
-        PluginBase.setBaseConfig(new BaseConfig(baseInstance));
+        BetterPlugin.setBaseConfig(new BaseConfig(baseInstance));
 
-        PluginBase.setScheduler(UniversalScheduler.getScheduler(getBaseInstance()));
+        BetterPlugin.setScheduler(UniversalScheduler.getScheduler(getBaseInstance()));
 
         new InventoryAPI(baseInstance).init();
 
@@ -37,7 +36,7 @@ public class BaseManager {
         EntityUtils.init();
     }
 
-    public static void otherInit(PluginBase baseInstance) {
+    public static void otherInit(BetterPlugin baseInstance) {
         PluginUtils.registerPlugin(baseInstance);
 
         new InventoryAPI(baseInstance).init();

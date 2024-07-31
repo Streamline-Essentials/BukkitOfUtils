@@ -8,95 +8,207 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public class MessageUtils {
-    public static void doReplaceAndSend(String message, String  prefix) {
+    public static void doReplaceAndSend(CommandSender to, String message, String prefix) {
         message = message.replace("%newline%", "\n");
         for (String line : message.split("\n")) {
-            sendMessage(BaseManager.getConsole(), prefix + line);
+            sendMessage(to, prefix + line);
         }
     }
 
+    public static void doReplaceAndSend(CommandSender to, String message) {
+        doReplaceAndSend(to, message, "");
+    }
+
+    public static void doReplaceAndSend(String message, String prefix) {
+        doReplaceAndSend(BaseManager.getConsole(), message, prefix);
+    }
+
+    public static void doReplaceAndSend(String message, BetterPlugin base, String prefix) {
+        doReplaceAndSend(message, base.getLogPrefix() + prefix);
+    }
+
+    @Deprecated
     public static void logInfo(String message) {
-        if (PluginBase.getBaseConfig().getIsInfoLoggingEnabled()) return;
-
-        doReplaceAndSend(message, PluginBase.getBaseConfig().getIsInfoLoggingPrefix());
+        logInfo(message, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logWarning(String message) {
-        if (PluginBase.getBaseConfig().getIsWarnLoggingEnabled()) return;
-
-        doReplaceAndSend(message, PluginBase.getBaseConfig().getIsWarnLoggingPrefix());
+        logWarning(message, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logSevere(String message) {
-        if (PluginBase.getBaseConfig().getIsSevereLoggingEnabled()) return;
-
-        doReplaceAndSend(message, PluginBase.getBaseConfig().getIsSevereLoggingPrefix());
+        logSevere(message, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logDebug(String message) {
-        if (PluginBase.getBaseConfig().getIsDebugLoggingEnabled()) return;
-
-        doReplaceAndSend(message, PluginBase.getBaseConfig().getIsDebugLoggingPrefix());
+        logDebug(message, BaseManager.getBaseInstance());
     }
 
+    public static void logInfo(String message, BetterPlugin base) {
+        if (! BetterPlugin.getBaseConfig().getIsInfoLoggingEnabled()) return;
+
+        doReplaceAndSend(message, base, BetterPlugin.getBaseConfig().getIsInfoLoggingPrefix());
+    }
+
+    public static void logWarning(String message, BetterPlugin base) {
+        if (! BetterPlugin.getBaseConfig().getIsWarnLoggingEnabled()) return;
+
+        doReplaceAndSend(message, base, BetterPlugin.getBaseConfig().getIsWarnLoggingPrefix());
+    }
+
+    public static void logSevere(String message, BetterPlugin base) {
+        if (! BetterPlugin.getBaseConfig().getIsSevereLoggingEnabled()) return;
+
+        doReplaceAndSend(message, base, BetterPlugin.getBaseConfig().getIsSevereLoggingPrefix());
+    }
+
+    public static void logDebug(String message, BetterPlugin base) {
+        if (! BetterPlugin.getBaseConfig().getIsDebugLoggingEnabled()) return;
+
+        doReplaceAndSend(message, base, BetterPlugin.getBaseConfig().getIsDebugLoggingPrefix());
+    }
+
+    @Deprecated
     public static void logInfo(StackTraceElement[] stackTraceElements) {
-        Arrays.stream(stackTraceElements).forEach(stackTraceElement -> {
-            logInfo(stackTraceElement.toString());
-        });
+        logInfo(stackTraceElements, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logWarning(StackTraceElement[] stackTraceElements) {
-        Arrays.stream(stackTraceElements).forEach(stackTraceElement -> {
-            logWarning(stackTraceElement.toString());
-        });
+        logWarning(stackTraceElements, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logSevere(StackTraceElement[] stackTraceElements) {
-        Arrays.stream(stackTraceElements).forEach(stackTraceElement -> {
-            logSevere(stackTraceElement.toString());
-        });
+        logSevere(stackTraceElements, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logDebug(StackTraceElement[] stackTraceElements) {
+        logDebug(stackTraceElements, BaseManager.getBaseInstance());
+    }
+
+    public static void logInfo(StackTraceElement[] stackTraceElements, BetterPlugin base) {
         Arrays.stream(stackTraceElements).forEach(stackTraceElement -> {
-            logDebug(stackTraceElement.toString());
+            logInfo(stackTraceElement.toString(), base);
         });
     }
 
+    public static void logWarning(StackTraceElement[] stackTraceElements, BetterPlugin base) {
+        Arrays.stream(stackTraceElements).forEach(stackTraceElement -> {
+            logWarning(stackTraceElement.toString(), base);
+        });
+    }
+
+    public static void logSevere(StackTraceElement[] stackTraceElements, BetterPlugin base) {
+        Arrays.stream(stackTraceElements).forEach(stackTraceElement -> {
+            logSevere(stackTraceElement.toString(), base);
+        });
+    }
+
+    public static void logDebug(StackTraceElement[] stackTraceElements, BetterPlugin base) {
+        Arrays.stream(stackTraceElements).forEach(stackTraceElement -> {
+            logDebug(stackTraceElement.toString(), base);
+        });
+    }
+
+    public static void logInfo(Throwable throwable, BetterPlugin base) {
+        logInfo(throwable.getMessage(), base);
+        logInfo(throwable.getStackTrace(), base);
+    }
+
+    public static void logWarning(Throwable throwable, BetterPlugin base) {
+        logWarning(throwable.getMessage(), base);
+        logWarning(throwable.getStackTrace(), base);
+    }
+
+    public static void logSevere(Throwable throwable, BetterPlugin base) {
+        logSevere(throwable.getMessage(), base);
+        logSevere(throwable.getStackTrace(), base);
+    }
+
+    public static void logDebug(Throwable throwable, BetterPlugin base) {
+        logDebug(throwable.getMessage(), base);
+        logDebug(throwable.getStackTrace(), base);
+    }
+
+    @Deprecated
     public static void logInfo(String message, Throwable throwable) {
-        logInfo(message);
-        logInfo(throwable.getStackTrace());
+        logInfo(message, throwable, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logWarning(String message, Throwable throwable) {
-        logWarning(message);
-        logWarning(throwable.getStackTrace());
+        logWarning(message, throwable, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logSevere(String message, Throwable throwable) {
-        logSevere(message);
-        logSevere(throwable.getStackTrace());
+        logSevere(message, throwable, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logDebug(String message, Throwable throwable) {
-        logDebug(message);
-        logDebug(throwable.getStackTrace());
+        logDebug(message, throwable, BaseManager.getBaseInstance());
     }
 
+    public static void logInfo(String message, Throwable throwable, BetterPlugin base) {
+        logInfo(message, base);
+        logInfo(throwable.getStackTrace(), base);
+    }
+
+    public static void logWarning(String message, Throwable throwable, BetterPlugin base) {
+        logWarning(message, base);
+        logWarning(throwable.getStackTrace(), base);
+    }
+
+    public static void logSevere(String message, Throwable throwable, BetterPlugin base) {
+        logSevere(message, base);
+        logSevere(throwable.getStackTrace(), base);
+    }
+
+    public static void logDebug(String message, Throwable throwable, BetterPlugin base) {
+        logDebug(message, base);
+        logDebug(throwable.getStackTrace(), base);
+    }
+
+    @Deprecated
     public static void logInfoWithInfo(String message, Throwable throwable) {
-        logInfo(message + (message.endsWith(" ") ? "" : " ") + throwable.getMessage(), throwable);
+        logInfoWithInfo(message, throwable, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logWarningWithInfo(String message, Throwable throwable) {
-        logWarning(message + (message.endsWith(" ") ? "" : " ") + throwable.getMessage(), throwable);
+        logWarningWithInfo(message, throwable, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logSevereWithInfo(String message, Throwable throwable) {
-        logSevere(message + (message.endsWith(" ") ? "" : " ") + throwable.getMessage(), throwable);
+        logSevereWithInfo(message, throwable, BaseManager.getBaseInstance());
     }
 
+    @Deprecated
     public static void logDebugWithInfo(String message, Throwable throwable) {
-        logDebug(message + (message.endsWith(" ") ? "" : " ") + throwable.getMessage(), throwable);
+        logDebugWithInfo(message, throwable, BaseManager.getBaseInstance());
+    }
+
+    public static void logInfoWithInfo(String message, Throwable throwable, BetterPlugin base) {
+        logInfo(message + (message.endsWith(" ") ? "" : " ") + throwable.getMessage(), throwable, base);
+    }
+
+    public static void logWarningWithInfo(String message, Throwable throwable, BetterPlugin base) {
+        logWarning(message + (message.endsWith(" ") ? "" : " ") + throwable.getMessage(), throwable, base);
+    }
+
+    public static void logSevereWithInfo(String message, Throwable throwable, BetterPlugin base) {
+        logSevere(message + (message.endsWith(" ") ? "" : " ") + throwable.getMessage(), throwable, base);
+    }
+
+    public static void logDebugWithInfo(String message, Throwable throwable, BetterPlugin base) {
+        logDebug(message + (message.endsWith(" ") ? "" : " ") + throwable.getMessage(), throwable, base);
     }
     
     public static void sendMessage(CommandSender to, String message) {
