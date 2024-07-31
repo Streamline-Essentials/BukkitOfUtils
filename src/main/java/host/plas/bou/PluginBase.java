@@ -6,10 +6,11 @@ import host.plas.bou.instances.BaseManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.plugin.java.JavaPlugin;
+import tv.quaint.objects.Identified;
 import tv.quaint.objects.handling.derived.IModifierEventable;
 
 @Getter @Setter
-public class PluginBase extends JavaPlugin implements IModifierEventable {
+public class PluginBase extends JavaPlugin implements IModifierEventable, Identified {
     @Getter
     private final ModifierType modifierType;
 
@@ -45,7 +46,8 @@ public class PluginBase extends JavaPlugin implements IModifierEventable {
     public void onEnable() {
         onBaseEnabling();
 
-        if (! (this instanceof BukkitOfUtils)) BaseManager.init(this);
+        if (this instanceof BukkitOfUtils) BaseManager.init(this);
+        else BaseManager.otherInit(this);
 
         onBaseEnabled();
     }
@@ -53,7 +55,7 @@ public class PluginBase extends JavaPlugin implements IModifierEventable {
     @Override
     public void onDisable() {
         onBaseDisable();
-        BaseManager.stop();
+        if (this instanceof BukkitOfUtils) BaseManager.stop();
     }
 
     @Override
