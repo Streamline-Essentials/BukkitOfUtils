@@ -75,8 +75,8 @@ public abstract class ComplexCommand implements TabExecutor, Identified {
     }
 
     @Deprecated
-    public void register() {
-        registerAndSet();
+    public boolean register() {
+        return true; // Deprecated
     }
 
     public void registerAndSet() {
