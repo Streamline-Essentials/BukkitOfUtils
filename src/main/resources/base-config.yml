@@ -39,4 +39,4 @@ timers:
     # If timers.ticking-frequency is 50, then 20 ticks = 1 second.
     # 10 ticks is the default and recommended value.
     # 10 ticks = 1/2 second.
-    interval: 10
+    frequency: 10

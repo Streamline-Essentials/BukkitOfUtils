@@ -13,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Consumer;
 
@@ -24,7 +25,7 @@ public class EntityUtils {
     private static EntityLookupTimer lookupTimer;
 
     public static void init() {
-        if (ClassHelper.isFolia()) lookupTimer = new EntityLookupTimer();
+        lookupTimer = new EntityLookupTimer();
     }
 
     public static void cacheEntityAlreadyInSync(Entity entity) {
@@ -80,13 +81,20 @@ public class EntityUtils {
                     }
                 }
             } else {
-                getCachedEntities().putAll(getEntitiesBukkit());
+                TaskManager.runTask(() -> {
+                    getEntitiesBukkit().values().forEach(EntityUtils::cacheEntity);
+                });
             }
         } catch (Exception e) {
             MessageUtils.logWarning("An error occurred while polling entities.", e);
         }
     }
 
+    /**
+     * Gets a map of entities from the server.
+     * Must be called from the main thread.
+     * @return A map of entities.
+     */
     public static ConcurrentSkipListMap<String, Entity> getEntitiesBukkit() {
         ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
 
@@ -103,26 +111,42 @@ public class EntityUtils {
         return entities;
     }
 
-    public static ConcurrentSkipListMap<String, Entity> getEntities() {
+    public static ConcurrentSkipListMap<String, Entity> getEntities(boolean isInSync) {
         if (ClassHelper.isFolia()) {
             return getCachedEntities();
         } else {
-            return getEntitiesBukkit();
+            if (isInSync) {
+                return getEntitiesBukkit();
+            } else {
+                return getCachedEntities();
+            }
         }
     }
 
+    public static ConcurrentSkipListMap<String, Entity> getEntities() {
+        return getEntities(false);
+    }
+
     public static void collectEntitiesThenDo(Consumer<Entity> consumer) {
-        getEntities().forEach((s, entity) -> {
-            TaskManager.runTask(entity, () -> consumer.accept(entity));
+        TaskManager.runTask(() -> {
+            getEntities(true).forEach((s, entity) -> {
+                TaskManager.runTask(entity, () -> consumer.accept(entity));
+            });
         });
     }
 
+    public static void collectEntitiesThenDoSet(Consumer<Collection<Entity>> consumer) {
+        TaskManager.runTask(() -> consumer.accept(getEntities(true).values()));
+    }
+
     public static void collectLivingEntitiesThenDo(Consumer<LivingEntity> consumer) {
-        getEntities().forEach((s, entity) -> {
-            TaskManager.runTask(entity, () -> {
-                if (entity instanceof LivingEntity) {
-                    consumer.accept((LivingEntity) entity);
-                }
+        TaskManager.runTask(() -> {
+            getEntities(true).forEach((s, entity) -> {
+                TaskManager.runTask(entity, () -> {
+                    if (entity instanceof LivingEntity) {
+                        consumer.accept((LivingEntity) entity);
+                    }
+                });
             });
         });
     }
@@ -134,11 +158,9 @@ public class EntityUtils {
 
         @Override
         public void run() {
-            if (ClassHelper.isFolia()) tickCache();
-            else pause();
-
             if (isCancelled()) return;
 
+            tickCache();
             if (getPeriod() != BaseManager.getBaseConfig().getEntityCollectionFrequency()) setPeriod(BaseManager.getBaseConfig().getEntityCollectionFrequency());
         }
     }
