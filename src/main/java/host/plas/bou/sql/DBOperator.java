@@ -1,6 +1,5 @@
 package host.plas.bou.sql;
 
-import host.plas.bou.MessageUtils;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.instances.BaseManager;
 import lombok.Getter;
@@ -79,7 +78,7 @@ public abstract class DBOperator {
 
             return rawConnection;
         } catch (Exception e) {
-            e.printStackTrace();
+            getPluginUser().logSevereWithInfo("Failed to get connection!", e);
             return null;
         }
     }
@@ -101,7 +100,7 @@ public abstract class DBOperator {
             if (stmt.execute()) result.set(ExecutionResult.YES);
             else result.set(ExecutionResult.NO);
         } catch (Exception e) {
-            MessageUtils.logInfo("Failed to execute statement: " + statement, e);
+            getPluginUser().logSevereWithInfo("Failed to execute statement: " + statement, e);
         }
 
         return result.get();
@@ -134,7 +133,7 @@ public abstract class DBOperator {
 
             action.accept(set);
         } catch (Exception e) {
-            MessageUtils.logInfo("Failed to execute query: " + statement, e);
+            getPluginUser().logSevereWithInfo("Failed to execute query: " + statement, e);
         }
     }
 

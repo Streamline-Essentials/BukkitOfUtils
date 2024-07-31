@@ -13,11 +13,6 @@ public class BukkitOfUtils extends BetterPlugin {
     }
 
     @Override
-    public void onBaseEnabling() {
-        BaseManager.init(this);
-    }
-
-    @Override
     public void onBaseEnabled() {
         // Plugin startup logic
         instance = this;
