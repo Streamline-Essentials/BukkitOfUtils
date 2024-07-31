@@ -14,8 +14,13 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     @Getter
     private final ModifierType modifierType;
 
-    @Getter @Setter
-    private static BaseConfig baseConfig;
+    public static BaseConfig getBaseConfig() {
+        return BaseManager.getBaseConfig();
+    }
+
+    public static BukkitOfUtils getBaseInstance() {
+        return BaseManager.getBaseInstance();
+    }
 
     @Getter @Setter
     private static TaskScheduler scheduler;
@@ -46,7 +51,7 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     public void onEnable() {
         onBaseEnabling();
 
-        if (this instanceof BukkitOfUtils) BaseManager.init(this);
+        if (this instanceof BukkitOfUtils) BaseManager.init((BukkitOfUtils) this);
         else BaseManager.otherInit(this);
 
         onBaseEnabled();

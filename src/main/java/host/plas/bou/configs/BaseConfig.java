@@ -10,6 +10,11 @@ public class BaseConfig extends SimpleConfiguration {
 
     @Override
     public void init() {
+        // Console.
+        getConsoleUUID();
+        getConsoleName();
+
+        // Logging.
         getIsInfoLoggingEnabled();
         getIsInfoLoggingPrefix();
         getIsWarnLoggingEnabled();
@@ -18,8 +23,10 @@ public class BaseConfig extends SimpleConfiguration {
         getIsSevereLoggingPrefix();
         getIsDebugLoggingEnabled();
         getIsDebugLoggingPrefix();
-        getConsoleUUID();
-        getConsoleName();
+
+        // Timers.
+        getTickingFrequency();
+        getEntityCollectionFrequency();
     }
 
     public boolean getIsInfoLoggingEnabled() {
@@ -80,5 +87,17 @@ public class BaseConfig extends SimpleConfiguration {
         reloadResource();
 
         return getOrSetDefault("console.name", "Console");
+    }
+
+    public int getTickingFrequency() {
+        reloadResource();
+
+        return getOrSetDefault("timers.ticking-frequency", 50);
+    }
+
+    public long getEntityCollectionFrequency() {
+        reloadResource();
+
+        return getOrSetDefault("timers.entity-collection-frequency", 10L);
     }
 }

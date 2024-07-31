@@ -4,6 +4,8 @@ import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskSchedule
 import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
 import host.plas.bou.MessageUtils;
 import host.plas.bou.BetterPlugin;
+import host.plas.bou.instances.BaseManager;
+import host.plas.bou.utils.PluginUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Chunk;
@@ -56,7 +58,8 @@ public class TaskManager {
     }
 
     public static void init() {
-        timer = new Timer(50, e -> tick());
+        final int tickingFrequency = BaseManager.getBaseConfig().getTickingFrequency();
+        timer = new Timer(tickingFrequency, e -> tick());
         timer.start();
 
         MessageUtils.logInfo("&cTaskManager &fis now initialized!");

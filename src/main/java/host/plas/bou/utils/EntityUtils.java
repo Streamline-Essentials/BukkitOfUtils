@@ -1,6 +1,7 @@
 package host.plas.bou.utils;
 
 import host.plas.bou.MessageUtils;
+import host.plas.bou.instances.BaseManager;
 import host.plas.bou.scheduling.BaseRunnable;
 import host.plas.bou.scheduling.TaskManager;
 import lombok.Getter;
@@ -128,13 +129,17 @@ public class EntityUtils {
 
     public static class EntityLookupTimer extends BaseRunnable {
         public EntityLookupTimer() {
-            super(0, 20);
+            super(0, BaseManager.getBaseConfig().getEntityCollectionFrequency());
         }
 
         @Override
         public void run() {
             if (ClassHelper.isFolia()) tickCache();
             else pause();
+
+            if (isCancelled()) return;
+
+            if (getPeriod() != BaseManager.getBaseConfig().getEntityCollectionFrequency()) setPeriod(BaseManager.getBaseConfig().getEntityCollectionFrequency());
         }
     }
 }
