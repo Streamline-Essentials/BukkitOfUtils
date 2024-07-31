@@ -74,6 +74,11 @@ public abstract class ComplexCommand implements TabExecutor, Identified {
         CommandHandler.unregisterCommand(this);
     }
 
+    @Deprecated
+    public void register() {
+        registerAndSet();
+    }
+
     public void registerAndSet() {
         if (registerWithBukkit()) {
             registerWithBOU();
