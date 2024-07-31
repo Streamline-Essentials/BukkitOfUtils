@@ -27,6 +27,10 @@ public class BaseManager {
     private static BaseConfig baseConfig;
 
     public static void init(BukkitOfUtils baseInstance) {
+        if (BukkitOfUtils.getInstance() == null) {
+            BukkitOfUtils.setInstance(baseInstance);
+        }
+
         setBaseInstance(baseInstance);
 
         setBaseConfig(new BaseConfig(baseInstance));

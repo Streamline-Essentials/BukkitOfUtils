@@ -2,10 +2,9 @@ package host.plas.bou.scheduling;
 
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
-import host.plas.bou.MessageUtils;
+import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.instances.BaseManager;
-import host.plas.bou.utils.PluginUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Chunk;
@@ -40,7 +39,7 @@ public class TaskManager {
             try {
                 runnable.tick();
             } catch (Throwable e) {
-                MessageUtils.logDebug("Error while ticking runnable: " + runnable, e);
+                BukkitOfUtils.getInstance().logDebug("Error while ticking runnable: " + runnable, e);
             }
         }
     }
@@ -58,18 +57,24 @@ public class TaskManager {
     }
 
     public static void init() {
-        final int tickingFrequency = BaseManager.getBaseConfig().getTickingFrequency();
-        timer = new Timer(tickingFrequency, e -> tick());
+        int tickingFrequency = BaseManager.getBaseConfig().getTickingFrequency();
+        timer = new Timer(tickingFrequency, e -> {
+            if (getTimer().getDelay() != BaseManager.getBaseConfig().getTickingFrequency()) {
+                getTimer().setDelay(BaseManager.getBaseConfig().getTickingFrequency());
+            }
+
+            tick();
+        });
         timer.start();
 
-        MessageUtils.logInfo("&cTaskManager &fis now initialized!");
+        BukkitOfUtils.getInstance().logInfo("&cTaskManager &fis now initialized!");
     }
 
     public static void stop() {
         timer.stop();
         currentRunnables.forEach((index, runnable) -> runnable.cancel());
 
-        MessageUtils.logInfo("&cTaskManager &fis now stopped!");
+        BukkitOfUtils.getInstance().logInfo("&cTaskManager &fis now stopped!");
     }
 
     public static TaskScheduler getScheduler() {

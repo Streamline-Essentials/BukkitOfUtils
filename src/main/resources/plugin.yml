@@ -2,3 +2,13 @@ name: '${name}'
 version: '${version}'
 main: '${main}'
 folia-supported: true
+authors: [ Drak ]
+
+commands:
+  entity-count:
+    description: Get the count of entities in the server.
+    aliases:
+      - entityc
+      - counte
+      - countentities
+    permission: bou.command.entity-count

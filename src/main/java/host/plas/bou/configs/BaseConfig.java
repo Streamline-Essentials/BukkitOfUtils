@@ -98,6 +98,6 @@ public class BaseConfig extends SimpleConfiguration {
     public long getEntityCollectionFrequency() {
         reloadResource();
 
-        return getOrSetDefault("timers.entity-collection-frequency", 10L);
+        return getOrSetDefault("timers.entity-collection.frequency", 10L);
     }
 }
