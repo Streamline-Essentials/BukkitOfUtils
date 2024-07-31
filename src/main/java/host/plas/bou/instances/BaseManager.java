@@ -5,6 +5,7 @@ import host.plas.bou.PluginBase;
 import host.plas.bou.utils.EntityUtils;
 import host.plas.bou.configs.BaseConfig;
 import host.plas.bou.scheduling.TaskManager;
+import host.plas.bou.utils.PluginUtils;
 import lombok.Setter;
 import lombok.Getter;
 import mc.obliviate.inventory.InventoryAPI;
@@ -20,26 +21,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 public class BaseManager {
     @Getter @Setter
-    private static ConcurrentSkipListMap<String, PluginBase> loadedPlugins = new ConcurrentSkipListMap<>();
-
-    @Getter @Setter
     private static PluginBase baseInstance;
-
-    public static void registerPlugin(PluginBase plugin) {
-        loadedPlugins.put(plugin.getName(), plugin);
-    }
-
-    public static void unregisterPlugin(PluginBase plugin) {
-        loadedPlugins.remove(plugin.getName());
-    }
-
-    public static Optional<PluginBase> getPlugin(String name) {
-        return loadedPlugins.values().stream().filter(plugin -> plugin.getName().equalsIgnoreCase(name)).findFirst();
-    }
-
-    public static boolean isPluginLoaded(String name) {
-        return getPlugin(name).isPresent();
-    }
 
     public static void init(PluginBase baseInstance) {
         setBaseInstance(baseInstance);
@@ -56,7 +38,7 @@ public class BaseManager {
     }
 
     public static void otherInit(PluginBase baseInstance) {
-        registerPlugin(baseInstance);
+        PluginUtils.registerPlugin(baseInstance);
 
         new InventoryAPI(baseInstance).init();
     }
@@ -79,7 +61,7 @@ public class BaseManager {
     }
 
     public static List<Player> getOnlinePlayers() {
-        return new ArrayList<>(getBaseInstance().getServer().getOnlinePlayers());
+        return new ArrayList<>(Bukkit.getOnlinePlayers());
     }
 
     public static ConcurrentSkipListMap<String, Player> getOnlinePlayersByUUID() {

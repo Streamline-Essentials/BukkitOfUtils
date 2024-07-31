@@ -1,6 +1,7 @@
 package host.plas.bou.commands;
 
 import host.plas.bou.MessageUtils;
+import host.plas.bou.PluginBase;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.command.Command;
@@ -9,28 +10,53 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import tv.quaint.objects.Identified;
 import tv.quaint.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Consumer;
 
 @Setter
 @Getter
-public abstract class ComplexCommand implements TabExecutor {
+public abstract class ComplexCommand implements TabExecutor, Identified {
     private String identifier;
+    private String commandName;
     private JavaPlugin provider;
     private boolean registered;
 
-    public ComplexCommand(String identifier, JavaPlugin provider) {
-        this.identifier = identifier;
+    public ComplexCommand(String commandName, JavaPlugin provider) {
+        this.identifier = CommandHandler.getIdentifier(commandName, provider);
+        this.commandName = commandName;
         this.provider = provider;
 
         registerAndSet();
     }
 
-    public boolean register() {
+    public PluginBase getPlugin() {
+        try {
+            return (PluginBase) getProvider();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public Optional<PluginBase> getPluginOptional() {
+        return Optional.ofNullable(getPlugin());
+    }
+
+    public boolean isBOUPlugin() {
+        return getPluginOptional().isPresent();
+    }
+
+    public void executeWithPlugin(Consumer<PluginBase> consumer) {
+        getPluginOptional().ifPresent(consumer);
+    }
+
+    public boolean registerWithBukkit() {
         try {
             Objects.requireNonNull(getProvider().getCommand(getIdentifier())).setExecutor(this);
             return true;
@@ -40,8 +66,17 @@ public abstract class ComplexCommand implements TabExecutor {
         }
     }
 
+    public void registerWithBOU() {
+        CommandHandler.registerCommand(this);
+    }
+
+    public void unregisterWithBOU() {
+        CommandHandler.unregisterCommand(this);
+    }
+
     public void registerAndSet() {
-        if (register()) {
+        if (registerWithBukkit()) {
+            registerWithBOU();
             setRegistered(true);
         }
     }

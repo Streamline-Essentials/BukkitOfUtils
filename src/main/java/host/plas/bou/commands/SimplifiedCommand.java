@@ -18,6 +18,11 @@ public abstract class SimplifiedCommand extends ComplexCommand {
     }
 
     @Override
+    public ConcurrentSkipListSet<String> tabComplete(CommandContext ctx) {
+        return new ConcurrentSkipListSet<>();
+    }
+
+    @Override
     public ConcurrentSkipListSet<String> tabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         return tabComplete(new CommandContext(sender, command, label, args));
     }
