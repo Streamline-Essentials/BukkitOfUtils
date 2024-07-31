@@ -1,7 +1,7 @@
 package host.plas.bou.commands;
 
 import host.plas.bou.MessageUtils;
-import host.plas.bou.PluginBase;
+import host.plas.bou.BetterPlugin;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.command.Command;
@@ -36,15 +36,15 @@ public abstract class ComplexCommand implements TabExecutor, Identified {
         registerAndSet();
     }
 
-    public PluginBase getPlugin() {
+    public BetterPlugin getPlugin() {
         try {
-            return (PluginBase) getProvider();
+            return (BetterPlugin) getProvider();
         } catch (Exception e) {
             return null;
         }
     }
 
-    public Optional<PluginBase> getPluginOptional() {
+    public Optional<BetterPlugin> getPluginOptional() {
         return Optional.ofNullable(getPlugin());
     }
 
@@ -52,7 +52,7 @@ public abstract class ComplexCommand implements TabExecutor, Identified {
         return getPluginOptional().isPresent();
     }
 
-    public void executeWithPlugin(Consumer<PluginBase> consumer) {
+    public void executeWithPlugin(Consumer<BetterPlugin> consumer) {
         getPluginOptional().ifPresent(consumer);
     }
 

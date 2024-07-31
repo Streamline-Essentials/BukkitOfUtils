@@ -1,6 +1,7 @@
 package host.plas.bou.sql;
 
 import host.plas.bou.MessageUtils;
+import host.plas.bou.BetterPlugin;
 import host.plas.bou.instances.BaseManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,11 +22,11 @@ import java.util.function.Consumer;
 public abstract class DBOperator {
     private ConnectorSet connectorSet;
     private HikariDataSource dataSource;
-    private String pluginUser;
+    private BetterPlugin pluginUser;
 
     private Connection rawConnection;
 
-    public DBOperator(ConnectorSet connectorSet, String pluginUser) {
+    public DBOperator(ConnectorSet connectorSet, BetterPlugin pluginUser) {
         this.connectorSet = connectorSet;
         this.pluginUser = pluginUser;
 
@@ -50,7 +51,7 @@ public abstract class DBOperator {
 
                 break;
         }
-        config.setPoolName(pluginUser + " - Pool");
+        config.setPoolName(pluginUser.getIdentifier() + " - Pool");
         config.setMaximumPoolSize(10);
         config.setConnectionTimeout(30000);
         config.setIdleTimeout(600000);
@@ -150,6 +151,10 @@ public abstract class DBOperator {
         }
     }
 
+    public File getDatabaseFolder() {
+        return getDatabaseFolder(this);
+    }
+
     public void ensureFile() {
         if (this.getConnectorSet().getType() != DatabaseType.SQLITE) return;
 
@@ -170,7 +175,17 @@ public abstract class DBOperator {
         this.ensureTables();
     }
 
-    public static File getDatabaseFolder() {
+    public static File getDatabaseFolder(DBOperator operator) {
+        File folder = new File(operator.getPluginUser().getDataFolder(), "storage");
+
+        if (! folder.exists()) {
+            folder.mkdirs();
+        }
+
+        return folder;
+    }
+
+    public static File getMainDatabaseFolder() {
         File folder = new File(BaseManager.getBaseInstance().getDataFolder(), "storage");
 
         if (! folder.exists()) {

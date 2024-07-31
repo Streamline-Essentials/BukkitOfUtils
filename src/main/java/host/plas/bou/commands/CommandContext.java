@@ -1,6 +1,6 @@
 package host.plas.bou.commands;
 
-import host.plas.bou.PluginBase;
+import host.plas.bou.BetterPlugin;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -49,7 +49,7 @@ public class CommandContext {
         String playerName = getStringArg(argIndex);
         if (playerName == null) return Optional.empty();
 
-        if (playerName.equals(PluginBase.getBaseConfig().getConsoleUUID())) {
+        if (playerName.equals(BetterPlugin.getBaseConfig().getConsoleUUID())) {
             return Optional.of(Bukkit.getConsoleSender());
         }
 
