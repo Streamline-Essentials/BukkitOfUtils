@@ -1,6 +1,7 @@
 package host.plas.bou;
 
 import host.plas.bou.instances.BaseManager;
+import host.plas.bou.notifications.NotificationTimer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -8,10 +9,25 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public class MessageUtils {
+    public static String getNotificationIdentifier(String message) {
+        return truncateString(message, 17);
+    }
+
+    public static String truncateString(String string, int length) {
+        if (string.length() > length) {
+            return string.substring(0, length);
+        }
+        return string;
+    }
+
     public static void doReplaceAndSend(CommandSender to, String message, String prefix) {
+        if (NotificationTimer.hasNotification(getNotificationIdentifier(message), to)) return;
+
         message = message.replace("%newline%", "\n");
         for (String line : message.split("\n")) {
             sendMessage(to, prefix + line);
+
+            NotificationTimer.addNotification(getNotificationIdentifier(message), to);
         }
     }
 
