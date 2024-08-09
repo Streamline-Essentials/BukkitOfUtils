@@ -1,5 +1,6 @@
-package host.plas.bou;
+package host.plas.bou.utils;
 
+import host.plas.bou.BetterPlugin;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.notifications.NotificationTimer;
 import net.md_5.bungee.api.ChatColor;
@@ -26,9 +27,9 @@ public class MessageUtils {
         message = message.replace("%newline%", "\n");
         for (String line : message.split("\n")) {
             sendMessage(to, prefix + line);
-
-            NotificationTimer.addNotification(getNotificationIdentifier(message), to);
         }
+
+        NotificationTimer.addNotification(getNotificationIdentifier(message), to);
     }
 
     public static void doReplaceAndSend(CommandSender to, String message) {

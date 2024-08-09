@@ -1,6 +1,6 @@
 package host.plas.bou.utils;
 
-import host.plas.bou.MessageUtils;
+import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.scheduling.BaseRunnable;
 import host.plas.bou.scheduling.TaskManager;
@@ -86,7 +86,7 @@ public class EntityUtils {
                 });
             }
         } catch (Exception e) {
-            MessageUtils.logWarning("An error occurred while polling entities.", e);
+            BukkitOfUtils.getInstance().logWarning("An error occurred while polling entities.", e);
         }
     }
 
@@ -105,7 +105,7 @@ public class EntityUtils {
                 });
             });
         } catch (Exception e) {
-            MessageUtils.logWarning("An error occurred while polling entities.", e);
+            BukkitOfUtils.getInstance().logWarning("An error occurred while polling entities.", e);
         }
 
         return entities;

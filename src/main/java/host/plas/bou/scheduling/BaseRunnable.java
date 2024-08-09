@@ -1,6 +1,6 @@
 package host.plas.bou.scheduling;
 
-import host.plas.bou.MessageUtils;
+import host.plas.bou.utils.MessageUtils;
 import lombok.Getter;
 import lombok.Setter;
 

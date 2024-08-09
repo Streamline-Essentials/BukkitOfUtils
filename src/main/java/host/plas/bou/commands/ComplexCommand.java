@@ -1,6 +1,6 @@
 package host.plas.bou.commands;
 
-import host.plas.bou.MessageUtils;
+import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.BetterPlugin;
 import lombok.Getter;
 import lombok.Setter;
@@ -61,7 +61,7 @@ public abstract class ComplexCommand implements TabExecutor, Identified {
             Objects.requireNonNull(getProvider().getCommand(getIdentifier())).setExecutor(this);
             return true;
         } catch (Exception e) {
-            MessageUtils.logWarning("Failed to register command '" + identifier + "'! --> No command found in plugin.yml!");
+            BukkitOfUtils.getInstance().logWarning("Failed to register command '" + identifier + "'! --> No command found in plugin.yml!");
             return false;
         }
     }

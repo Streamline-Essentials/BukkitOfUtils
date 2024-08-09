@@ -1,6 +1,6 @@
 package host.plas.bou.commands;
 
-import host.plas.bou.MessageUtils;
+import host.plas.bou.utils.MessageUtils;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.utils.SenderUtils;
 import lombok.Getter;

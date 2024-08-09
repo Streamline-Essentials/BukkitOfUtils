@@ -3,6 +3,7 @@ package host.plas.bou;
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import host.plas.bou.configs.BaseConfig;
 import host.plas.bou.instances.BaseManager;
+import host.plas.bou.utils.MessageUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -81,7 +82,7 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     @Override
     public void initializeDataFolder() {
         if (! getDataFolder().mkdirs()) {
-            MessageUtils.logWarning("Could not create data folder for " + getIdentifier() + "!");
+            BukkitOfUtils.getInstance().logWarning("Could not create data folder for " + getIdentifier() + "!");
         }
     }
 
