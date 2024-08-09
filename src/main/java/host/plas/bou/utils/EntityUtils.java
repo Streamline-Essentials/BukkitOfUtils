@@ -1,5 +1,7 @@
 package host.plas.bou.utils;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.scheduling.BaseRunnable;
@@ -12,6 +14,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -19,7 +22,10 @@ import java.util.function.Consumer;
 
 public class EntityUtils {
     @Getter @Setter
-    private static ConcurrentSkipListMap<String, Entity> cachedEntities = new ConcurrentSkipListMap<>();
+    private static Cache<String, Entity> cachedEntities = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofSeconds(1))
+            .build()
+            ;
 
     @Getter @Setter
     private static EntityLookupTimer lookupTimer;
@@ -28,9 +34,17 @@ public class EntityUtils {
         lookupTimer = new EntityLookupTimer();
     }
 
+    public static boolean containsValue(Entity entity) {
+        return cachedEntities.asMap().containsValue(entity);
+    }
+
+    public static boolean containsKey(String uniqueId) {
+        return cachedEntities.asMap().containsKey(uniqueId);
+    }
+
     public static void cacheEntityAlreadyInSync(Entity entity) {
         if (! entity.isValid()) return;
-        if (cachedEntities.containsKey(entity.getUniqueId().toString())) return;
+        if (containsKey(entity.getUniqueId().toString())) return;
 
         cachedEntities.put(entity.getUniqueId().toString(), entity);
     }
@@ -65,7 +79,7 @@ public class EntityUtils {
     }
 
     public static void clearCache() {
-        cachedEntities.clear();
+        cachedEntities.invalidateAll();
     }
 
     public static void collectEntities() {
@@ -112,15 +126,18 @@ public class EntityUtils {
     }
 
     public static ConcurrentSkipListMap<String, Entity> getEntities(boolean isInSync) {
+        ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
         if (ClassHelper.isFolia()) {
-            return getCachedEntities();
+            entities.putAll(getCachedEntities().asMap());
         } else {
             if (isInSync) {
-                return getEntitiesBukkit();
+                entities.putAll(getEntitiesBukkit());
             } else {
-                return getCachedEntities();
+                entities.putAll(getCachedEntities().asMap());
             }
         }
+
+        return entities;
     }
 
     public static ConcurrentSkipListMap<String, Entity> getEntities() {
