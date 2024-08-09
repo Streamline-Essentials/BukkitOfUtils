@@ -98,4 +98,14 @@ public class ColorUtils {
 
         return builder.create();
     }
+
+    public static String colorAsString(String message) {
+        StringBuilder builder = new StringBuilder();
+
+        for (BaseComponent component : color(message)) {
+            builder.append(component.toLegacyText());
+        }
+
+        return builder.toString();
+    }
 }

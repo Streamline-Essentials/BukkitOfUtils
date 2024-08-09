@@ -44,7 +44,7 @@ public class BaseConfig extends SimpleConfiguration {
     public boolean getIsWarnLoggingEnabled() {
         reloadResource();
 
-        return getOrSetDefault("logging.warn", true);
+        return getOrSetDefault("logging.warn.enabled", true);
     }
 
     public String getIsWarnLoggingPrefix() {
@@ -56,7 +56,7 @@ public class BaseConfig extends SimpleConfiguration {
     public boolean getIsSevereLoggingEnabled() {
         reloadResource();
 
-        return getOrSetDefault("logging.severe", true);
+        return getOrSetDefault("logging.severe.enabled", true);
     }
 
     public String getIsSevereLoggingPrefix() {
@@ -68,7 +68,7 @@ public class BaseConfig extends SimpleConfiguration {
     public boolean getIsDebugLoggingEnabled() {
         reloadResource();
 
-        return getOrSetDefault("logging.debug", false);
+        return getOrSetDefault("logging.debug.enabled", false);
     }
 
     public String getIsDebugLoggingPrefix() {
