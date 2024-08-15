@@ -1,6 +1,7 @@
 package host.plas.bou.sql;
 
 import host.plas.bou.BetterPlugin;
+import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.instances.BaseManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,8 @@ public abstract class DBOperator {
     public DBOperator(ConnectorSet connectorSet, BetterPlugin pluginUser) {
         this.connectorSet = connectorSet;
         this.pluginUser = pluginUser;
+
+        pluginUser.subscribeDisableIfSame(this::shutdown);
 
 //        this.connectionMap = new ConcurrentSkipListMap<>();
 //        this.connectionTimers = new ConcurrentSkipListMap<>();
@@ -81,6 +84,28 @@ public abstract class DBOperator {
         } catch (Exception e) {
             getPluginUser().logSevereWithInfo("Failed to get connection!", e);
             return null;
+        }
+    }
+
+    public Connection getConnection() {
+        return getConnection(new Date()); // TODO: Fix this
+    }
+
+    public void shutdown(PluginDisableEvent event) {
+        BetterPlugin plugin = event.getPlugin();
+
+        plugin.logInfo("Shutting down database connection...");
+
+        shutdown();
+
+        plugin.logInfo("Shut down database connection!");
+    }
+
+    public void shutdown() {
+        if (dataSource != null) {
+            dataSource.close();
+
+            dataSource = null;
         }
     }
 

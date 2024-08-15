@@ -2,6 +2,10 @@ package host.plas.bou;
 
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import host.plas.bou.configs.BaseConfig;
+import host.plas.bou.events.callbacks.CallbackManager;
+import host.plas.bou.events.callbacks.DisableCallback;
+import host.plas.bou.events.callbacks.PluginCallback;
+import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.MessageUtils;
 import lombok.Getter;
@@ -9,6 +13,8 @@ import lombok.Setter;
 import org.bukkit.plugin.java.JavaPlugin;
 import tv.quaint.objects.Identified;
 import tv.quaint.objects.handling.derived.IModifierEventable;
+
+import java.util.function.Consumer;
 
 @Getter @Setter
 public class BetterPlugin extends JavaPlugin implements IModifierEventable, Identified {
@@ -62,6 +68,16 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     public void onDisable() {
         onBaseDisable();
         if (this instanceof BukkitOfUtils) BaseManager.stop();
+    }
+
+    public static DisableCallback subscribeDisable(Consumer<PluginDisableEvent> consumer) {
+        return new DisableCallback(consumer);
+    }
+
+    public DisableCallback subscribeDisableIfSame(Consumer<PluginDisableEvent> consumer) {
+        return new DisableCallback(c -> {
+            if (c.getPlugin().equals(this)) consumer.accept(c);
+        });
     }
 
     @Override
