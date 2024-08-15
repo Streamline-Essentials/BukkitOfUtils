@@ -56,8 +56,6 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
 
     @Override
     public void onEnable() {
-        CallbackManager.init();
-
         onBaseEnabling();
 
         if (this instanceof BukkitOfUtils) BaseManager.init((BukkitOfUtils) this);
