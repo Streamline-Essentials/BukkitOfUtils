@@ -3,6 +3,7 @@ package host.plas.bou.instances;
 import com.github.Anon8281.universalScheduler.UniversalScheduler;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.events.callbacks.CallbackManager;
 import host.plas.bou.utils.EntityUtils;
 import host.plas.bou.configs.BaseConfig;
 import host.plas.bou.scheduling.TaskManager;
@@ -27,27 +28,28 @@ public class BaseManager {
     private static BaseConfig baseConfig;
 
     public static void init(BukkitOfUtils baseInstance) {
-        if (BukkitOfUtils.getInstance() == null) {
-            BukkitOfUtils.setInstance(baseInstance);
-        }
+        preInit(baseInstance);
 
-        setBaseInstance(baseInstance);
-
-        setBaseConfig(new BaseConfig(baseInstance));
-
-        BetterPlugin.setScheduler(UniversalScheduler.getScheduler(baseInstance));
-
-        new InventoryAPI(baseInstance).init();
-
-        TaskManager.init();
+        CallbackManager.init();
 
         EntityUtils.init();
     }
 
-    public static void otherInit(BetterPlugin baseInstance) {
-        PluginUtils.registerPlugin(baseInstance);
-
+    public static void preInit(BukkitOfUtils baseInstance) {
+        if (BukkitOfUtils.getInstance() == null) {
+            BukkitOfUtils.setInstance(baseInstance);
+        }
+        setBaseInstance(baseInstance);
+        setBaseConfig(new BaseConfig(baseInstance));
+        BetterPlugin.setScheduler(UniversalScheduler.getScheduler(baseInstance));
         new InventoryAPI(baseInstance).init();
+        TaskManager.init();
+    }
+
+    public static void otherInit(BetterPlugin otherInstance) {
+        PluginUtils.registerPlugin(otherInstance);
+
+        new InventoryAPI(otherInstance).init();
     }
 
     public static void stop() {
