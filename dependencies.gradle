@@ -17,6 +17,7 @@ ext {
     ]
     COMP_ONLY = [
             'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
+            'org.spigotmc:spigot:1.20.4-R0.1-SNAPSHOT',
     ]
     FILES = [
     ]
