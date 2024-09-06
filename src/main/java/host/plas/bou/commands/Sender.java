@@ -1,5 +1,6 @@
 package host.plas.bou.commands;
 
+import host.plas.bou.utils.ColorUtils;
 import host.plas.bou.utils.MessageUtils;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.utils.SenderUtils;
@@ -49,7 +50,7 @@ public class Sender {
         AtomicString finalMessage = new AtomicString(message);
 
         if (format) {
-            finalMessage.set(MessageUtils.codedString(message));
+            finalMessage.set(ColorUtils.colorizeHard(message));
         }
 
         getCommandSender().ifPresent(sender -> {
@@ -72,7 +73,7 @@ public class Sender {
             if (sender instanceof Player) {
                 Player player = (Player) sender;
 
-                player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+                player.sendTitle(ColorUtils.colorizeHard(title), ColorUtils.colorizeHard(subtitle), fadeIn, stay, fadeOut);
 
                 success.set(true);
             }
@@ -127,7 +128,7 @@ public class Sender {
         }
         String t = title.toString().trim();
 
-        String[] splitTitle = t.split("\\n");
+        String[] splitTitle = t.split("\\\\n", 2);
         String titleString = splitTitle[0];
         String subtitleString = splitTitle.length > 1 ? splitTitle[1] : "";
 
