@@ -20,7 +20,7 @@ public class MessageCMD extends SimplifiedCommand {
 
     @Override
     public boolean command(CommandContext ctx) {
-        if (ctx.isArgUsable(1)) {
+        if (! ctx.isArgUsable(1)) {
             ctx.sendMessage("&cUsage: /boumessage <player> [message ...]");
             return false;
         }
