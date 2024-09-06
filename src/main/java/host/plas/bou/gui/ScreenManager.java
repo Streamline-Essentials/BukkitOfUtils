@@ -7,7 +7,7 @@ import lombok.Setter;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ScreenManager {
@@ -19,13 +19,13 @@ public class ScreenManager {
     }
 
     @Getter @Setter
-    private static ConcurrentHashMap<Player, ScreenInstance> screens = new ConcurrentHashMap<>();
+    private static ConcurrentSkipListSet<ScreenInstance> screens = new ConcurrentSkipListSet<>();
 
     public static Optional<ScreenInstance> getScreen(Player player) {
         AtomicReference<Optional<ScreenInstance>> screen = new AtomicReference<>(Optional.empty());
 
-        screens.forEach((p, s) -> {
-            if (p.getUniqueId().equals(player.getUniqueId())) {
+        screens.forEach(s -> {
+            if (s.getIdentifier().equals(player.getUniqueId().toString())) {
                 screen.set(Optional.of(s));
             }
         });
@@ -38,28 +38,24 @@ public class ScreenManager {
             removeScreen(player);
         }
 
-        screens.put(player, screen);
+        screens.add(screen);
     }
 
     public static void removeScreen(Player player) {
-        screens.forEach((p, sheet) -> {
-            if (p.getUniqueId().equals(player.getUniqueId())) {
-                screens.remove(p);
-            }
-        });
+        screens.removeIf(s -> s.getIdentifier().equals(player.getUniqueId().toString()));
     }
 
     public static boolean hasScreen(Player player) {
         return getScreen(player).isPresent();
     }
 
-    public static ConcurrentHashMap<Player, ScreenInstance> getPlayersOf(ScreenBlock block) {
-        ConcurrentHashMap<Player, ScreenInstance> players = new ConcurrentHashMap<>();
+    public static ConcurrentSkipListSet<ScreenInstance> getPlayersOf(ScreenBlock block) {
+        ConcurrentSkipListSet<ScreenInstance> players = new ConcurrentSkipListSet<>();
 
-        getScreens().forEach((player, screenInstance) -> {
+        getScreens().forEach(screenInstance -> {
             screenInstance.getScreenBlock().ifPresent(screenBlock -> {
                 if (screenBlock.equals(block)) {
-                    players.put(player, screenInstance);
+                    players.add(screenInstance);
                 }
             });
         });
