@@ -16,7 +16,7 @@ public class TitleCMD extends SimplifiedCommand {
 
     @Override
     public boolean command(CommandContext ctx) {
-        if (ctx.isArgUsable(1)) {
+        if (! ctx.isArgUsable(1)) {
             ctx.sendMessage("&cUsage: /boutitle <player> [title ...]");
             return false;
         }
@@ -35,7 +35,7 @@ public class TitleCMD extends SimplifiedCommand {
         }
 
         if (ctx.getArgs().size() == 2) {
-            return new ConcurrentSkipListSet<>(List.of("title\\nsubtitle"));
+            return new ConcurrentSkipListSet<>(List.of("title\\nsubtitle", "-fadeIn=10", "-stay=70", "-fadeOut=20"));
         }
 
         return new ConcurrentSkipListSet<>();
