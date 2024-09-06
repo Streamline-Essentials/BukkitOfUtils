@@ -1,5 +1,6 @@
 package host.plas.bou;
 
+import host.plas.bou.firestring.FireStringManager;
 import host.plas.bou.gui.ScreenManager;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.owncmd.EntityCountCMD;
@@ -27,6 +28,7 @@ public class BukkitOfUtils extends BetterPlugin {
 
         ClassHelper.init();
         ScreenManager.init();
+        FireStringManager.init();
     }
 
     @Override
