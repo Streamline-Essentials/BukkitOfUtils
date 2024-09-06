@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import tv.quaint.objects.AtomicString;
 
 import java.util.Optional;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter @Setter
@@ -62,6 +63,75 @@ public class Sender {
 
     public boolean sendMessage(String message) {
         return sendMessage(message, true);
+    }
+
+    public boolean sendTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+        AtomicBoolean success = new AtomicBoolean(false);
+
+        getCommandSender().ifPresent(sender -> {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+
+                player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+
+                success.set(true);
+            }
+        });
+
+        return success.get();
+    }
+
+    public boolean sendTitle(String string) {
+        int fadeIn = 10;
+        int stay = 70;
+        int fadeOut = 20;
+
+        ConcurrentSkipListSet<Integer> remove = new ConcurrentSkipListSet<>();
+        String[] split = string.split(" ");
+        int i = 0;
+        for (String s : split) {
+            if (s.startsWith("-fadeIn=")) {
+                try {
+                    fadeIn = Integer.parseInt(s.replace("-fadeIn=", ""));
+                    remove.add(i);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            } else if (s.startsWith("-stay=")) {
+                try {
+                    stay = Integer.parseInt(s.replace("-stay=", ""));
+                    remove.add(i);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            } else if (s.startsWith("-fadeOut=")) {
+                try {
+                    fadeOut = Integer.parseInt(s.replace("-fadeOut=", ""));
+                    remove.add(i);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            i++;
+        }
+
+        StringBuilder title = new StringBuilder();
+        int n = 0;
+        for (String s : split) {
+            if (! remove.contains(n)) {
+                title.append(s).append(" ");
+            }
+
+            n++;
+        }
+        String t = title.toString().trim();
+
+        String[] splitTitle = t.split("\\n");
+        String titleString = splitTitle[0];
+        String subtitleString = splitTitle.length > 1 ? splitTitle[1] : "";
+
+        return sendTitle(titleString, subtitleString, fadeIn, stay, fadeOut);
     }
 
     public Optional<OfflinePlayer> getOfflinePlayer() {

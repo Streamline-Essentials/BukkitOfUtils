@@ -12,3 +12,13 @@ commands:
       - counte
       - countentities
     permission: bou.command.entity-count
+  boumessage:
+    description: Send a message to a user.
+    aliases:
+      - boumsg
+    permission: bou.command.boumessage
+  boutitle:
+    description: Send a title to a user.
+    aliases:
+      - bout
+    permission: bou.command.boutitle
