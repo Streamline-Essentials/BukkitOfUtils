@@ -86,7 +86,7 @@ public abstract class ScreenBlock implements Identifiable {
     public void onRedraw(BlockRedrawEvent event) {
         ScreenBlock block = event.getScreenBlock();
 
-        ScreenManager.getPlayersOf(block).forEach((p, s) -> {
+        ScreenManager.getPlayersOf(block).forEach(s -> {
             s.close();
             s.open();
         });

@@ -14,11 +14,13 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import tv.quaint.objects.Identified;
 
 import java.util.Optional;
 
 @Getter @Setter
-public class ScreenInstance extends Gui {
+public class ScreenInstance extends Gui implements Identified {
+    private final String identifier;
     private GuiType type;
     private Optional<ScreenBlock> screenBlock;
     private InventorySheet inventorySheet;
@@ -26,6 +28,8 @@ public class ScreenInstance extends Gui {
 
     public ScreenInstance(@NotNull Player player, GuiType type, InventorySheet inventorySheet, boolean noPlace) {
         super(player, type.name(), ColorUtils.colorizeHard(getTitleByType(type)), inventorySheet.getRows());
+
+        this.identifier = player.getUniqueId().toString();
 
         this.type = type;
         this.screenBlock = Optional.empty();
