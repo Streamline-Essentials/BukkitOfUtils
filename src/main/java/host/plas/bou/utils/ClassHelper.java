@@ -1,11 +1,13 @@
 package host.plas.bou.utils;
 
-import lombok.Getter;
+import org.bukkit.Bukkit;
 
+import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class ClassHelper {
     public static final ConcurrentSkipListMap<String, Boolean> PROPERTY_CACHE = new ConcurrentSkipListMap<>();
+    public static Optional<Optional<String>> SERVER_VERSION = Optional.empty();
 
     public static boolean hasClassNoCache(String fullClass) {
         try {
@@ -35,5 +37,24 @@ public class ClassHelper {
 
     public static boolean isExpandedSchedulingAvailable() {
         return hasClass("io.papermc.paper.threadedregions.scheduler.ScheduledTask");
+    }
+
+    public static Optional<String> getServerVersion() {
+        if (SERVER_VERSION.isPresent()) return SERVER_VERSION.get();
+
+        String v = null;
+        try {
+            v = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // ignore
+        }
+
+        Optional<String> optional = Optional.ofNullable(v);
+        SERVER_VERSION = Optional.of(optional);
+        return optional;
+    }
+
+    public static void init() {
+        getServerVersion();
     }
 }
