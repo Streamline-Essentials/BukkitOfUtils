@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -26,9 +27,13 @@ public abstract class DBOperator {
 
     private Connection rawConnection;
 
+    private ConcurrentSkipListMap<String, String> alterMap;
+
     public DBOperator(ConnectorSet connectorSet, BetterPlugin pluginUser) {
         this.connectorSet = connectorSet;
         this.pluginUser = pluginUser;
+
+        this.alterMap = new ConcurrentSkipListMap<>();
 
         pluginUser.subscribeDisableIfSame(this::shutdown);
 
@@ -74,7 +79,7 @@ public abstract class DBOperator {
 
 //            Connection rawConnection = getConnectionMap().get(qStart);
 
-            if (rawConnection != null && ! rawConnection.isClosed()) {
+            if (rawConnection != null && !rawConnection.isClosed()) {
                 return rawConnection;
             }
 
@@ -109,11 +114,19 @@ public abstract class DBOperator {
         }
     }
 
+    public void addAlter(String version, String statement) {
+        alterMap.put(version, statement);
+    }
+
+    public void removeAlter(String version) {
+        alterMap.remove(version);
+    }
+
     public DatabaseType getType() {
         return connectorSet.getType();
     }
 
-    public ExecutionResult executeSingle(String statement, Consumer<PreparedStatement> statementBuilder) {
+    public ExecutionResult executeSingle(String statement, Consumer<PreparedStatement> statementBuilder, boolean ignoreErrors) {
         AtomicReference<ExecutionResult> result = new AtomicReference<>(ExecutionResult.ERROR);
 
         try {
@@ -126,13 +139,17 @@ public abstract class DBOperator {
             if (stmt.execute()) result.set(ExecutionResult.YES);
             else result.set(ExecutionResult.NO);
         } catch (Exception e) {
-            getPluginUser().logSevereWithInfo("Failed to execute statement: " + statement, e);
+            if (! ignoreErrors) getPluginUser().logSevereWithInfo("Failed to execute statement: " + statement, e);
         }
 
         return result.get();
     }
 
     public List<ExecutionResult> execute(String statement, Consumer<PreparedStatement> statementBuilder) {
+        return execute(statement, statementBuilder, false);
+    }
+
+    public List<ExecutionResult> execute(String statement, Consumer<PreparedStatement> statementBuilder, boolean ignoreErrors) {
         List<ExecutionResult> results = new ArrayList<>();
 
         String[] statements = statement.split(";;");
@@ -140,14 +157,18 @@ public abstract class DBOperator {
         for (String s : statements) {
             if (s == null || s.isEmpty() || s.isBlank()) continue;
             String fs = s;
-            if (! fs.endsWith(";")) fs += ";";
-            results.add(executeSingle(fs, statementBuilder));
+            if (!fs.endsWith(";")) fs += ";";
+            results.add(executeSingle(fs, statementBuilder, ignoreErrors));
         }
 
         return results;
     }
 
     public void executeQuery(String statement, Consumer<PreparedStatement> statementBuilder, DBAction action) {
+        executeQuery(statement, statementBuilder, action, false);
+    }
+
+    public void executeQuery(String statement, Consumer<PreparedStatement> statementBuilder, DBAction action, boolean ignoreErrors) {
         try {
             Date qStart = new Date();
             Connection connection = getConnection(qStart);
@@ -159,7 +180,7 @@ public abstract class DBOperator {
 
             action.accept(set);
         } catch (Exception e) {
-            getPluginUser().logSevereWithInfo("Failed to execute query: " + statement, e);
+            if (! ignoreErrors) getPluginUser().logSevereWithInfo("Failed to execute query: " + statement, e);
         }
     }
 
@@ -167,7 +188,7 @@ public abstract class DBOperator {
         if (connectorSet.getType() != DatabaseType.SQLITE) return;
 
         File file = new File(getDatabaseFolder(), connectorSet.getSqliteFileName());
-        if (! file.exists()) {
+        if (!file.exists()) {
             try {
                 file.createNewFile();
             } catch (Exception e) {
@@ -194,10 +215,20 @@ public abstract class DBOperator {
 
     public abstract void ensureDatabase();
 
+    public void alterTables() {
+        getAlterMap().forEach((version, statement) -> {
+            if (version == null || version.isEmpty() || version.isBlank()) return;
+            if (statement == null || statement.isEmpty() || statement.isBlank()) return;
+
+            execute(statement, stmt -> {});
+        });
+    }
+
     public void ensureUsable() {
         this.ensureFile();
         this.ensureDatabase();
         this.ensureTables();
+        this.alterTables();
     }
 
     public static File getDatabaseFolder(DBOperator operator) {
