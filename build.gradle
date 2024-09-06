@@ -50,7 +50,7 @@ disableAutoTargetJvm()
 
 dependencies {
     // Defaults.
-    compileOnly(files(FILES))
+    implementation(compileOnly(files(FILES)))
     annotationProcessor(ANNO)
     implementation(IMPL)
     compileOnly(COMP_ONLY)
