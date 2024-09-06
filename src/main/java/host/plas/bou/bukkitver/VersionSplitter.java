@@ -4,7 +4,6 @@ import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.utils.ClassHelper;
 import net.minecraft.nbt.MojangsonParser;
 import net.minecraft.nbt.NBTTagCompound;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.InvocationTargetException;

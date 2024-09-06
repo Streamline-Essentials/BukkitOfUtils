@@ -56,6 +56,34 @@ public class CommandContext {
         return Optional.ofNullable(Bukkit.getPlayer(playerName));
     }
 
+    public String concatAfter(int index) {
+        return args.stream().filter(arg -> arg.getIndex() > index).map(CommandArgument::getContent).reduce((a, b) -> a + " " + b).orElse("");
+    }
+
+    public String concatFrom(int index) {
+        return args.stream().filter(arg -> arg.getIndex() >= index).map(CommandArgument::getContent).reduce((a, b) -> a + " " + b).orElse("");
+    }
+
+    public String concatBefore(int index) {
+        return args.stream().filter(arg -> arg.getIndex() < index).map(CommandArgument::getContent).reduce((a, b) -> a + " " + b).orElse("");
+    }
+
+    public String concat(int start, int end) {
+        return args.stream().filter(arg -> arg.getIndex() >= start && arg.getIndex() <= end).map(CommandArgument::getContent).reduce((a, b) -> a + " " + b).orElse("");
+    }
+
+    public String concatExcept(int... indexes) {
+        return args.stream().filter(arg -> ! (indexes.length == 0 || indexes[0] == -1 || indexes[0] == 0)).map(CommandArgument::getContent).reduce((a, b) -> a + " " + b).orElse("");
+    }
+
+    public CommandArgument getLastArg() {
+        return args.last();
+    }
+
+    public String getLastArgString() {
+        return getLastArg().getContent();
+    }
+
     public Optional<Player> getPlayerArg(int argIndex) {
         return getSenderArg(argIndex).filter(sender -> sender instanceof Player).map(sender -> (Player) sender);
     }
