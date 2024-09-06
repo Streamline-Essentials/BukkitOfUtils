@@ -19,7 +19,7 @@ ext {
             'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
     ]
     FILES = [
-            'libs/spigot-1.20.4-R0.1-SNAPSHOT.jar',
+            'libs/folia-1.20.4.jar',
     ]
     OTHER_PLUGINS = [
 //            'me.clip:placeholderapi:2.11.5', // Not in the BukkitOfUtils project...
