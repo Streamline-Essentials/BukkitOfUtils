@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 
 public class EntityUtils {
@@ -166,6 +167,20 @@ public class EntityUtils {
                 });
             });
         });
+    }
+
+    public static ConcurrentSkipListSet<String> getOnlinePlayerNames() {
+        ConcurrentSkipListSet<String> names = new ConcurrentSkipListSet<>();
+        Bukkit.getOnlinePlayers().forEach(player -> names.add(player.getName()));
+
+        return names;
+    }
+
+    public static ConcurrentSkipListSet<String> getOnlinePlayerUuids() {
+        ConcurrentSkipListSet<String> uuids = new ConcurrentSkipListSet<>();
+        Bukkit.getOnlinePlayers().forEach(player -> uuids.add(player.getUniqueId().toString()));
+
+        return uuids;
     }
 
     public static class EntityLookupTimer extends BaseRunnable {
