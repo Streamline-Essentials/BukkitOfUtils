@@ -50,7 +50,7 @@ public class NotificationTimer extends BaseRunnable implements Comparable<Notifi
     private CommandSender player;
 
     private NotificationTimer(String identifier, CommandSender player) {
-        super(5 * 20, 1); // 5 second delayed then cancels. Asynchronous.
+        super(20, 1); // 5 second delayed then cancels. Asynchronous.
 
         this.identifier = identifier;
         this.player = player;
