@@ -150,4 +150,20 @@ public class Sender {
             return getPlayer().map(p -> p);
         }
     }
+
+    public void executeCommand(String command) {
+        if (isConsole()) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+        } else {
+            getPlayer().ifPresent(player -> Bukkit.dispatchCommand(player, command));
+        }
+    }
+
+    public void chatAs(String message) {
+        if (isConsole()) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), message);
+        } else {
+            getPlayer().ifPresent(player -> player.chat(message));
+        }
+    }
 }

@@ -2,6 +2,7 @@ package host.plas.bou.firestring;
 
 import host.plas.bou.commands.Sender;
 import host.plas.bou.instances.BaseManager;
+import host.plas.bou.scheduling.TaskManager;
 import host.plas.bou.utils.SenderUtils;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -12,6 +13,25 @@ import java.util.Optional;
 public enum BuiltIn {
     COMMAND_AS_CONSOLE("console", string -> {
         Bukkit.dispatchCommand(SenderUtils.getConsoleSender(), string);
+    }),
+    COMMAND_AS_PLAYER("player", string -> {
+        String[] split = string.split(" ", 2);
+        String name = split[0];
+        String command = split[1];
+
+        Optional<Sender> sender = SenderUtils.getAsSender(name);
+        sender.ifPresent(value -> value.executeCommand(command));
+    }),
+    CHAT_AS_CONSOLE("consolechat", string -> {
+        TaskManager.use(SenderUtils.getConsoleAsSender(), sender -> sender.chatAs(string));
+    }),
+    CHAT_AS_PLAYER("playerchat", string -> {
+        String[] split = string.split(" ", 2);
+        String name = split[0];
+        String message = split[1];
+
+        Optional<Sender> sender = SenderUtils.getAsSender(name);
+        sender.ifPresent(value -> value.chatAs(message));
     }),
     MESSAGE_PLAYER("message", string -> {
         String[] split = string.split(" ", 2);
