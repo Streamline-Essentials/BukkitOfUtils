@@ -11,7 +11,7 @@ import java.util.Locale;
 
 public class MessageUtils {
     public static String getNotificationIdentifier(String message) {
-        return truncateString(message, 17);
+        return truncateString(message, 50);
     }
 
     public static String truncateString(String string, int length) {

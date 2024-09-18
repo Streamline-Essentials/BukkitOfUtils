@@ -10,11 +10,11 @@ import tv.quaint.utils.MatcherUtils;
 import java.util.List;
 
 @Getter @Setter
-public class FireStringThing implements Identifiable {
+public class FireString implements Identifiable {
     private String identifier;
     private FireStringConsumer consumer;
 
-    public FireStringThing(String identifier, FireStringConsumer consumer, boolean load) {
+    public FireString(String identifier, FireStringConsumer consumer, boolean load) {
         this.identifier = identifier;
         this.consumer = consumer;
 
@@ -37,7 +37,7 @@ public class FireStringThing implements Identifiable {
 
     public boolean checkAndFire(String string) {
         SingleSet<String, String> set = parse(string);
-        if (set.getKey().equals(string)) {
+        if (set.getKey().equals(getIdentifier())) {
             fire(set.getValue());
             return true;
         } else {
@@ -47,7 +47,7 @@ public class FireStringThing implements Identifiable {
 
     public static String getRegex() {
         // I want to match "[hello] world" and return "hello" and "world"
-        return "\\[(.*?)\\] (.*)";
+        return "[(](.*?)[)] (.*)";
     }
 
     public static SingleSet<String, String> parse(String string) {
@@ -56,8 +56,19 @@ public class FireStringThing implements Identifiable {
 
         if (groups.isEmpty()) {
             return new SingleSet<>("", string);
-        }
+        } else {
+            for (String[] group : groups) {
+                return new SingleSet<>(group[0], group[1]);
+            }
 
-        return new SingleSet<>(groups.get(0)[0], groups.get(0)[1]);
+            return new SingleSet<>("", string);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "FireString{" +
+                "identifier='" + identifier + '\'' +
+                '}';
     }
 }

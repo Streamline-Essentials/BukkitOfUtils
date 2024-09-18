@@ -13,7 +13,9 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
 import javax.swing.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.function.Consumer;
 
 public class TaskManager {
     @Getter @Setter
@@ -183,5 +185,18 @@ public class TaskManager {
 
     public static MyScheduledTask teleport(Entity entityToTeleport, Location location) {
         return getScheduler().teleport(entityToTeleport, location);
+    }
+
+    public static void doThis(Callable<?> callable) {
+        try {
+            callable.call();
+        } catch (Exception e) {
+            BukkitOfUtils.getInstance().logWarning("Failed to do a callable task.");
+            BukkitOfUtils.getInstance().logWarning(e);
+        }
+    }
+
+    public static <C> void use(C c, Consumer<C> consumer) {
+        consumer.accept(c);
     }
 }
