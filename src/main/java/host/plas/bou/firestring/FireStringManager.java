@@ -1,5 +1,6 @@
 package host.plas.bou.firestring;
 
+import host.plas.bou.BukkitOfUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +16,8 @@ public class FireStringManager {
         unregister(fireStringThing.getIdentifier());
 
         getFireStringThings().add(fireStringThing);
+
+        BukkitOfUtils.getInstance().logInfo("Registered &cFireStringThing &fwith identifier &d" + fireStringThing.getIdentifier());
     }
 
     public static void unregister(String identifier) {
@@ -27,13 +30,24 @@ public class FireStringManager {
 
     public static void fire(String string) {
         fireStringThings.forEach(fireStringThing -> {
-            if (fireStringThing.checkAndFire(string)) {
-                return; // do something later...
+            try {
+                if (fireStringThing.checkAndFire(string)) {
+                    BukkitOfUtils.getInstance().logInfo("Fired string for " + fireStringThing.getIdentifier() + " with string " + string);
+                }
+            } catch (Exception e) {
+                BukkitOfUtils.getInstance().logWarning("Failed to fire string for " + fireStringThing.getIdentifier() + " with string " + string);
+                BukkitOfUtils.getInstance().logWarning(e);
             }
         });
     }
 
     public static void init() {
-        Arrays.stream(BuiltIn.values()).forEach(builtIn -> register(builtIn.getFireString()));
+        Arrays.stream(BuiltIn.values()).forEach(builtIn -> {
+            FireStringThing fireString = new FireStringThing(builtIn.getIdentifier(), builtIn.getConsumer(), true);
+
+            // do something with fireString
+        });
+
+        BukkitOfUtils.getInstance().logInfo("Initialized &cFireStringManager &fwith &a" + fireStringThings.size() + " &fFireStrings");
     }
 }

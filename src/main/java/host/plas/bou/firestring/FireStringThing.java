@@ -46,7 +46,8 @@ public class FireStringThing implements Identifiable {
     }
 
     public static String getRegex() {
-        return "\\[(?<identifier>.+)] (?<string>.+)";
+        // I want to match "[hello] world" and return "hello" and "world"
+        return "\\[(.*?)\\] (.*)";
     }
 
     public static SingleSet<String, String> parse(String string) {
