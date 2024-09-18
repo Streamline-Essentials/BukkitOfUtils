@@ -220,7 +220,7 @@ public abstract class DBOperator {
             if (version == null || version.isEmpty() || version.isBlank()) return;
             if (statement == null || statement.isEmpty() || statement.isBlank()) return;
 
-            execute(statement, stmt -> {});
+            execute(statement, stmt -> {}, true);
         });
     }
 
