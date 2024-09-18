@@ -54,4 +54,8 @@ public class SenderUtils {
     public static Optional<Sender> getAsSender(String nameOrUuid) {
         return getSender(nameOrUuid).map(Sender::new);
     }
+
+    public static Sender getConsoleAsSender() {
+        return new Sender(getConsoleSender());
+    }
 }

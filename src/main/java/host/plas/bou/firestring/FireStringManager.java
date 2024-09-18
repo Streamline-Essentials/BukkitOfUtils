@@ -10,32 +10,32 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 public class FireStringManager {
     @Getter @Setter
-    private static ConcurrentSkipListSet<FireStringThing> fireStringThings = new ConcurrentSkipListSet<>();
+    private static ConcurrentSkipListSet<FireString> fireStrings = new ConcurrentSkipListSet<>();
 
-    public static void register(FireStringThing fireStringThing) {
-        unregister(fireStringThing.getIdentifier());
+    public static void register(FireString fireString) {
+        unregister(fireString.getIdentifier());
 
-        getFireStringThings().add(fireStringThing);
+        getFireStrings().add(fireString);
 
-        BukkitOfUtils.getInstance().logInfo("Registered &cFireStringThing &fwith identifier &d" + fireStringThing.getIdentifier());
+        BukkitOfUtils.getInstance().logInfo("&7> &6[&b" + fireString.getIdentifier() + "&6] &cFireString &fRegistered&7!");
     }
 
     public static void unregister(String identifier) {
-        getFireStringThings().removeIf(fireStringThing -> fireStringThing.getIdentifier().equals(identifier));
+        getFireStrings().removeIf(fireString -> fireString.getIdentifier().equals(identifier));
     }
 
-    public static Optional<FireStringThing> get(String identifier) {
-        return getFireStringThings().stream().filter(fireStringThing -> fireStringThing.getIdentifier().equals(identifier)).findFirst();
+    public static Optional<FireString> get(String identifier) {
+        return getFireStrings().stream().filter(fireString -> fireString.getIdentifier().equals(identifier)).findFirst();
     }
 
     public static void fire(String string) {
-        fireStringThings.forEach(fireStringThing -> {
+        fireStrings.forEach(fireString -> {
             try {
-                if (fireStringThing.checkAndFire(string)) {
-                    BukkitOfUtils.getInstance().logInfo("Fired string for " + fireStringThing.getIdentifier() + " with string " + string);
+                if (fireString.checkAndFire(string)) {
+                    // do nothing
                 }
             } catch (Exception e) {
-                BukkitOfUtils.getInstance().logWarning("Failed to fire string for " + fireStringThing.getIdentifier() + " with string " + string);
+                BukkitOfUtils.getInstance().logWarning("Failed to fire string for " + fireString.getIdentifier() + " with string " + string);
                 BukkitOfUtils.getInstance().logWarning(e);
             }
         });
@@ -43,11 +43,11 @@ public class FireStringManager {
 
     public static void init() {
         Arrays.stream(BuiltIn.values()).forEach(builtIn -> {
-            FireStringThing fireString = new FireStringThing(builtIn.getIdentifier(), builtIn.getConsumer(), true);
+            FireString fireString = new FireString(builtIn.getIdentifier(), builtIn.getConsumer(), false);
 
-            // do something with fireString
+            register(fireString);
         });
 
-        BukkitOfUtils.getInstance().logInfo("Initialized &cFireStringManager &fwith &a" + fireStringThings.size() + " &fFireStrings");
+        BukkitOfUtils.getInstance().logInfo("Initialized &cFireStringManager &fwith &a" + fireStrings.size() + " &fFireStrings");
     }
 }
