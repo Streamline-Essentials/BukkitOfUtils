@@ -56,6 +56,15 @@ dependencies {
     compileOnly(COMP_ONLY)
     shadow(SHADOW)
 
+    shadow(
+            annotationProcessor(
+                    implementation('com.github.server-utilities:TheBase:master-SNAPSHOT')
+                            .exclude(group: 'com.zaxxer', module: 'HikariCP')
+            )
+                    .exclude(group: 'com.zaxxer', module: 'HikariCP')
+    )
+            .exclude(group: 'com.zaxxer', module: 'HikariCP')
+
     // Other Plugins
     compileOnly(OTHER_PLUGINS)
 }
@@ -79,12 +88,19 @@ processResources {
     }
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17)) // Java 17 - Change this to your desired version
+    }
+}
+
 shadowJar {
     archiveClassifier.set('')
 
     archiveFileName = "${project.name}-${project.version}.jar"
 
     relocate('com.github.Anon8281.universalScheduler', 'host.plas.bou.libs.universalScheduler')
+    relocate('com.github.benmanes.caffeine', 'host.plas.bou.libs.caffeine')
 }
 
 artifacts {
