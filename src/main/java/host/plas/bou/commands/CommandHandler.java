@@ -55,10 +55,11 @@ public class CommandHandler {
     }
 
     public static String getIdentifier(String commandName, JavaPlugin provider) {
-        return getCommandKey(commandName, provider).toString(); // toString() gets "namespace:key".
+//        return getCommandKey(commandName, provider).toString(); // toString() gets "namespace:key".
+        return provider.getName() + ":" + commandName;
     }
 
-    public static NamespacedKey getCommandKey(String commandName, JavaPlugin provider) {
-        return PluginUtils.getPluginKey(provider, commandName);
-    }
+//    public static NamespacedKey getCommandKey(String commandName, JavaPlugin provider) {
+//        return PluginUtils.getPluginKey(provider, commandName);
+//    }
 }

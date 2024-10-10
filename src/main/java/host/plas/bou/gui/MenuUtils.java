@@ -57,7 +57,7 @@ public class MenuUtils {
     public static void injectStatic(ItemStack stack) {
         ItemMeta meta = stack.getItemMeta();
         if (meta != null) {
-            meta.getPersistentDataContainer().set(getStaticKey(), PersistentDataType.BOOLEAN, true);
+            meta.getPersistentDataContainer().set(getStaticKey(), PersistentDataType.INTEGER, 1);
             stack.setItemMeta(meta);
         }
     }
@@ -65,7 +65,7 @@ public class MenuUtils {
     public static void injectButton(ItemStack stack) {
         ItemMeta meta = stack.getItemMeta();
         if (meta != null) {
-            meta.getPersistentDataContainer().set(getButtonKey(), PersistentDataType.BOOLEAN, true);
+            meta.getPersistentDataContainer().set(getButtonKey(), PersistentDataType.INTEGER, 1);
             stack.setItemMeta(meta);
         }
     }
@@ -74,13 +74,13 @@ public class MenuUtils {
         ItemMeta meta = stack.getItemMeta();
         if (meta == null) return false;
 
-        return meta.getPersistentDataContainer().has(getStaticKey(), PersistentDataType.BOOLEAN);
+        return meta.getPersistentDataContainer().has(getStaticKey(), PersistentDataType.INTEGER);
     }
 
     public static boolean isButton(ItemStack stack) {
         ItemMeta meta = stack.getItemMeta();
         if (meta == null) return false;
 
-        return meta.getPersistentDataContainer().has(getButtonKey(), PersistentDataType.BOOLEAN);
+        return meta.getPersistentDataContainer().has(getButtonKey(), PersistentDataType.INTEGER);
     }
 }

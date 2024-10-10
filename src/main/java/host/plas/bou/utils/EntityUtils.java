@@ -68,7 +68,7 @@ public class EntityUtils {
     }
 
     public static int totalEntities(World world) {
-        return world.getEntityCount();
+        return world.getEntities().size();
     }
 
     public static int totalEntities() {
@@ -88,7 +88,7 @@ public class EntityUtils {
             if (ClassHelper.isFolia()) {
                 for (World world : Bukkit.getWorlds()) {
                     for (Chunk chunk : world.getLoadedChunks()) {
-                        if (! chunk.isEntitiesLoaded()) continue;
+//                        if (! chunk.isEntitiesLoaded()) continue;
 
                         TaskManager.runTask(chunk, () -> {
                             Arrays.stream(chunk.getEntities()).forEach(EntityUtils::cacheEntity);
