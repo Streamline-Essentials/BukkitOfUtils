@@ -2,8 +2,10 @@ package host.plas.bou.bukkitver;
 
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.utils.ClassHelper;
-import net.minecraft.nbt.MojangsonParser;
-import net.minecraft.nbt.NBTTagCompound;
+//import net.minecraft.nbt.MojangsonParser;
+//import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.v1_16_R3.MojangsonParser;
+import net.minecraft.server.v1_16_R3.NBTTagCompound;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.InvocationTargetException;
@@ -42,9 +44,10 @@ public class VersionSplitter {
     public static Optional<ItemStack> getItem(String nbt) {
         try {
 //            CompoundTag compound = TagParser.parseTag(nbt);
-            NBTTagCompound compound = MojangsonParser.a(nbt);
+//            NBTTagCompound compound = MojangsonParser.a(nbt);
+            NBTTagCompound compound = MojangsonParser.parse(nbt);
 
-            net.minecraft.world.item.ItemStack item = net.minecraft.world.item.ItemStack.a(compound);
+            net.minecraft.server.v1_16_R3.ItemStack item = net.minecraft.server.v1_16_R3.ItemStack.a(compound);
 
             Optional<Object> optional = runNMSMethod("asBukkitCopy", "inventory.CraftItemStack", item);
             if (optional.isEmpty()) return Optional.empty();
@@ -66,14 +69,14 @@ public class VersionSplitter {
         if (optional.isEmpty()) return Optional.empty();
 
         try {
-            net.minecraft.world.item.ItemStack nmsItem = optional.map(o -> (net.minecraft.world.item.ItemStack) o).get();
+            net.minecraft.server.v1_16_R3.ItemStack nmsItem = optional.map(o -> (net.minecraft.server.v1_16_R3.ItemStack) o).get();
 //        CompoundTag compound = new CompoundTag();
 //        nmsItem.save(compound);
 //
 //        return compound.toString();
 
             NBTTagCompound compound = new NBTTagCompound();
-            nmsItem.b(compound);
+            nmsItem.save(compound);
 
             return Optional.of(compound.toString());
         } catch (Throwable e) {

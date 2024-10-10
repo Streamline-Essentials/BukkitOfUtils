@@ -13,7 +13,11 @@ import java.util.Optional;
 
 public class ItemUtils {
     public static void registerRecipe(CraftingConfig config) {
-        Bukkit.getServer().removeRecipe(PluginUtils.getPluginKey(BukkitOfUtils.getInstance(), config.getIdentifier()));
+        try {
+            Bukkit.getServer().removeRecipe(PluginUtils.getPluginKey(BukkitOfUtils.getInstance(), config.getIdentifier()));
+        } catch (Exception e) {
+            // do nothing
+        }
 
         Bukkit.getServer().addRecipe(getRecipe(config));
     }
