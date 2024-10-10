@@ -10,15 +10,16 @@ ext {
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
     ]
     ANNO = [
-            'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
+            'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT:',
     ]
     COMP_ONLY = [
-            'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT',
+            'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT',
     ]
     FILES = [
-            'libs/folia-1.20.4.jar',
+//            'libs/folia-1.20.4.jar',
     ]
     OTHER_PLUGINS = [
-//            'me.clip:placeholderapi:2.11.5', // Not in the BukkitOfUtils project...
+            'me.clip:placeholderapi:2.11.5',
+            'net.luckperms:api:5.4',
     ]
 }
