@@ -32,6 +32,6 @@ public class ItemData {
     }
 
     public static ItemStack deserialize(String data) {
-        return ItemUtils.getItem(data);
+        return ItemUtils.getItemAbs(data);
     }
 }
