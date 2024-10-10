@@ -1,10 +1,12 @@
 package host.plas.bou.items;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import host.plas.bou.BukkitOfUtils;
-import host.plas.bou.bukkitver.VersionSplitter;
 import host.plas.bou.utils.PluginUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
@@ -27,24 +29,41 @@ public class ItemUtils {
         recipe.shape(config.getLine1(), config.getLine2(), config.getLine3());
 
         for (String key : config.getIngredients().keySet()) {
-            recipe.setIngredient(key.charAt(0), getItem(config.getIngredients().get(key)).getType());
+            recipe.setIngredient(key.charAt(0), getItemAbs(config.getIngredients().get(key)).getType());
         }
 
         return recipe;
     }
 
     public static ItemStack getCraftingResult(CraftingConfig config) {
-        return getItem(config.getResult());
+        return getItemAbs(config.getResult());
     }
 
-    public static ItemStack getItem(String nbt) {
-        Optional<ItemStack> optional = VersionSplitter.getItem(nbt);
-        return optional.orElse(new ItemStack(Material.AIR));
+    public static ItemStack getItemAbs(String nbt) {
+        return getItem(nbt).orElse(new ItemStack(Material.AIR));
+    }
+
+    public static Optional<ItemStack> getItem(String nbt) {
+        YamlConfiguration config = new YamlConfiguration();
+        try {
+            config.loadFromString(nbt);
+            return Optional.ofNullable(config.getItemStack("item"));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public static String getItemNBT(ItemStack item) {
-        Optional<String> optional = VersionSplitter.getItemNBT(item);
-        return optional.orElse("");
+        YamlConfiguration config = new YamlConfiguration();
+        config.set("item", item);
+        return config.saveToString();
+    }
+
+    public static void thing() {
+        Gson gson = new GsonBuilder()
+                .enableComplexMapKeySerialization()
+                .setPrettyPrinting()
+                .create();
     }
 
     public static boolean isItemEqual(ItemStack item1, ItemStack item2) {
