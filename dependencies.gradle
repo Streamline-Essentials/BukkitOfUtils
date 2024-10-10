@@ -3,6 +3,7 @@ ext {
             'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
             'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
+            'xyz.jpenilla:reflection-remapper:0.1.1',
     ]
     SHADOW = [
             'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
@@ -10,10 +11,10 @@ ext {
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
     ]
     ANNO = [
-            'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT:',
+            'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT:',
     ]
     COMP_ONLY = [
-            'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT',
+            'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT',
     ]
     FILES = [
 //            'libs/folia-1.20.4.jar',
