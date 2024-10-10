@@ -90,7 +90,7 @@ processResources {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17)) // Java 17 - Change this to your desired version
+        languageVersion.set(JavaLanguageVersion.of(11)) // Change this to your desired version
     }
 }
 
