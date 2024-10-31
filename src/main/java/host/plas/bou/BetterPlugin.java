@@ -2,9 +2,7 @@ package host.plas.bou;
 
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import host.plas.bou.configs.BaseConfig;
-import host.plas.bou.events.callbacks.CallbackManager;
 import host.plas.bou.events.callbacks.DisableCallback;
-import host.plas.bou.events.callbacks.PluginCallback;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.MessageUtils;

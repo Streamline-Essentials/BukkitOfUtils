@@ -59,13 +59,6 @@ public class ItemUtils {
         return config.saveToString();
     }
 
-    public static void thing() {
-        Gson gson = new GsonBuilder()
-                .enableComplexMapKeySerialization()
-                .setPrettyPrinting()
-                .create();
-    }
-
     public static boolean isItemEqual(ItemStack item1, ItemStack item2) {
         return getItemNBT(item1).equals(getItemNBT(item2));
     }

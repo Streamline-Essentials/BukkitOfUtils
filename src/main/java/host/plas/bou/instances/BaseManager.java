@@ -16,6 +16,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -57,11 +58,11 @@ public class BaseManager {
     }
 
     public static World getMainWorld() {
-        World world = Bukkit.getWorlds().get(0);
-        if (world == null) {
+        WeakReference<World> world = new WeakReference<>(Bukkit.getWorlds().get(0));
+        if (world.get() == null) {
             throw new NullPointerException("Main world is null.");
         } else {
-            return world;
+            return world.get();
         }
     }
 
