@@ -21,7 +21,7 @@ public class UUIDFetcher {
 
     try {
       HttpURLConnection connection =
-          (HttpURLConnection) new URL(String.format(API_URL, name)).openConnection();
+              (HttpURLConnection) new URL(String.format(API_URL, name)).openConnection();
 
       connection.setUseCaches(false);
       connection.setDefaultUseCaches(false);
@@ -33,7 +33,7 @@ public class UUIDFetcher {
       // These connection parameters need to be set or the API won't accept the connection.
 
       try (BufferedReader bufferedReader =
-          new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                   new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
         StringBuilder response = new StringBuilder();
         String line;
 
@@ -48,12 +48,12 @@ public class UUIDFetcher {
         JsonObject data = parsed.getAsJsonObject(); // Read the returned JSON data.
 
         return UUID.fromString(
-            data.get("data")
-                .getAsJsonObject()
-                .get("player")
-                .getAsJsonObject()
-                .get("id") // Grab the UUID.
-                .getAsString());
+                data.get("data")
+                        .getAsJsonObject()
+                        .get("player")
+                        .getAsJsonObject()
+                        .get("id") // Grab the UUID.
+                        .getAsString());
       }
     } catch (Exception ignored) {
       // Ignoring exception since this is usually caused by non-existent usernames.
