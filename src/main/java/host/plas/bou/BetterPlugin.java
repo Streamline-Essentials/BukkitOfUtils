@@ -78,6 +78,14 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
         });
     }
 
+    public String getColorizedIdentifier() {
+        if (isEnabled()) {
+            return "&a" + getIdentifier();
+        } else {
+            return "&c" + getIdentifier();
+        }
+    }
+
     @Override
     public boolean isPlugin() {
         return true;

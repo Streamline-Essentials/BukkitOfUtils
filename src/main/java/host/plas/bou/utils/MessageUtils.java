@@ -174,21 +174,25 @@ public class MessageUtils {
 
     public static void logInfo(String message, Throwable throwable, BetterPlugin base) {
         logInfo(message, base);
+        logInfo(throwable.getMessage(), base);
         logInfo(throwable.getStackTrace(), base);
     }
 
     public static void logWarning(String message, Throwable throwable, BetterPlugin base) {
         logWarning(message, base);
+        logWarning(throwable.getMessage(), base);
         logWarning(throwable.getStackTrace(), base);
     }
 
     public static void logSevere(String message, Throwable throwable, BetterPlugin base) {
         logSevere(message, base);
+        logSevere(throwable.getMessage(), base);
         logSevere(throwable.getStackTrace(), base);
     }
 
     public static void logDebug(String message, Throwable throwable, BetterPlugin base) {
         logDebug(message, base);
+        logDebug(throwable.getMessage(), base);
         logDebug(throwable.getStackTrace(), base);
     }
 
