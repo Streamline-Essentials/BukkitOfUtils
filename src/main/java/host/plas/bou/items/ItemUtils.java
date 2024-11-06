@@ -4,16 +4,67 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.utils.PluginUtils;
+import host.plas.bou.utils.VersionTool;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 
+import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Optional;
 
 public class ItemUtils {
+    public static final Gson GSON = new GsonBuilder().create();
+
+    public static String stackToJson(ItemStack stack) {
+        try {
+            Map<String, Object> map = stack.serialize();
+
+            return GSON.toJson(map);
+        } catch (Exception err) {
+            try {
+                // Get NMS ItemStack
+                Object nmsItemStack = VersionTool.getNMSItemStack(stack);
+
+                if (nmsItemStack == null) {
+                    return "{}";  // Return empty JSON if the item is null or incompatible
+                }
+
+                // Get the NBT tag compound using reflection
+                Class<?> nmsItemStackClass = nmsItemStack.getClass();
+                Method saveMethod = nmsItemStackClass.getMethod("save", VersionTool.getNBTTagCompoundClass());
+                Object nbtTagCompound = saveMethod.invoke(nmsItemStack, VersionTool.getNBTTagCompoundClass().newInstance());
+
+                // Convert NBT to JSON using `toString()`
+                return nbtTagCompound.toString();
+            } catch (Throwable e) {
+                BukkitOfUtils.getInstance().logWarning("Failed to serialize ItemStack to JSON: ", e);
+                return "{}";
+            }
+        }
+    }
+
+    public static ItemStack jsonToStack(String nbtJson) {
+        try {
+            // Get an instance of NBTTagCompound from the JSON string
+            Object nbtTagCompound = VersionTool.parseNBT(nbtJson);
+            if (nbtTagCompound == null) {
+                return null;
+            }
+
+            // Create an NMS ItemStack from the NBT data
+            Object nmsItemStack = VersionTool.getNMSItemStackFromNBT(nbtTagCompound);
+
+            // Convert the NMS ItemStack back to Bukkit's ItemStack
+            return VersionTool.getBukkitItemStack(nmsItemStack);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static void registerRecipe(CraftingConfig config) {
         try {
             Bukkit.getServer().removeRecipe(PluginUtils.getPluginKey(BukkitOfUtils.getInstance(), config.getIdentifier()));
@@ -44,19 +95,21 @@ public class ItemUtils {
     }
 
     public static Optional<ItemStack> getItem(String nbt) {
-        YamlConfiguration config = new YamlConfiguration();
         try {
-            config.loadFromString(nbt);
-            return Optional.ofNullable(config.getItemStack("item"));
+            return Optional.ofNullable(jsonToStack(nbt));
         } catch (Exception e) {
+            BukkitOfUtils.getInstance().logWarning("Failed to get item from NBT: ", e);
             return Optional.empty();
         }
     }
 
     public static String getItemNBT(ItemStack item) {
-        YamlConfiguration config = new YamlConfiguration();
-        config.set("item", item);
-        return config.saveToString();
+        try {
+            return stackToJson(item);
+        } catch (Exception e) {
+            BukkitOfUtils.getInstance().logWarning("Failed to get NBT from item: ", e);
+            return "{}";
+        }
     }
 
     public static boolean isItemEqual(ItemStack item1, ItemStack item2) {
