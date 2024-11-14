@@ -11,60 +11,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 
-import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.Optional;
 
 public class ItemUtils {
-    public static final Gson GSON = new GsonBuilder().create();
-
-    public static String stackToJson(ItemStack stack) {
-        try {
-            Map<String, Object> map = stack.serialize();
-
-            return GSON.toJson(map);
-        } catch (Exception err) {
-            try {
-                // Get NMS ItemStack
-                Object nmsItemStack = VersionTool.getNMSItemStack(stack);
-
-                if (nmsItemStack == null) {
-                    return "{}";  // Return empty JSON if the item is null or incompatible
-                }
-
-                // Get the NBT tag compound using reflection
-                Class<?> nmsItemStackClass = nmsItemStack.getClass();
-                Method saveMethod = nmsItemStackClass.getMethod("save", VersionTool.getNBTTagCompoundClass());
-                Object nbtTagCompound = saveMethod.invoke(nmsItemStack, VersionTool.getNBTTagCompoundClass().newInstance());
-
-                // Convert NBT to JSON using `toString()`
-                return nbtTagCompound.toString();
-            } catch (Throwable e) {
-                BukkitOfUtils.getInstance().logWarning("Failed to serialize ItemStack to JSON: ", e);
-                return "{}";
-            }
-        }
-    }
-
-    public static ItemStack jsonToStack(String nbtJson) {
-        try {
-            // Get an instance of NBTTagCompound from the JSON string
-            Object nbtTagCompound = VersionTool.parseNBT(nbtJson);
-            if (nbtTagCompound == null) {
-                return null;
-            }
-
-            // Create an NMS ItemStack from the NBT data
-            Object nmsItemStack = VersionTool.getNMSItemStackFromNBT(nbtTagCompound);
-
-            // Convert the NMS ItemStack back to Bukkit's ItemStack
-            return VersionTool.getBukkitItemStack(nmsItemStack);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public static void registerRecipe(CraftingConfig config) {
         try {
             Bukkit.getServer().removeRecipe(PluginUtils.getPluginKey(BukkitOfUtils.getInstance(), config.getIdentifier()));
@@ -96,7 +45,7 @@ public class ItemUtils {
 
     public static Optional<ItemStack> getItem(String nbt) {
         try {
-            return Optional.ofNullable(jsonToStack(nbt));
+            return Optional.ofNullable(VersionTool.getBukkitItemStackFromJsonString(nbt));
         } catch (Exception e) {
             BukkitOfUtils.getInstance().logWarning("Failed to get item from NBT: ", e);
             return Optional.empty();
@@ -105,7 +54,7 @@ public class ItemUtils {
 
     public static String getItemNBT(ItemStack item) {
         try {
-            return stackToJson(item);
+            return VersionTool.getJsonStringFromBukkitItemStack(item);
         } catch (Exception e) {
             BukkitOfUtils.getInstance().logWarning("Failed to get NBT from item: ", e);
             return "{}";

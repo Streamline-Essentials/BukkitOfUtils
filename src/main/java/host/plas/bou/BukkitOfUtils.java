@@ -22,6 +22,7 @@ public class BukkitOfUtils extends BetterPlugin {
 
     @Override
     public void onBaseEnabled() {
+        BaseManager.init(this);
         // Plugin startup logic
 //        instance = this; // Set earlier.
         new DebugCMD();
@@ -38,7 +39,6 @@ public class BukkitOfUtils extends BetterPlugin {
 
     @Override
     public void onBaseDisable() {
-        // Plugin shutdown logic
-//        BaseManager.stop(); // Set earlier.
+        BaseManager.stop();
     }
 }

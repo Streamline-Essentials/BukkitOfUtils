@@ -1,5 +1,6 @@
 package host.plas.bou.commands;
 
+import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.ColorUtils;
 import host.plas.bou.utils.MessageUtils;
 import host.plas.bou.BetterPlugin;
@@ -38,7 +39,7 @@ public class Sender {
     }
 
     public boolean isConsole() {
-        return Bukkit.getConsoleSender().equals(commandSender) || uuid.equals(BetterPlugin.getBaseConfig().getConsoleUUID());
+        return Bukkit.getConsoleSender().equals(commandSender) || uuid.equals(BaseManager.getBaseConfig().getConsoleUUID());
     }
 
     public boolean isPlayer() {

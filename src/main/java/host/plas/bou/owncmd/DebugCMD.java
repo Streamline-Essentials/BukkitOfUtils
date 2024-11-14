@@ -10,6 +10,7 @@ import host.plas.bou.items.ItemUtils;
 import host.plas.bou.utils.EntityUtils;
 import host.plas.bou.utils.PluginUtils;
 import host.plas.bou.utils.SenderUtils;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -48,11 +49,11 @@ public class DebugCMD extends SimplifiedCommand {
                 }
 
                 ItemStack itemN = player.getInventory().getItemInMainHand();
-                if (itemN.getType().isAir()) {
+                if (itemN.getType() == Material.AIR) {
                     itemN = player.getInventory().getItemInOffHand();
                 }
 
-                if (itemN.getType().isAir()) {
+                if (itemN.getType() == Material.AIR) {
                     ctx.sendMessage("&cYou must be holding an item.");
                     return false;
                 }
@@ -86,11 +87,11 @@ public class DebugCMD extends SimplifiedCommand {
                 }
 
                 ItemStack itemST = player.getInventory().getItemInMainHand();
-                if (itemST.getType().isAir()) {
+                if (itemST.getType() == Material.AIR) {
                     itemST = player.getInventory().getItemInOffHand();
                 }
 
-                if (itemST.getType().isAir()) {
+                if (itemST.getType() == Material.AIR) {
                     ctx.sendMessage("&cYou must be holding an item.");
                     return false;
                 }
@@ -144,6 +145,34 @@ public class DebugCMD extends SimplifiedCommand {
 
                 ctx.sendMessage("&7Item added to your inventory&8!");
                 break;
+            case "make-item":
+                if (player == null) {
+                    ctx.sendMessage("&cOnly players can use this command.");
+                    return false;
+                }
+                if (! ctx.isArgUsable(1)) {
+                    ctx.sendMessage("&cUsage: /boudebug make-item <nbt>");
+                    return false;
+                }
+
+                String nbt = ctx.concat(1, ctx.getArgs().size());
+
+                Optional<ItemStack> itemOptional = ItemUtils.getItem(nbt);
+                if (itemOptional.isEmpty()) {
+                    ctx.sendMessage("&cItem could not be parsed.");
+                    return false;
+                }
+                ItemStack item = itemOptional.get();
+
+                if (player.getInventory().firstEmpty() == -1) {
+                    ctx.sendMessage("&cYour inventory is full.");
+                    return false;
+                }
+
+                player.getInventory().addItem(item);
+
+                ctx.sendMessage("&7Item added to your inventory&8!");
+                break;
         }
 
         return true;
@@ -152,7 +181,7 @@ public class DebugCMD extends SimplifiedCommand {
     @Override
     public ConcurrentSkipListSet<String> tabComplete(CommandContext ctx) {
         if (ctx.getArgs().size() <= 1) {
-            return new ConcurrentSkipListSet<>(List.of("item-nbt", "list-bou-plugins", "store-item", "get-item"));
+            return new ConcurrentSkipListSet<>(List.of("item-nbt", "list-bou-plugins", "store-item", "get-item", "make-item"));
         }
 
         if (ctx.getArgs().size() == 2) {
