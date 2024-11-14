@@ -19,10 +19,6 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     @Getter
     private final ModifierType modifierType;
 
-    public static BaseConfig getBaseConfig() {
-        return BaseManager.getBaseConfig();
-    }
-
     public static BukkitOfUtils getBaseInstance() {
         return BaseManager.getBaseInstance();
     }
@@ -56,8 +52,9 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     public void onEnable() {
         onBaseEnabling();
 
-        if (this instanceof BukkitOfUtils) BaseManager.init((BukkitOfUtils) this);
-        else BaseManager.otherInit(this);
+        if (! (this instanceof BukkitOfUtils)) {
+            BaseManager.otherInit(this);
+        }
 
         onBaseEnabled();
     }
@@ -65,7 +62,6 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     @Override
     public void onDisable() {
         onBaseDisable();
-        if (this instanceof BukkitOfUtils) BaseManager.stop();
     }
 
     public static DisableCallback subscribeDisable(Consumer<PluginDisableEvent> consumer) {

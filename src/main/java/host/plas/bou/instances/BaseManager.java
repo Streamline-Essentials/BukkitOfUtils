@@ -25,8 +25,14 @@ public class BaseManager {
     @Getter @Setter
     private static BukkitOfUtils baseInstance;
 
-    @Getter @Setter
+    @Setter
     private static BaseConfig baseConfig;
+
+    public static BaseConfig getBaseConfig() {
+        ensureConfig();
+
+        return baseConfig;
+    }
 
     public static void init(BukkitOfUtils baseInstance) {
         preInit(baseInstance);
@@ -41,10 +47,17 @@ public class BaseManager {
             BukkitOfUtils.setInstance(baseInstance);
         }
         setBaseInstance(baseInstance);
-        setBaseConfig(new BaseConfig(baseInstance));
+        ensureConfig();
+
         BetterPlugin.setScheduler(UniversalScheduler.getScheduler(baseInstance));
         new InventoryAPI(baseInstance).init();
         TaskManager.init();
+    }
+
+    public static void ensureConfig() {
+        if (baseConfig == null) {
+            setBaseConfig(new BaseConfig(BukkitOfUtils.getInstance()));
+        }
     }
 
     public static void otherInit(BetterPlugin otherInstance) {
