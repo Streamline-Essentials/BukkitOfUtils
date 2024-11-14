@@ -22,3 +22,8 @@ commands:
     aliases:
       - bout
     permission: bou.command.boutitle
+  boudebug:
+    description: Debug command.
+    aliases:
+      - boud
+    permission: bou.command.boudebug

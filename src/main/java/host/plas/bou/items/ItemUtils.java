@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.utils.PluginUtils;
+import host.plas.bou.utils.VersionTool;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
@@ -44,26 +44,21 @@ public class ItemUtils {
     }
 
     public static Optional<ItemStack> getItem(String nbt) {
-        YamlConfiguration config = new YamlConfiguration();
         try {
-            config.loadFromString(nbt);
-            return Optional.ofNullable(config.getItemStack("item"));
+            return Optional.ofNullable(VersionTool.getBukkitItemStackFromJsonString(nbt));
         } catch (Exception e) {
+            BukkitOfUtils.getInstance().logWarning("Failed to get item from NBT: ", e);
             return Optional.empty();
         }
     }
 
     public static String getItemNBT(ItemStack item) {
-        YamlConfiguration config = new YamlConfiguration();
-        config.set("item", item);
-        return config.saveToString();
-    }
-
-    public static void thing() {
-        Gson gson = new GsonBuilder()
-                .enableComplexMapKeySerialization()
-                .setPrettyPrinting()
-                .create();
+        try {
+            return VersionTool.getJsonStringFromBukkitItemStack(item);
+        } catch (Exception e) {
+            BukkitOfUtils.getInstance().logWarning("Failed to get NBT from item: ", e);
+            return "{}";
+        }
     }
 
     public static boolean isItemEqual(ItemStack item1, ItemStack item2) {
