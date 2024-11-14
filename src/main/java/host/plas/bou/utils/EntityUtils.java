@@ -14,16 +14,16 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
+import java.lang.ref.WeakReference;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 
 public class EntityUtils {
     @Getter @Setter
-    private static Cache<String, Entity> cachedEntities = Caffeine.newBuilder()
+    private static Cache<String, WeakReference<Entity>> cachedEntities = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofSeconds(1))
             .build()
             ;
@@ -43,22 +43,23 @@ public class EntityUtils {
         return cachedEntities.asMap().containsKey(uniqueId);
     }
 
-    public static void cacheEntityAlreadyInSync(Entity entity) {
-        if (! entity.isValid()) return;
-        if (containsKey(entity.getUniqueId().toString())) return;
+    public static void cacheEntityAlreadyInSync(WeakReference<Entity> entity) {
+        if (entity == null || entity.get() == null) return;
+        if (! entity.get().isValid()) return;
+        if (containsKey(entity.get().getUniqueId().toString())) return;
 
-        cachedEntities.put(entity.getUniqueId().toString(), entity);
+        cachedEntities.put(entity.get().getUniqueId().toString(), entity);
     }
 
-    public static void cacheEntity(Entity entity, boolean isInSync) {
+    public static void cacheEntity(WeakReference<Entity> entity, boolean isInSync) {
         if (isInSync || ! ClassHelper.isFolia()) {
             cacheEntityAlreadyInSync(entity);
         } else {
-            TaskManager.getScheduler().runTask(entity, () -> cacheEntityAlreadyInSync(entity));
+            TaskManager.getScheduler().runTask(entity.get(), () -> cacheEntityAlreadyInSync(entity));
         }
     }
 
-    public static void cacheEntity(Entity entity) {
+    public static void cacheEntity(WeakReference<Entity> entity) {
         cacheEntity(entity, false);
     }
 
@@ -91,7 +92,9 @@ public class EntityUtils {
 //                        if (! chunk.isEntitiesLoaded()) continue;
 
                         TaskManager.runTask(chunk, () -> {
-                            Arrays.stream(chunk.getEntities()).forEach(EntityUtils::cacheEntity);
+                            Arrays.stream(chunk.getEntities()).forEach(entity -> {
+                                cacheEntity(new WeakReference<>(entity));
+                            });
                         });
                     }
                 }
@@ -110,13 +113,13 @@ public class EntityUtils {
      * Must be called from the main thread.
      * @return A map of entities.
      */
-    public static ConcurrentSkipListMap<String, Entity> getEntitiesBukkit() {
-        ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
+    public static ConcurrentSkipListMap<String, WeakReference<Entity>> getEntitiesBukkit() {
+        ConcurrentSkipListMap<String, WeakReference<Entity>> entities = new ConcurrentSkipListMap<>();
 
         try {
             Bukkit.getWorlds().forEach(world -> {
                 world.getEntities().forEach(entity -> {
-                    entities.put(entity.getUniqueId().toString(), entity);
+                    entities.put(entity.getUniqueId().toString(), new WeakReference<>(entity));
                 });
             });
         } catch (Exception e) {
@@ -126,8 +129,8 @@ public class EntityUtils {
         return entities;
     }
 
-    public static ConcurrentSkipListMap<String, Entity> getEntities(boolean isInSync) {
-        ConcurrentSkipListMap<String, Entity> entities = new ConcurrentSkipListMap<>();
+    public static ConcurrentSkipListMap<String, WeakReference<Entity>> getEntities(boolean isInSync) {
+        ConcurrentSkipListMap<String, WeakReference<Entity>> entities = new ConcurrentSkipListMap<>();
         if (ClassHelper.isFolia()) {
             entities.putAll(getCachedEntities().asMap());
         } else {
@@ -141,26 +144,33 @@ public class EntityUtils {
         return entities;
     }
 
-    public static ConcurrentSkipListMap<String, Entity> getEntities() {
+    public static ConcurrentSkipListMap<String, WeakReference<Entity>> getEntities() {
         return getEntities(false);
     }
 
     public static void collectEntitiesThenDo(Consumer<Entity> consumer) {
         TaskManager.runTask(() -> {
             getEntities(true).forEach((s, entity) -> {
-                TaskManager.runTask(entity, () -> consumer.accept(entity));
+                TaskManager.runTask(entity.get(), () -> consumer.accept(entity.get()));
             });
         });
     }
 
     public static void collectEntitiesThenDoSet(Consumer<Collection<Entity>> consumer) {
-        TaskManager.runTask(() -> consumer.accept(getEntities(true).values()));
+        TaskManager.runTask(() -> {
+            getEntities(true).forEach((s, entity) -> {
+                TaskManager.runTask(entity.get(), () -> {
+                    if (entity.get() == null) return;
+                    ThingyUtils.withThing(consumer, List.of(entity.get()));
+                });
+            });
+        });
     }
 
     public static void collectLivingEntitiesThenDo(Consumer<LivingEntity> consumer) {
         TaskManager.runTask(() -> {
             getEntities(true).forEach((s, entity) -> {
-                TaskManager.runTask(entity, () -> {
+                TaskManager.runTask(entity.get(), () -> {
                     if (entity instanceof LivingEntity) {
                         consumer.accept((LivingEntity) entity);
                     }

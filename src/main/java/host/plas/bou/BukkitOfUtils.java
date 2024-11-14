@@ -4,6 +4,7 @@ import host.plas.bou.compat.CompatManager;
 import host.plas.bou.firestring.FireStringManager;
 import host.plas.bou.gui.ScreenManager;
 import host.plas.bou.instances.BaseManager;
+import host.plas.bou.owncmd.DebugCMD;
 import host.plas.bou.owncmd.EntityCountCMD;
 import host.plas.bou.owncmd.MessageCMD;
 import host.plas.bou.owncmd.TitleCMD;
@@ -21,8 +22,10 @@ public class BukkitOfUtils extends BetterPlugin {
 
     @Override
     public void onBaseEnabled() {
+        BaseManager.init(this);
         // Plugin startup logic
 //        instance = this; // Set earlier.
+        new DebugCMD();
         new EntityCountCMD();
         new MessageCMD();
         new TitleCMD();
@@ -36,7 +39,6 @@ public class BukkitOfUtils extends BetterPlugin {
 
     @Override
     public void onBaseDisable() {
-        // Plugin shutdown logic
-//        BaseManager.stop(); // Set earlier.
+        BaseManager.stop();
     }
 }

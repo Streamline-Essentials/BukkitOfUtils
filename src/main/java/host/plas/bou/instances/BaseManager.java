@@ -16,6 +16,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -24,8 +25,14 @@ public class BaseManager {
     @Getter @Setter
     private static BukkitOfUtils baseInstance;
 
-    @Getter @Setter
+    @Setter
     private static BaseConfig baseConfig;
+
+    public static BaseConfig getBaseConfig() {
+        ensureConfig();
+
+        return baseConfig;
+    }
 
     public static void init(BukkitOfUtils baseInstance) {
         preInit(baseInstance);
@@ -40,10 +47,17 @@ public class BaseManager {
             BukkitOfUtils.setInstance(baseInstance);
         }
         setBaseInstance(baseInstance);
-        setBaseConfig(new BaseConfig(baseInstance));
+        ensureConfig();
+
         BetterPlugin.setScheduler(UniversalScheduler.getScheduler(baseInstance));
         new InventoryAPI(baseInstance).init();
         TaskManager.init();
+    }
+
+    public static void ensureConfig() {
+        if (baseConfig == null) {
+            setBaseConfig(new BaseConfig(BukkitOfUtils.getInstance()));
+        }
     }
 
     public static void otherInit(BetterPlugin otherInstance) {
@@ -57,11 +71,11 @@ public class BaseManager {
     }
 
     public static World getMainWorld() {
-        World world = Bukkit.getWorlds().get(0);
-        if (world == null) {
+        WeakReference<World> world = new WeakReference<>(Bukkit.getWorlds().get(0));
+        if (world.get() == null) {
             throw new NullPointerException("Main world is null.");
         } else {
-            return world;
+            return world.get();
         }
     }
 

@@ -2,9 +2,7 @@ package host.plas.bou;
 
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import host.plas.bou.configs.BaseConfig;
-import host.plas.bou.events.callbacks.CallbackManager;
 import host.plas.bou.events.callbacks.DisableCallback;
-import host.plas.bou.events.callbacks.PluginCallback;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.MessageUtils;
@@ -20,10 +18,6 @@ import java.util.function.Consumer;
 public class BetterPlugin extends JavaPlugin implements IModifierEventable, Identified {
     @Getter
     private final ModifierType modifierType;
-
-    public static BaseConfig getBaseConfig() {
-        return BaseManager.getBaseConfig();
-    }
 
     public static BukkitOfUtils getBaseInstance() {
         return BaseManager.getBaseInstance();
@@ -58,8 +52,9 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     public void onEnable() {
         onBaseEnabling();
 
-        if (this instanceof BukkitOfUtils) BaseManager.init((BukkitOfUtils) this);
-        else BaseManager.otherInit(this);
+        if (! (this instanceof BukkitOfUtils)) {
+            BaseManager.otherInit(this);
+        }
 
         onBaseEnabled();
     }
@@ -67,7 +62,6 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     @Override
     public void onDisable() {
         onBaseDisable();
-        if (this instanceof BukkitOfUtils) BaseManager.stop();
     }
 
     public static DisableCallback subscribeDisable(Consumer<PluginDisableEvent> consumer) {
@@ -78,6 +72,14 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
         return new DisableCallback(c -> {
             if (c.getPlugin().equals(this)) consumer.accept(c);
         });
+    }
+
+    public String getColorizedIdentifier() {
+        if (isEnabled()) {
+            return "&a" + getIdentifier();
+        } else {
+            return "&c" + getIdentifier();
+        }
     }
 
     @Override

@@ -15,6 +15,7 @@ public class MessageUtils {
     }
 
     public static String truncateString(String string, int length) {
+        if (string == null) return "null";
         if (string.length() > length) {
             return string.substring(0, length);
         }
@@ -22,6 +23,7 @@ public class MessageUtils {
     }
 
     public static void doReplaceAndSend(CommandSender to, String message, String prefix) {
+        if (message == null) return;
         if (NotificationTimer.hasNotification(getNotificationIdentifier(message), to)) return;
 
         message = message.replace("%newline%", "\n");
@@ -65,27 +67,27 @@ public class MessageUtils {
     }
 
     public static void logInfo(String message, BetterPlugin base) {
-        if (! BetterPlugin.getBaseConfig().getIsInfoLoggingEnabled()) return;
+        if (! BaseManager.getBaseConfig().getIsInfoLoggingEnabled()) return;
 
-        doReplaceAndSend(message, base, BetterPlugin.getBaseConfig().getIsInfoLoggingPrefix());
+        doReplaceAndSend(message, base, BaseManager.getBaseConfig().getIsInfoLoggingPrefix());
     }
 
     public static void logWarning(String message, BetterPlugin base) {
-        if (! BetterPlugin.getBaseConfig().getIsWarnLoggingEnabled()) return;
+        if (! BaseManager.getBaseConfig().getIsWarnLoggingEnabled()) return;
 
-        doReplaceAndSend(message, base, BetterPlugin.getBaseConfig().getIsWarnLoggingPrefix());
+        doReplaceAndSend(message, base, BaseManager.getBaseConfig().getIsWarnLoggingPrefix());
     }
 
     public static void logSevere(String message, BetterPlugin base) {
-        if (! BetterPlugin.getBaseConfig().getIsSevereLoggingEnabled()) return;
+        if (! BaseManager.getBaseConfig().getIsSevereLoggingEnabled()) return;
 
-        doReplaceAndSend(message, base, BetterPlugin.getBaseConfig().getIsSevereLoggingPrefix());
+        doReplaceAndSend(message, base, BaseManager.getBaseConfig().getIsSevereLoggingPrefix());
     }
 
     public static void logDebug(String message, BetterPlugin base) {
-        if (! BetterPlugin.getBaseConfig().getIsDebugLoggingEnabled()) return;
+        if (! BaseManager.getBaseConfig().getIsDebugLoggingEnabled()) return;
 
-        doReplaceAndSend(message, base, BetterPlugin.getBaseConfig().getIsDebugLoggingPrefix());
+        doReplaceAndSend(message, base, BaseManager.getBaseConfig().getIsDebugLoggingPrefix());
     }
 
     @Deprecated
@@ -174,21 +176,25 @@ public class MessageUtils {
 
     public static void logInfo(String message, Throwable throwable, BetterPlugin base) {
         logInfo(message, base);
+        logInfo(throwable.getMessage(), base);
         logInfo(throwable.getStackTrace(), base);
     }
 
     public static void logWarning(String message, Throwable throwable, BetterPlugin base) {
         logWarning(message, base);
+        logWarning(throwable.getMessage(), base);
         logWarning(throwable.getStackTrace(), base);
     }
 
     public static void logSevere(String message, Throwable throwable, BetterPlugin base) {
         logSevere(message, base);
+        logSevere(throwable.getMessage(), base);
         logSevere(throwable.getStackTrace(), base);
     }
 
     public static void logDebug(String message, Throwable throwable, BetterPlugin base) {
         logDebug(message, base);
+        logDebug(throwable.getMessage(), base);
         logDebug(throwable.getStackTrace(), base);
     }
 
