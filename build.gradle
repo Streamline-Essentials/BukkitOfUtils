@@ -56,14 +56,9 @@ dependencies {
     compileOnly(COMP_ONLY)
     shadow(SHADOW)
 
-    shadow(
-            annotationProcessor(
-                    implementation('com.github.server-utilities:TheBase:master-SNAPSHOT')
-                            .exclude(group: 'com.zaxxer', module: 'HikariCP')
-            )
-                    .exclude(group: 'com.zaxxer', module: 'HikariCP')
-    )
-            .exclude(group: 'com.zaxxer', module: 'HikariCP')
+    // TheBase
+    implementation('com.github.Server-Utilities:TheBase:master-SNAPSHOT').exclude(group: 'com.zaxxer', module: 'HikariCP')
+    shadow('com.github.Server-Utilities:TheBase:master-SNAPSHOT').exclude(group: 'com.zaxxer', module: 'HikariCP')
 
     // Other Plugins
     compileOnly(OTHER_PLUGINS)
