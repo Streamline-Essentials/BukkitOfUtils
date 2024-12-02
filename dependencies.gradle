@@ -3,7 +3,6 @@ ext {
             'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
             'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
-            'xyz.jpenilla:reflection-remapper:0.1.1',
     ]
     SHADOW = [
             'com.github.hamza-cskn.obliviate-invs:core:4.1.12',

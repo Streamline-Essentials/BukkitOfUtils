@@ -2,11 +2,14 @@ package host.plas.bou.compat;
 
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.compat.luckperms.LPHeld;
+import host.plas.bou.compat.luckperms.LPHolder;
 import host.plas.bou.compat.papi.PAPIHeld;
+import host.plas.bou.compat.papi.PAPIHolder;
 import lombok.Getter;
 import lombok.Setter;
 import tv.quaint.objects.handling.IEventable;
 
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Function;
@@ -82,5 +85,47 @@ public class CompatManager {
 
     public static boolean isEnabled(String identifier) {
         return getHolder(identifier) != null && getHolder(identifier).isEnabled();
+    }
+
+    public static Optional<PAPIHeld> getPAPIHeld() {
+        HeldHolder holder = getHolder(PAPI_IDENTIFIER);
+        try {
+            return Optional.of((PAPIHeld) holder);
+        } catch (Throwable e) {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<LPHeld> getLPHeld() {
+        HeldHolder holder = getHolder(LP_IDENTIFIER);
+        try {
+            return Optional.of((LPHeld) holder);
+        } catch (Throwable e) {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<PAPIHolder> getPAPIHolder() {
+        Optional<PAPIHeld> held = getPAPIHeld();
+        if (held.isEmpty()) return Optional.empty();
+        PAPIHeld h = held.get();
+        ApiHolder<?> holder = h.getHolder();
+        try {
+            return Optional.of((PAPIHolder) holder);
+        } catch (Throwable e) {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<LPHolder> getLPHolder() {
+        Optional<LPHeld> held = getLPHeld();
+        if (held.isEmpty()) return Optional.empty();
+        LPHeld h = held.get();
+        ApiHolder<?> holder = h.getHolder();
+        try {
+            return Optional.of((LPHolder) holder);
+        } catch (Throwable e) {
+            return Optional.empty();
+        }
     }
 }
