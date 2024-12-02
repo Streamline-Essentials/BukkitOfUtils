@@ -86,7 +86,7 @@ public class LocationUtils {
     public static Location getTopLocation(Location location, boolean downThenUp) {
         Location top = location.clone();
         if (downThenUp) {
-            top = searchForTopBlock(location, BlockFace.DOWN);
+            top = searchForTopBlock(location, BlockFace.DOWN, true, false);
             if (top == null) {
                 top = searchForTopBlock(location, BlockFace.UP);
             }
@@ -102,20 +102,41 @@ public class LocationUtils {
     }
 
     public static Location searchForTopBlock(Location location, BlockFace direction) {
+        return searchForTopBlock(location, direction, false, false);
+    }
+
+    public static Location searchForTopBlock(Location location, BlockFace direction, boolean centered) {
+        return searchForTopBlock(location, direction, false, centered);
+    }
+
+    public static Location searchForTopBlock(Location location, BlockFace direction, boolean stopAtNonAir, boolean centered) {
         Location top = location.clone();
         Block block = top.getBlock();
         World world = top.getWorld();
-        if (world == null) return null;
+        if (world == null) return null; // not going to be null, but just in case
         while (! checkForTopableBlock(block)) {
-            if (block.getY() < world.getMinHeight() && block.getY() > world.getMaxHeight()) return null;
+            if (block.getY() < world.getMinHeight() && block.getY() > world.getMaxHeight()) break;
+
+            if (stopAtNonAir) {
+                if (block.getType() != Material.AIR) {
+                    block = block.getRelative(direction.getOppositeFace());
+                    break;
+                }
+            }
 
             block = top.getBlock().getRelative(direction);
             top = block.getLocation();
         }
 
-        if (block.getY() < world.getMinHeight() && block.getY() > world.getMaxHeight()) return null;
+        if (block.getY() < world.getMinHeight()) {
+            return null;
+        }
+        if (block.getY() > world.getMaxHeight()) {
+            return null;
+        }
 
-        return getCenteredLocation(top);
+        if (centered) return getCenteredLocation(top);
+        return top;
     }
 
     public static boolean checkForTopableBlock(Location location) {
@@ -124,8 +145,7 @@ public class LocationUtils {
 
     // Ensure to check for highest block after using this.
     public static boolean checkForTopableBlock(Block block) {
-        return (block.getType() != Material.AIR && block.getRelative(BlockFace.UP).getType() == Material.AIR &&
-                block.getRelative(BlockFace.UP).getRelative(BlockFace.UP).getType() == Material.AIR);
+        return (block.getType() == Material.AIR && block.getRelative(BlockFace.UP).getType() == Material.AIR);
     }
 
     public static Location getHighestNonAirBlock(Location location) {
