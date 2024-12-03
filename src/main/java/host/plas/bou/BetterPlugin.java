@@ -1,23 +1,29 @@
 package host.plas.bou;
 
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
-import host.plas.bou.configs.BaseConfig;
 import host.plas.bou.events.callbacks.DisableCallback;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.instances.BaseManager;
+import host.plas.bou.scheduling.TaskManager;
 import host.plas.bou.utils.MessageUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.plugin.java.JavaPlugin;
+import tv.quaint.async.SyncInstance;
+import tv.quaint.async.ThreadHolder;
+import tv.quaint.async.WithSync;
 import tv.quaint.objects.Identified;
 import tv.quaint.objects.handling.derived.IModifierEventable;
 
 import java.util.function.Consumer;
 
 @Getter @Setter
-public class BetterPlugin extends JavaPlugin implements IModifierEventable, Identified {
+public class BetterPlugin extends JavaPlugin implements IModifierEventable, Identified, WithSync {
     @Getter
     private final ModifierType modifierType;
+
+    @Getter @Setter
+    private static SyncInstance syncInstance;
 
     public static BukkitOfUtils getBaseInstance() {
         return BaseManager.getBaseInstance();
@@ -32,6 +38,9 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     }
 
     public BetterPlugin() {
+        syncInstance = new SyncInstance(this, this);
+        ThreadHolder.register(syncInstance);
+
         modifierType = ModifierType.PLUGIN;
 
         onBaseConstruct();
@@ -186,5 +195,25 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
 
     public void logDebugWithInfo(String message, Throwable throwable) {
         MessageUtils.logDebugWithInfo(message, throwable, this);
+    }
+
+    @Override
+    public void sync(Runnable runnable) {
+        TaskManager.runTask(runnable);
+    }
+
+    @Override
+    public void sync(Runnable runnable, long delay) {
+        TaskManager.runTaskLater(runnable, delay);
+    }
+
+    @Override
+    public void sync(Runnable runnable, long delay, long period) {
+        TaskManager.runTaskTimer(runnable, delay, period);
+    }
+
+    @Override
+    public boolean isSync() {
+        return TaskManager.isThreadSync();
     }
 }

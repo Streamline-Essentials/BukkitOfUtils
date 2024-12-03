@@ -6,6 +6,7 @@ import host.plas.bou.instances.BaseManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -62,5 +63,26 @@ public class SenderUtils {
 
     public static Sender getConsoleAsSender() {
         return new Sender(getConsoleSender());
+    }
+
+    public static Sender getSender(CommandSender sender) {
+        return new Sender(sender);
+    }
+
+    public static Optional<Sender> getOfflineSender(OfflinePlayer player) {
+        try {
+            if (player instanceof Player) {
+                return Optional.of(getSender((Player) player));
+            } else {
+                Player p = player.getPlayer();
+                if (p == null) {
+                    return Optional.empty();
+                } else {
+                    return Optional.of(getSender(p));
+                }
+            }
+        } catch (Throwable e) {
+            return Optional.empty();
+        }
     }
 }

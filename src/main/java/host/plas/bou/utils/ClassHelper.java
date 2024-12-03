@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.function.Supplier;
 
 public class ClassHelper {
     public static final ConcurrentSkipListMap<String, Boolean> PROPERTY_CACHE = new ConcurrentSkipListMap<>();
@@ -56,5 +57,35 @@ public class ClassHelper {
 
     public static void init() {
         getServerVersion();
+    }
+
+    public static void ifFolia(Runnable ifTrue) {
+        if (isFolia()) {
+            ifTrue.run();
+        }
+    }
+
+    public static void ifFoliaOrElse(Runnable ifTrue, Runnable ifFalse) {
+        if (isFolia()) {
+            ifTrue.run();
+        } else {
+            ifFalse.run();
+        }
+    }
+
+    public static <C> C ifFolia(Supplier<C> ifTrue, C ifFalse) {
+        if (isFolia()) {
+            return ifTrue.get();
+        }
+
+        return ifFalse;
+    }
+
+    public static <C> C ifFoliaOrElse(Supplier<C> ifTrue, Supplier<C> ifFalse) {
+        if (isFolia()) {
+            return ifTrue.get();
+        } else {
+            return ifFalse.get();
+        }
     }
 }
