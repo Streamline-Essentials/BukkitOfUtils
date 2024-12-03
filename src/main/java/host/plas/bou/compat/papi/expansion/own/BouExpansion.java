@@ -10,7 +10,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class BouExpansion extends BetterExpansion {
     public BouExpansion() {
-        super(BukkitOfUtils.getInstance(), "bou", BukkitOfUtils.getInstance().getDescription().getAuthors().get(0), BukkitOfUtils.getInstance().getDescription().getVersion());
+        super(BukkitOfUtils.getInstance(), "bou",
+                () -> BukkitOfUtils.getInstance().getDescription().getAuthors().get(0),
+                () -> BukkitOfUtils.getInstance().getDescription().getVersion());
     }
 
     @Override

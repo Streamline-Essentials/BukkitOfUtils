@@ -11,6 +11,7 @@ import host.plas.bou.owncmd.TitleCMD;
 import host.plas.bou.utils.ClassHelper;
 import lombok.Getter;
 import lombok.Setter;
+import tv.quaint.async.WithSync;
 
 public class BukkitOfUtils extends BetterPlugin {
     @Getter @Setter
