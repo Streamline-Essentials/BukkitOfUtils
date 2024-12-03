@@ -1,10 +1,13 @@
 package host.plas.bou.sql;
 
 import host.plas.bou.BetterPlugin;
+import host.plas.bou.events.callbacks.DisableCallback;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.instances.BaseManager;
+import host.plas.bou.utils.DatabaseUtils;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 import tv.quaint.thebase.lib.hikari.HikariConfig;
 import tv.quaint.thebase.lib.hikari.HikariDataSource;
 
@@ -15,12 +18,18 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 @Getter @Setter
-public abstract class DBOperator {
+public abstract class DBOperator implements Comparable<DBOperator> {
+    public static final long COOLDOWN_MILLIS = 1000 * 2; // 2 seconds
+
+    private long id;
+
     private ConnectorSet connectorSet;
     private HikariDataSource dataSource;
     private BetterPlugin pluginUser;
@@ -29,18 +38,39 @@ public abstract class DBOperator {
 
     private ConcurrentSkipListMap<String, String> alterMap;
 
+    private boolean usable;
+
+    private Date lastConnection;
+
     public DBOperator(ConnectorSet connectorSet, BetterPlugin pluginUser) {
+        this.id = DatabaseUtils.getNextId(pluginUser);
+
         this.connectorSet = connectorSet;
         this.pluginUser = pluginUser;
 
         this.alterMap = new ConcurrentSkipListMap<>();
 
-        pluginUser.subscribeDisableIfSame(this::shutdown);
-
-//        this.connectionMap = new ConcurrentSkipListMap<>();
-//        this.connectionTimers = new ConcurrentSkipListMap<>();
+        this.usable = false;
 
         this.dataSource = buildDataSource();
+
+        register();
+    }
+
+    public void register() {
+        DatabaseUtils.put(getPluginUser(), this);
+    }
+
+    public void unregister() {
+        DatabaseUtils.remove(getPluginUser(), this);
+    }
+
+    public boolean isRegistered() {
+        return DatabaseUtils.has(getPluginUser(), this);
+    }
+
+    public String getIdentifier() {
+        return pluginUser.getIdentifier() + " - " + id;
     }
 
     public HikariDataSource buildDataSource() {
@@ -58,7 +88,7 @@ public abstract class DBOperator {
 
                 break;
         }
-        config.setPoolName(pluginUser.getIdentifier() + " - Pool");
+        config.setPoolName(getIdentifier() + " - Pool");
         config.setMaximumPoolSize(10);
         config.setMinimumIdle(2);
         config.setConnectionTimeout(30000);
@@ -68,7 +98,14 @@ public abstract class DBOperator {
         config.setConnectionTestQuery("SELECT 1");
 
         dataSource = new HikariDataSource(config);
+
+        setUsable();
+
         return dataSource;
+    }
+
+    public void updateLastConnection() {
+        lastConnection = new Date();
     }
 
     public Connection getConnection(Date qStart) {
@@ -80,11 +117,13 @@ public abstract class DBOperator {
 //            Connection rawConnection = getConnectionMap().get(qStart);
 
             if (rawConnection != null && !rawConnection.isClosed()) {
+                updateLastConnection();
                 return rawConnection;
             }
 
             rawConnection = dataSource.getConnection();
 
+            updateLastConnection();
             return rawConnection;
         } catch (Exception e) {
             getPluginUser().logSevereWithInfo("Failed to get connection!", e);
@@ -96,22 +135,62 @@ public abstract class DBOperator {
         return getConnection(new Date()); // TODO: Fix this
     }
 
-    public void shutdown(PluginDisableEvent event) {
-        BetterPlugin plugin = event.getPlugin();
+    public void setUsable() {
+        this.usable = true;
+    }
 
-        plugin.logInfo("Shutting down database connection...");
+    public void setUnusable() {
+        this.usable = false;
+    }
 
-        shutdown();
-
-        plugin.logInfo("Shut down database connection!");
+    public String getPrettyName() {
+        return getIdentifier();
     }
 
     public void shutdown() {
-        if (dataSource != null) {
-            dataSource.close();
+        awaitShutdown(DBOperator::threadedShutdown).join().accept(this);
+    }
 
-            dataSource = null;
+    public void forceCommit() {
+        try (Connection connection = getConnection()) {
+            connection.setAutoCommit(false);
+            connection.commit();
+        } catch (Exception e) {
+            getPluginUser().logSevereWithInfo("Failed to close connection!", e);
         }
+    }
+
+    public static void threadedShutdown(DBOperator operator) {
+        if (! operator.isUsable()) return;
+
+        operator.getPluginUser().logInfo("Shutting down database connection (" + operator.getPrettyName() + ")...");
+
+        if (operator.getDataSource() != null) {
+            operator.forceCommit();
+            operator.getDataSource().close();
+            operator.setDataSource(null);
+        }
+
+        operator.unregister();
+        operator.setUnusable();
+
+        operator.getPluginUser().logInfo("Database connection (" + operator.getPrettyName() + ") has been shut down.");
+    }
+
+    public boolean isPastCooldown() {
+        if (lastConnection == null) return true;
+
+        return new Date().getTime() - lastConnection.getTime() >= COOLDOWN_MILLIS;
+    }
+
+    public CompletableFuture<Consumer<DBOperator>> awaitShutdown(Consumer<DBOperator> whenDone) {
+        return CompletableFuture.supplyAsync(() -> {
+            while (! isPastCooldown()) {
+                Thread.onSpinWait();
+            }
+
+            return whenDone;
+        });
     }
 
     public void addAlter(String version, String statement) {
@@ -229,6 +308,11 @@ public abstract class DBOperator {
         this.ensureDatabase();
         this.ensureTables();
         this.alterTables();
+    }
+
+    @Override
+    public int compareTo(@NotNull DBOperator o) {
+        return Long.compare(this.id, o.id);
     }
 
     public static File getDatabaseFolder(DBOperator operator) {

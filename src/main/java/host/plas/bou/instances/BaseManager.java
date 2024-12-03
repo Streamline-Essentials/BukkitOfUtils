@@ -3,6 +3,7 @@ package host.plas.bou.instances;
 import com.github.Anon8281.universalScheduler.UniversalScheduler;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.events.MainListener;
 import host.plas.bou.events.callbacks.CallbackManager;
 import host.plas.bou.utils.EntityUtils;
 import host.plas.bou.configs.BaseConfig;
@@ -28,6 +29,9 @@ public class BaseManager {
     @Setter
     private static BaseConfig baseConfig;
 
+    @Getter @Setter
+    private static MainListener mainListener;
+
     public static BaseConfig getBaseConfig() {
         ensureConfig();
 
@@ -40,6 +44,8 @@ public class BaseManager {
         CallbackManager.init();
 
         EntityUtils.init();
+
+        mainListener = new MainListener();
     }
 
     public static void preInit(BukkitOfUtils baseInstance) {
