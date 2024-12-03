@@ -1,12 +1,15 @@
 package host.plas.bou.scheduling;
 
+import com.github.Anon8281.universalScheduler.foliaScheduler.FoliaScheduler;
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.instances.BaseManager;
+import host.plas.bou.utils.ClassHelper;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -198,5 +201,53 @@ public class TaskManager {
 
     public static <C> void use(C c, Consumer<C> consumer) {
         consumer.accept(c);
+    }
+
+    public static boolean isThreadSync(Object obj) {
+        Entity e = null;
+        Location l = null;
+        if (obj != null) {
+            if (obj instanceof Entity) {
+                e = (Entity) obj;
+            } else if (obj instanceof Location) {
+                l = (Location) obj;
+            }
+        }
+
+        final Entity finalE = e;
+        final Location finalL = l;
+
+        return ClassHelper.ifFoliaOrElse(
+                () -> {
+                    TaskScheduler scheduler = getScheduler();
+                    if (scheduler == null) {
+                        return Bukkit.isPrimaryThread();
+                    }
+                    try {
+                        FoliaScheduler foliaScheduler = (FoliaScheduler) scheduler;
+                        if (finalE != null) {
+                            return foliaScheduler.isEntityThread(finalE);
+                        } else if (finalL != null) {
+                            return foliaScheduler.isRegionThread(finalL);
+                        }
+
+                        return foliaScheduler.isTickThread() || foliaScheduler.isGlobalThread();
+                    } catch (Throwable t) {
+                        BukkitOfUtils.getInstance().logWarning("Failed to cast scheduler to FoliaScheduler.", t);
+                        if (finalE != null) {
+                            return scheduler.isEntityThread(finalE);
+                        } else if (finalL != null) {
+                            return scheduler.isRegionThread(finalL);
+                        }
+
+                        return scheduler.isTickThread() || scheduler.isGlobalThread();
+                    }
+                },
+                Bukkit::isPrimaryThread
+        );
+    }
+
+    public static boolean isThreadSync() {
+        return isThreadSync(null);
     }
 }

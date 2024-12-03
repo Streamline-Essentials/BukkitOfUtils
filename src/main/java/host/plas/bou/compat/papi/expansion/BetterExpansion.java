@@ -11,23 +11,49 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tv.quaint.objects.Identified;
 
+import java.util.function.Supplier;
+
 @Getter @Setter
 public abstract class BetterExpansion extends PlaceholderExpansion implements Identified {
     private BetterPlugin betterPlugin;
     private boolean persistent;
 
-    private String identifier;
-    private String author;
-    private String version;
+    private Supplier<String> identifierGetter;
+    private Supplier<String> authorGetter;
+    private Supplier<String> versionGetter;
 
-    public BetterExpansion(BetterPlugin betterPlugin, String identifier, String author, String version, boolean persistent, boolean register) {
+    public BetterExpansion(BetterPlugin betterPlugin, Supplier<String> identifierGetter, Supplier<String> authorGetter, Supplier<String> versionGetter, boolean persistent, boolean register) {
         this.betterPlugin = betterPlugin;
-        this.identifier = identifier;
-        this.author = author;
-        this.version = version;
+        this.identifierGetter = identifierGetter;
+        this.authorGetter = authorGetter;
+        this.versionGetter = versionGetter;
         this.persistent = persistent;
 
         if (register) register();
+    }
+
+    public BetterExpansion(BetterPlugin betterPlugin, Supplier<String> identifierGetter, Supplier<String> authorGetter, Supplier<String> versionGetter, boolean persistentAndRegister) {
+        this(betterPlugin, identifierGetter, authorGetter, versionGetter, persistentAndRegister, persistentAndRegister);
+    }
+
+    public BetterExpansion(BetterPlugin betterPlugin, Supplier<String> identifierGetter, Supplier<String> authorGetter, Supplier<String> versionGetter) {
+        this(betterPlugin, identifierGetter, authorGetter, versionGetter, true);
+    }
+
+    public BetterExpansion(BetterPlugin betterPlugin, String identifier, Supplier<String> authorGetter, Supplier<String> versionGetter, boolean persistent, boolean register) {
+        this(betterPlugin, () -> identifier, authorGetter, versionGetter, persistent, register);
+    }
+
+    public BetterExpansion(BetterPlugin betterPlugin, String identifier, Supplier<String> authorGetter, Supplier<String> versionGetter, boolean persistentAndRegister) {
+        this(betterPlugin, identifier, authorGetter, versionGetter, persistentAndRegister, persistentAndRegister);
+    }
+
+    public BetterExpansion(BetterPlugin betterPlugin, String identifier, Supplier<String> authorGetter, Supplier<String> versionGetter) {
+        this(betterPlugin, identifier, authorGetter, versionGetter, true);
+    }
+
+    public BetterExpansion(BetterPlugin betterPlugin, String identifier, String author, String version, boolean persistent, boolean register) {
+        this(betterPlugin, () -> identifier, () -> author, () -> version, persistent, register);
     }
 
     public BetterExpansion(BetterPlugin betterPlugin, String identifier, String author, String version, boolean persistentAndRegister) {
@@ -36,6 +62,21 @@ public abstract class BetterExpansion extends PlaceholderExpansion implements Id
 
     public BetterExpansion(BetterPlugin betterPlugin, String identifier, String author, String version) {
         this(betterPlugin, identifier, author, version, true);
+    }
+
+    @Override
+    public @NotNull String getIdentifier() {
+        return identifierGetter.get();
+    }
+
+    @Override
+    public @NotNull String getVersion() {
+        return versionGetter.get();
+    }
+
+    @Override
+    public @NotNull String getAuthor() {
+        return authorGetter.get();
     }
 
     @Override
