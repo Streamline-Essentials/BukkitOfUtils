@@ -84,5 +84,6 @@ On top of that, it also has a few abilities it does by itself:
 
 ![More Info](https://github.com/Streamline-Essentials/StreamlineWiki/blob/main/website/images/MoreInfo.png?raw=true)
 ## How do I get started using this?
+
 Head on over to the plugin's wiki to see how you can use it in your own plugin's project.
 Wiki: [https://wiki.plas.host/bukkitofutils](https://wiki.plas.host/bukkitofutils)
