@@ -1,14 +1,18 @@
 package host.plas.bou.compat.papi;
 
+import host.plas.bou.BetterPlugin;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.compat.ApiHolder;
 import host.plas.bou.compat.CompatManager;
 import host.plas.bou.compat.papi.expansion.BetterExpansion;
 import host.plas.bou.compat.papi.expansion.own.BouExpansion;
+import host.plas.bou.utils.EntityUtils;
 import lombok.Getter;
 import lombok.Setter;
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.OfflinePlayer;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -80,5 +84,39 @@ public class PAPIHolder extends ApiHolder<PlaceholderAPIPlugin> {
         if (isEnabled()) {
             ownExpansion = new BouExpansion();
         }
+    }
+
+    public ConcurrentSkipListSet<BetterExpansion> getOfPlugin(BetterPlugin plugin) {
+        ConcurrentSkipListSet<BetterExpansion> expansions = new ConcurrentSkipListSet<>();
+
+        getLoadedExpansions().forEach(expansion -> {
+            if (expansion.getBetterPlugin().getIdentifier().equals(plugin.getIdentifier())) {
+                expansions.add(expansion);
+            }
+        });
+
+        return expansions;
+    }
+
+    public void flush(BetterPlugin plugin) {
+        getOfPlugin(plugin).forEach(expansion -> {
+            try {
+                unregister(expansion);
+                if (! expansion.unregister()) {
+//                    BukkitOfUtils.getInstance().logWarning("Failed to unregister expansion " + expansion.getIdentifier() + " from PlaceholderAPI.");
+                }
+            } catch (Throwable e) {
+                BukkitOfUtils.getInstance().logWarning("Failed to unregister expansion " + expansion.getIdentifier() + " from PlaceholderAPI.", e);
+            }
+        });
+    }
+
+    public String replace(OfflinePlayer player, String from) {
+        if (! isEnabled()) return from;
+        return PlaceholderAPI.setPlaceholders(player, from);
+    }
+
+    public String replace(String from) {
+        return replace(EntityUtils.getDummyOfflinePlayer(), from);
     }
 }

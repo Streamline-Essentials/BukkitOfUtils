@@ -1,6 +1,7 @@
 package host.plas.bou;
 
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
+import host.plas.bou.events.ListenerConglomerate;
 import host.plas.bou.events.callbacks.DisableCallback;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.instances.BaseManager;
@@ -8,17 +9,23 @@ import host.plas.bou.scheduling.TaskManager;
 import host.plas.bou.utils.MessageUtils;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import tv.quaint.async.SyncInstance;
 import tv.quaint.async.ThreadHolder;
 import tv.quaint.async.WithSync;
+import tv.quaint.events.BaseEventHandler;
+import tv.quaint.events.BaseEventListener;
 import tv.quaint.objects.Identified;
+import tv.quaint.objects.handling.IEventable;
 import tv.quaint.objects.handling.derived.IModifierEventable;
 
 import java.util.function.Consumer;
 
 @Getter @Setter
-public class BetterPlugin extends JavaPlugin implements IModifierEventable, Identified, WithSync {
+public class BetterPlugin extends JavaPlugin implements IModifierEventable, Identified, WithSync, BaseEventListener {
     @Getter
     private final ModifierType modifierType;
 
@@ -71,6 +78,47 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     @Override
     public void onDisable() {
         onBaseDisable();
+
+        PluginDisableEvent event = new PluginDisableEvent(this).fire();
+    }
+
+    public void registerListenerConglomerate(ListenerConglomerate listener) {
+        registerListener((Listener) listener);
+        registerListener((BaseEventListener) listener);
+    }
+
+    public void unregisterListenerConglomerate(ListenerConglomerate listener) {
+        unregisterListener((Listener) listener);
+        unregisterListener((BaseEventListener) listener);
+    }
+
+    public void registerListener(BaseEventListener listener) {
+        BaseEventHandler.bake(listener, this);
+    }
+
+    public void unregisterListener(BaseEventListener listener) {
+        BaseEventHandler.unbake(listener);
+    }
+
+    public void unregisterAllBaseListeners() {
+        BaseEventHandler.unbake((IEventable) this);
+    }
+
+    public void registerListener(Listener listener) {
+        Bukkit.getPluginManager().registerEvents(listener, this);
+    }
+
+    public void unregisterListener(Listener listener) {
+        HandlerList.unregisterAll(listener);
+    }
+
+    public void unregisterAllBukkitListeners() {
+        HandlerList.unregisterAll(this);
+    }
+
+    public void unregisterAllListeners() {
+        unregisterAllBaseListeners();
+        unregisterAllBukkitListeners();
     }
 
     public static DisableCallback subscribeDisable(Consumer<PluginDisableEvent> consumer) {
