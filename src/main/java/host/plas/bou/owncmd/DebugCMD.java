@@ -7,16 +7,24 @@ import host.plas.bou.commands.SimplifiedCommand;
 import host.plas.bou.items.ConvertableItemStack;
 import host.plas.bou.items.ItemBin;
 import host.plas.bou.items.ItemUtils;
-import host.plas.bou.utils.EntityUtils;
-import host.plas.bou.utils.PluginUtils;
-import host.plas.bou.utils.SenderUtils;
+import host.plas.bou.scheduling.BaseRunnable;
+import host.plas.bou.scheduling.TaskManager;
+import host.plas.bou.utils.*;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class DebugCMD extends SimplifiedCommand {
@@ -173,6 +181,131 @@ public class DebugCMD extends SimplifiedCommand {
 
                 ctx.sendMessage("&7Item added to your inventory&8!");
                 break;
+            case "uuid":
+                if (! ctx.isArgUsable(1)) {
+                    ctx.sendMessage("&cUsage: /boudebug get-uuid <name>");
+                    return false;
+                }
+
+                String name = ctx.getStringArg(1);
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
+                UUID uuid = offlinePlayer.getUniqueId();
+
+                String message = "&7UUID of &b" + name + "&8: &7" + uuid + " &e&lCLICK TO COPY";
+                message = ColorUtils.colorizeHard(message);
+                message = ColorUtils.colorAsString(message);
+                ComponentBuilder componentBuilder = new ComponentBuilder(message);
+                ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, uuid.toString());
+                componentBuilder.event(clickEvent);
+
+                ctx.sendMessage(message, componentBuilder.create());
+                break;
+            case "up":
+                if (player == null) {
+                    ctx.sendMessage("&cOnly players can use this command.");
+                    return false;
+                }
+
+                Location upLoc = LocationUtils.getTopLocation(player.getLocation());
+                LocationUtils.teleport(player, upLoc);
+
+                ctx.sendMessage("&7Teleported you up to a space available above you.");
+                break;
+            case "down":
+                if (player == null) {
+                    ctx.sendMessage("&cOnly players can use this command.");
+                    return false;
+                }
+
+                Location downLoc = LocationUtils.searchForTopBlock(player.getLocation(), BlockFace.DOWN, true);
+                LocationUtils.teleport(player, downLoc);
+
+                ctx.sendMessage("&7Teleported you down to a space available below you.");
+                break;
+            case "top":
+                if (player == null) {
+                    ctx.sendMessage("&cOnly players can use this command.");
+                    return false;
+                }
+
+                Location topLoc = LocationUtils.getTopMostTopLocation(player.getLocation());
+                LocationUtils.teleport(player, topLoc);
+
+                ctx.sendMessage("&7Teleported you to the top-most space available above you.");
+                break;
+            case "tasks":
+                if (! ctx.isArgUsable(1)) {
+                    ctx.sendMessage("&cUsage: /boudebug tasks <action>");
+                    return false;
+                }
+
+                String taskAction = ctx.getStringArg(1).toLowerCase();
+                switch (taskAction) {
+                    case "list":
+                        String taskList = TaskManager.listTasks();
+                        ctx.sendMessage(taskList);
+                        break;
+                    case "cancel":
+                        if (! ctx.isArgUsable(2)) {
+                            ctx.sendMessage("&cUsage: /boudebug tasks cancel <id>");
+                            return false;
+                        }
+
+                        if (ctx.getIntArg(2).isEmpty()) {
+                            ctx.sendMessage("&cThe ID must be an integer.");
+                            return false;
+                        }
+
+                        int id = ctx.getIntArg(2).get();
+                        TaskManager.cancel(id);
+
+                        ctx.sendMessage("&7Task with ID &a" + id + " &7was &ccancelled&8.");
+                        break;
+                    case "pause":
+                        if (! ctx.isArgUsable(2)) {
+                            ctx.sendMessage("&cUsage: /boudebug tasks pause <id>");
+                            return false;
+                        }
+
+                        if (ctx.getIntArg(2).isEmpty()) {
+                            ctx.sendMessage("&cThe ID must be an integer.");
+                            return false;
+                        }
+
+                        int idP = ctx.getIntArg(2).get();
+                        BaseRunnable runnable = TaskManager.getRunnable(idP);
+                        if (runnable == null) {
+                            ctx.sendMessage("&cNo task found with that ID.");
+                            return false;
+                        }
+
+                        runnable.pause();
+
+                        ctx.sendMessage("&7Task with ID &a" + idP + " &7was &cpaused&8.");
+                        break;
+                    case "resume":
+                        if (! ctx.isArgUsable(2)) {
+                            ctx.sendMessage("&cUsage: /boudebug tasks resume <id>");
+                            return false;
+                        }
+
+                        if (ctx.getIntArg(2).isEmpty()) {
+                            ctx.sendMessage("&cThe ID must be an integer.");
+                            return false;
+                        }
+
+                        int idR = ctx.getIntArg(2).get();
+                        BaseRunnable runnableR = TaskManager.getRunnable(idR);
+                        if (runnableR == null) {
+                            ctx.sendMessage("&cNo task found with that ID.");
+                            return false;
+                        }
+
+                        runnableR.resume();
+
+                        ctx.sendMessage("&7Task with ID &a" + idR + " &7was &aresumed&8.");
+                        break;
+                }
         }
 
         return true;
@@ -180,16 +313,35 @@ public class DebugCMD extends SimplifiedCommand {
 
     @Override
     public ConcurrentSkipListSet<String> tabComplete(CommandContext ctx) {
+        ConcurrentSkipListSet<String> completions = new ConcurrentSkipListSet<>();
+
         if (ctx.getArgs().size() <= 1) {
-            return new ConcurrentSkipListSet<>(List.of("item-nbt", "list-bou-plugins", "store-item", "get-item", "make-item"));
+            completions.addAll(List.of(
+                    "item-nbt", "list-bou-plugins", "store-item", "get-item", "make-item", "uuid",
+                    "up", "down", "top", "tasks"
+            ));
         }
 
         if (ctx.getArgs().size() == 2) {
             if (ctx.getStringArg(0).equalsIgnoreCase("get-item")) {
-                return ItemBin.getStashedIdsAsStrings();
+                completions.addAll(ItemBin.getStashedIdsAsStrings());
+            }
+            if (ctx.getStringArg(0).equalsIgnoreCase("tasks")) {
+                completions.addAll(List.of("list", "cancel", "pause", "resume"));
+            }
+            if (ctx.getStringArg(0).equalsIgnoreCase("uuid")) {
+                Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).forEach(completions::add);
             }
         }
 
-        return new ConcurrentSkipListSet<>();
+        if (ctx.getArgs().size() == 3) {
+            if (ctx.getStringArg(1).equalsIgnoreCase("cancel") ||
+                    ctx.getStringArg(1).equalsIgnoreCase("pause") ||
+                    ctx.getStringArg(1).equalsIgnoreCase("resume")) {
+                completions.addAll(TaskManager.getTaskIdsAsStrings());
+            }
+        }
+
+        return completions;
     }
 }

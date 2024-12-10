@@ -108,4 +108,8 @@ public class ColorUtils {
 
         return builder.toString();
     }
+
+    public static String simpleColorBoolean(boolean bool) {
+        return bool  ? "&aYes" : "&cNo";
+    }
 }
