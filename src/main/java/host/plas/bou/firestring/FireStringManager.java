@@ -17,7 +17,7 @@ public class FireStringManager {
 
         getFireStrings().add(fireString);
 
-        BukkitOfUtils.getInstance().logInfo("&7> &6[&b" + fireString.getIdentifier() + "&6] &cFireString &fRegistered&7!");
+        BukkitOfUtils.getInstance().logInfo("&7> &6(&b" + fireString.getIdentifier() + "&6) &cFireString &fRegistered&7!");
     }
 
     public static void unregister(String identifier) {

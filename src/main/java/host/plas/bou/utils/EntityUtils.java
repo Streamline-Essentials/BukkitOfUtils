@@ -10,9 +10,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
 import java.lang.ref.WeakReference;
 import java.time.Duration;
@@ -205,5 +209,36 @@ public class EntityUtils {
             tickCache();
             if (getPeriod() != BaseManager.getBaseConfig().getEntityCollectionFrequency()) setPeriod(BaseManager.getBaseConfig().getEntityCollectionFrequency());
         }
+    }
+
+
+
+    public static Optional<Player> getLastDamager(Entity entity) {
+        try {
+            EntityDamageByEntityEvent lastDamageCause = (EntityDamageByEntityEvent) entity.getLastDamageCause();
+            if (lastDamageCause == null) return Optional.empty();
+            return abstractDamager(lastDamageCause.getDamager());
+        } catch (Throwable e) {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<Player> abstractDamager(Entity damager) {
+        Player attacker = null;
+        if (damager instanceof Projectile) {
+            Projectile projectile = (Projectile) damager;
+            if (projectile.getShooter() instanceof Player) {
+                attacker = (Player) projectile.getShooter();
+            }
+        } else {
+            if (! (damager instanceof Player)) return Optional.empty();
+            attacker = (Player) damager;
+        }
+
+        return Optional.ofNullable(attacker);
+    }
+
+    public static OfflinePlayer getDummyOfflinePlayer() {
+        return Bukkit.getOfflinePlayer("Drakified");
     }
 }

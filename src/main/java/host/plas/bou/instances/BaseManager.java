@@ -9,6 +9,7 @@ import host.plas.bou.utils.EntityUtils;
 import host.plas.bou.configs.BaseConfig;
 import host.plas.bou.scheduling.TaskManager;
 import host.plas.bou.utils.PluginUtils;
+import host.plas.bou.utils.VersionTool;
 import lombok.Setter;
 import lombok.Getter;
 import mc.obliviate.inventory.InventoryAPI;
@@ -46,6 +47,8 @@ public class BaseManager {
         EntityUtils.init();
 
         mainListener = new MainListener();
+
+        VersionTool.init();
     }
 
     public static void preInit(BukkitOfUtils baseInstance) {

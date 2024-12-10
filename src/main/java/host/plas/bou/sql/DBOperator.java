@@ -78,7 +78,14 @@ public abstract class DBOperator implements Comparable<DBOperator> {
 
         switch (connectorSet.getType()) {
             case MYSQL:
-                config.setJdbcUrl(connectorSet.getUri());
+                String mysqlJdbcUrl = connectorSet.getUri();
+                if (!mysqlJdbcUrl.contains("?")) {
+                    mysqlJdbcUrl += "?autoReconnect=true";
+                } else {
+                    mysqlJdbcUrl += "&autoReconnect=true";
+                }
+
+                config.setJdbcUrl(mysqlJdbcUrl);
                 config.setUsername(connectorSet.getUsername());
                 config.setPassword(connectorSet.getPassword());
 

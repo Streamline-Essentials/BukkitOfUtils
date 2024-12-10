@@ -4,6 +4,8 @@ import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.obj.ContextedString;
 import lombok.Getter;
 import lombok.Setter;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -54,6 +56,30 @@ public class CommandContext extends ContextedString<CommandArgument> {
 
     public boolean sendMessage(String message) {
         return sender.sendMessage(message);
+    }
+
+    public boolean sendMessage(BaseComponent... messages) {
+        return sender.sendMessage(messages);
+    }
+
+    public boolean sendMessage(String alternate, BaseComponent... messages) {
+        return sender.sendMessage(alternate, messages);
+    }
+
+    public boolean sendMessage(ComponentBuilder builder) {
+        return sender.sendMessage(builder);
+    }
+
+    public boolean sendMessage(String alternate, ComponentBuilder builder) {
+        return sender.sendMessage(alternate, builder);
+    }
+
+    public boolean sendTitle(String toParse) {
+        return sender.sendTitle(toParse);
+    }
+
+    public boolean sendTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+        return sender.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
     }
 
     public Player getPlayerOrNull() {

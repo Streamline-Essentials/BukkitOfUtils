@@ -1,17 +1,27 @@
 package host.plas.bou.items;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.compat.papi.PAPICompat;
+import host.plas.bou.utils.ColorUtils;
+import host.plas.bou.utils.EntityUtils;
 import host.plas.bou.utils.PluginUtils;
 import host.plas.bou.utils.VersionTool;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class ItemUtils {
     public static void registerRecipe(CraftingConfig config) {
@@ -63,5 +73,101 @@ public class ItemUtils {
 
     public static boolean isItemEqual(ItemStack item1, ItemStack item2) {
         return getItemNBT(item1).equals(getItemNBT(item2));
+    }
+
+    public static boolean isNothingItem(ItemStack stack) {
+        return stack == null || stack.getType() == Material.AIR;
+    }
+
+
+    public static ConcurrentSkipListMap<Integer, String> loreToMap(String... loreLines) {
+        ConcurrentSkipListMap<Integer, String> lore = new ConcurrentSkipListMap<>();
+
+        for (int i = 0; i < loreLines.length; i++) {
+            lore.put(i, loreLines[i]);
+        }
+
+        return lore;
+    }
+
+    public static List<String> mapToLore(ConcurrentSkipListMap<Integer, String> loreMap) {
+        return new ArrayList<>(loreMap.values());
+    }
+
+    public static String compute(OfflinePlayer player, String input) {
+        input = PAPICompat.replace(player, input);
+        input = ColorUtils.colorizeHard(input);
+
+        return input;
+    }
+
+    public static String compute(String input) {
+        return compute(EntityUtils.getDummyOfflinePlayer(), input);
+    }
+
+    public static ItemStack make(OfflinePlayer player, Material material, String displayName, boolean format, String... loreLines) {
+        ItemStack item = new ItemStack(material);
+
+        ConcurrentSkipListMap<Integer, String> lore = loreToMap(loreLines);
+        lore.forEach((index, line) -> {
+            if (format) line = compute(player, line);
+
+            lore.put(index, line);
+        });
+
+        List<String> loreList = mapToLore(lore);
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(compute(player, displayName));
+            meta.setLore(loreList);
+            item.setItemMeta(meta);
+        }
+
+        return item;
+    }
+
+    public static ItemStack make(Material material, String displayName, String... loreLines) {
+        ItemStack item = new ItemStack(material);
+
+        ConcurrentSkipListMap<Integer, String> lore = loreToMap(loreLines);
+        lore.forEach((index, line) -> {
+            line = compute(line);
+
+            lore.put(index, line);
+        });
+
+        List<String> loreList = mapToLore(lore);
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(compute(displayName));
+            meta.setLore(loreList);
+            item.setItemMeta(meta);
+        }
+
+        return item;
+    }
+
+    public static void setTag(ItemStack stack, JavaPlugin plugin, String key, String value) {
+        ItemMeta meta = stack.getItemMeta();
+        if (meta != null) {
+            meta.getPersistentDataContainer().set(PluginUtils.getPluginKey(plugin, key), PersistentDataType.STRING, value);
+            stack.setItemMeta(meta);
+        }
+    }
+
+    public static Optional<String> getTag(ItemStack stack, JavaPlugin plugin, String key) {
+        if (stack == null) return Optional.empty();
+
+        ItemMeta meta = stack.getItemMeta();
+
+        String value = null;
+        if (meta != null) {
+            if (meta.getPersistentDataContainer().has(PluginUtils.getPluginKey(plugin, key), PersistentDataType.STRING))
+                value = meta.getPersistentDataContainer().get(PluginUtils.getPluginKey(plugin, key), PersistentDataType.STRING);
+        }
+
+        return Optional.ofNullable(value);
     }
 }
