@@ -128,4 +128,12 @@ public class CompatManager {
             return Optional.empty();
         }
     }
+
+    public static boolean isPAPIEnabled() {
+        return isEnabled(PAPI_IDENTIFIER);
+    }
+
+    public static boolean isLPEnabled() {
+        return isEnabled(LP_IDENTIFIER);
+    }
 }

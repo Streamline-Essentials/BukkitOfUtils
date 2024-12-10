@@ -15,6 +15,8 @@ public abstract class BaseRunnable implements Runnable {
     private int index;
     private boolean paused;
 
+    private long ticksLived;
+
     /**
      * Constructor for all Streamline API-ed Runnables.
      *
@@ -27,6 +29,7 @@ public abstract class BaseRunnable implements Runnable {
         this.period = period;
         this.index = TaskManager.getNextIndex();
         this.paused = false;
+        this.ticksLived = 0;
 
         TaskManager.start(this);
     }
@@ -43,7 +46,12 @@ public abstract class BaseRunnable implements Runnable {
             }
         }
 
+        countTicks();
+    }
+
+    public void countTicks() {
         this.currentTickCount ++;
+        this.ticksLived ++;
     }
 
     public void cancel() {
@@ -60,5 +68,16 @@ public abstract class BaseRunnable implements Runnable {
 
     public void resume() {
         this.paused = false;
+    }
+
+    @Override
+    public String toString() {
+        return "BaseRunnable{" +
+                "startedAt=" + startedAt +
+                ", currentTickCount=" + currentTickCount +
+                ", period=" + period +
+                ", index=" + index +
+                ", paused=" + paused +
+                '}';
     }
 }

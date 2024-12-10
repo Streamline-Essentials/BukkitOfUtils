@@ -1,5 +1,6 @@
 package host.plas.bou.commands;
 
+import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.ColorUtils;
 import host.plas.bou.utils.MessageUtils;
@@ -7,10 +8,13 @@ import host.plas.bou.BetterPlugin;
 import host.plas.bou.utils.SenderUtils;
 import lombok.Getter;
 import lombok.Setter;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import tv.quaint.objects.AtomicString;
 
 import java.util.Optional;
@@ -166,5 +170,38 @@ public class Sender {
         } else {
             getPlayer().ifPresent(player -> player.chat(message));
         }
+    }
+
+    public boolean sendMessage(@Nullable String alternate, BaseComponent... components) {
+        AtomicBoolean success = new AtomicBoolean(false);
+        getCommandSender().ifPresent(sender -> {
+            try {
+                sender.spigot().sendMessage(components);
+                success.set(true);
+            } catch (Throwable e) {
+                BukkitOfUtils.getInstance().logWarning("Failed to send Component message: " + e.getMessage(), e);
+
+                if (alternate != null) {
+                    sendMessage(alternate);
+                    success.set(true);
+                } else {
+                    success.set(false);
+                }
+            }
+        });
+
+        return success.get();
+    }
+
+    public boolean sendMessage(BaseComponent... components) {
+        return sendMessage(null, components);
+    }
+
+    public boolean sendMessage(String alternate, ComponentBuilder builder) {
+        return sendMessage(alternate, builder.create());
+    }
+
+    public boolean sendMessage(ComponentBuilder builder) {
+        return sendMessage(builder.create());
     }
 }

@@ -1,12 +1,17 @@
 package host.plas.bou.scheduling;
 
+import com.github.Anon8281.universalScheduler.bukkitScheduler.BukkitScheduledTask;
+import com.github.Anon8281.universalScheduler.foliaScheduler.FoliaScheduledTask;
 import com.github.Anon8281.universalScheduler.foliaScheduler.FoliaScheduler;
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.BetterPlugin;
+import host.plas.bou.commands.CommandContext;
+import host.plas.bou.commands.Sender;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.ClassHelper;
+import host.plas.bou.utils.VersionTool;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -14,10 +19,13 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.scheduler.BukkitTask;
 
 import javax.swing.*;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 
 public class TaskManager {
@@ -187,7 +195,21 @@ public class TaskManager {
     }
 
     public static MyScheduledTask teleport(Entity entityToTeleport, Location location) {
-        return getScheduler().teleport(entityToTeleport, location);
+        try {
+            return getScheduler().teleport(entityToTeleport, location);
+        } catch (Throwable e) {
+            try {
+                entityToTeleport.teleport(location);
+            } catch (Throwable e2) {
+                try {
+                    VersionTool.teleportAsync(entityToTeleport, location);
+                } catch (Throwable e3) {
+                    BukkitOfUtils.getInstance().logWarning("Failed to teleport entity: " + entityToTeleport + " to location: " + location, e3);
+                }
+            }
+
+            return getScheduler().runTask(() -> {});
+        }
     }
 
     public static void doThis(Callable<?> callable) {
@@ -249,5 +271,38 @@ public class TaskManager {
 
     public static boolean isThreadSync() {
         return isThreadSync(null);
+    }
+
+    public static String buildTaskInfo(BaseRunnable runnable) {
+        StringBuilder sb = new StringBuilder();
+
+        sb
+                .append("  &2- &bTask &e(&a").append(runnable.getIndex()).append(" &9- ").append(runnable.getStartedAt()).append("&e)&7:").append("\n")
+                .append("    &dPeriod&7: &a").append(runnable.getPeriod()).append(" &9| &dTicks Lived&7: &a").append(runnable.getTicksLived()).append("\n")
+                .append("    &dCurrent Tick Count&7: &a").append(runnable.getCurrentTickCount()).append(" &9| &dPaused&7? &a").append(runnable.isPaused() ? "&aYes" : "&cNo").append("\n")
+                .append("    &dCancelled&7? &a").append(runnable.isCancelled() ? "&aYes" : "&cNo")
+                ;
+
+        return sb.toString();
+    }
+
+    public static String listTasks() {
+        StringBuilder sb = new StringBuilder("&cCurrent Tasks &e(&a").append(currentRunnables.size()).append("&e)&7:\n");
+
+        for (BaseRunnable runnable : currentRunnables.values()) {
+            sb.append(buildTaskInfo(runnable)).append("\n");
+        }
+
+        while (sb.toString().endsWith("\n")) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+
+        return sb.toString();
+    }
+
+    public static ConcurrentSkipListSet<String> getTaskIdsAsStrings() {
+        ConcurrentSkipListSet<String> taskIds = new ConcurrentSkipListSet<>();
+        currentRunnables.forEach((index, runnable) -> taskIds.add(String.valueOf(index)));
+        return taskIds;
     }
 }

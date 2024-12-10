@@ -8,6 +8,8 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -220,6 +222,67 @@ public class VersionTool {
 
     // FAST REFLECTION METHODS
 
+    public static void init() {
+        initClasses();
+        initMethods();
+    }
+
+    public static void initClasses() {
+        try {
+            getCraftItemStackClass();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getNBTTagCompoundClass();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getMojangsonParserClass();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getNMSItemStackClass();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getFoliaEntityClass();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getFoliaLocationClass();
+        } catch (Throwable e) {
+            // do nothing
+        }
+    }
+
+    public static void initMethods() {
+        try {
+            getMojangsonParserParseMethod();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getNMSItemStackAMethod();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getCraftItemStackAsBukkitCopyMethod();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getFoliaEntityTeleportAsyncMethod();
+        } catch (Throwable e) {
+            // do nothing
+        }
+    }
+
     private static Class<?> CLASS_CRAFT_ITEM_STACK = null;
 
     public static Class<?> getCraftItemStackClass() throws Throwable {
@@ -262,6 +325,24 @@ public class VersionTool {
         return CLASS_NMS_ITEM_STACK;
     }
 
+    private static Class<?> CLASS_FOLIA_ENTITY = null;
+
+    public static Class<?> getFoliaEntityClass() throws Throwable {
+        if (CLASS_FOLIA_ENTITY == null) {
+            CLASS_FOLIA_ENTITY = Class.forName("org.bukkit.entity.Entity");
+        }
+        return CLASS_FOLIA_ENTITY;
+    }
+
+    private static Class<?> CLASS_FOLIA_LOCATION = null;
+
+    public static Class<?> getFoliaLocationClass() throws Throwable {
+        if (CLASS_FOLIA_LOCATION == null) {
+            CLASS_FOLIA_LOCATION = Class.forName("org.bukkit.Location");
+        }
+        return CLASS_FOLIA_LOCATION;
+    }
+
     private static Method MOJANGSON_PARSER_PARSE_METHOD = null;
 
     public static Method getMojangsonParserParseMethod() throws Throwable {
@@ -289,6 +370,15 @@ public class VersionTool {
         return CRAFT_ITEM_STACK_AS_BUKKIT_COPY_METHOD;
     }
 
+    private static Method FOLIA_ENTITY_TELEPORT_ASYNC_METHOD = null;
+
+    public static Method getFoliaEntityTeleportAsyncMethod() throws Throwable {
+        if (FOLIA_ENTITY_TELEPORT_ASYNC_METHOD == null) {
+            FOLIA_ENTITY_TELEPORT_ASYNC_METHOD = getFoliaEntityClass().getMethod("teleportAsync", getFoliaLocationClass());
+        }
+        return FOLIA_ENTITY_TELEPORT_ASYNC_METHOD;
+    }
+
     // WORKER METHODS
 
     public static Object parseNBT(String nbtJson) throws Throwable {
@@ -301,6 +391,14 @@ public class VersionTool {
 
     public static ItemStack getBukkitItemStack(Object nmsItemStack) throws Throwable {
         return (ItemStack) getCraftItemStackAsBukkitCopyMethod().invoke(null, nmsItemStack);
+    }
+
+    public static void teleportAsync(Entity entity, Location location) {
+        try {
+            getFoliaEntityTeleportAsyncMethod().invoke(entity, location);
+        } catch (Throwable e) {
+            BukkitOfUtils.getInstance().logWarning("Failed to teleport entity asynchronously: ", e);
+        }
     }
 
     // SERVER VERSION
