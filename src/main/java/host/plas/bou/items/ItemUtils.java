@@ -19,6 +19,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -105,6 +106,10 @@ public class ItemUtils {
         return compute(EntityUtils.getDummyOfflinePlayer(), input);
     }
 
+    public static ItemStack make(OfflinePlayer player, Material material, String displayName, boolean format, Collection<String> loreLines) {
+        return make(player, material, displayName, format, loreLines.toArray(new String[0]));
+    }
+
     public static ItemStack make(OfflinePlayer player, Material material, String displayName, boolean format, String... loreLines) {
         ItemStack item = new ItemStack(material);
 
@@ -125,6 +130,10 @@ public class ItemUtils {
         }
 
         return item;
+    }
+
+    public static ItemStack make(Material material, String displayName, Collection<String> loreLines) {
+        return make(material, displayName, loreLines.toArray(new String[0]));
     }
 
     public static ItemStack make(Material material, String displayName, String... loreLines) {

@@ -1,7 +1,7 @@
 package host.plas.bou.items.droppable;
 
 import host.plas.bou.BukkitOfUtils;
-import host.plas.bou.utils.CosmicMath;
+import host.plas.bou.math.CosmicMath;
 import lombok.Getter;
 import lombok.Setter;
 import tv.quaint.objects.Identifiable;

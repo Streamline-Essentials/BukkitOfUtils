@@ -205,4 +205,8 @@ public class ManagedInventory implements Idable {
 
         return equal.get();
     }
+
+    public int size() {
+        return slots.size();
+    }
 }
