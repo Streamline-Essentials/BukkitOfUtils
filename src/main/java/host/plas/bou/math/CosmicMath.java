@@ -1,4 +1,4 @@
-package host.plas.bou.utils;
+package host.plas.bou.math;
 
 import java.util.Random;
 
@@ -61,5 +61,13 @@ public class CosmicMath {
         double dy = y2 - y1;
         double dz = z2 - z1;
         return Math.atan2(Math.sqrt(dx * dx + dz * dz), dy);
+    }
+
+    public static int ceilDiv(int x, int y) {
+        return - Math.floorDiv(- x, y); // ceil(x / y) = - floor(- x / y)
+    }
+
+    public static long ceilDiv(long x, long y) {
+        return - Math.floorDiv(- x, y); // ceil(x / y) = - floor(- x / y)
     }
 }

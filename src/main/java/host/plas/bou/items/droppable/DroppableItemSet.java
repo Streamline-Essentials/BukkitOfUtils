@@ -1,14 +1,13 @@
 package host.plas.bou.items.droppable;
 
-import host.plas.dma.arena.GameType;
-import host.plas.dma.managers.LoggingHandler;
+import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.math.CosmicMath;
 import lombok.Getter;
 import lombok.Setter;
 import tv.quaint.objects.Identifiable;
 
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -40,23 +39,6 @@ public class DroppableItemSet implements Identifiable {
         return new ConcurrentSkipListSet<>(Arrays.asList(items));
     }
 
-    public ConcurrentSkipListSet<GameType> getGameTypes() {
-        ConcurrentSkipListSet<GameType> gameTypes = new ConcurrentSkipListSet<>();
-
-        getArenaSet().forEach(arena -> {
-            try {
-                if (arena.startsWith("TYPE:")) {
-                    String type = arena.split(":")[1];
-                    gameTypes.add(GameType.valueOf(type));
-                }
-            } catch (Throwable e) {
-                // ignore
-            }
-        });
-
-        return gameTypes;
-    }
-
     // Returns a single DroppableItem that passes the roll
     // DroppableItem chances will be added together in a map,
     // then a random number will be generated and checked against the chances
@@ -73,26 +55,21 @@ public class DroppableItemSet implements Identifiable {
             itemChances.put(chance, item);
         });
 
-        Random RNG = new Random();
         Double lastChance = itemChances.lastKey();
         if (lastChance == null) {
             return Optional.empty();
         }
-        double random = RNG.nextDouble(0, lastChance);
+        double random = CosmicMath.getRandomDouble(0, lastChance);
 
         try {
             return Optional.ofNullable(itemChances.ceilingEntry(random).getValue());
         } catch (Throwable e) {
-            LoggingHandler.logWarning("Failed to poll item from DroppableItemSet: " + getIdentifier(), e);
+            BukkitOfUtils.getInstance().logWarning("Failed to poll item from DroppableItemSet: " + getIdentifier(), e);
             return Optional.empty();
         }
     }
 
     public boolean checkArena(String arena) {
         return getArenaSet().contains(arena);
-    }
-
-    public boolean checkGameType(GameType type) {
-        return getGameTypes().contains(type);
     }
 }
