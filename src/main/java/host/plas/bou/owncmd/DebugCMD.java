@@ -4,6 +4,7 @@ import host.plas.bou.BetterPlugin;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.commands.CommandContext;
 import host.plas.bou.commands.SimplifiedCommand;
+import host.plas.bou.gui.menus.TaskMenu;
 import host.plas.bou.items.ConvertableItemStack;
 import host.plas.bou.items.ItemBin;
 import host.plas.bou.items.ItemUtils;
@@ -305,6 +306,15 @@ public class DebugCMD extends SimplifiedCommand {
 
                         ctx.sendMessage("&7Task with ID &a" + idR + " &7was &aresumed&8.");
                         break;
+                    case "menu":
+                        if (player == null) {
+                            ctx.sendMessage("&cOnly players can use this command.");
+                            return false;
+                        }
+
+                        TaskMenu.open(player);
+                        ctx.sendMessage("&7Task menu opened.");
+                        break;
                 }
         }
 
@@ -327,7 +337,7 @@ public class DebugCMD extends SimplifiedCommand {
                 completions.addAll(ItemBin.getStashedIdsAsStrings());
             }
             if (ctx.getStringArg(0).equalsIgnoreCase("tasks")) {
-                completions.addAll(List.of("list", "cancel", "pause", "resume"));
+                completions.addAll(List.of("list", "cancel", "pause", "resume", "menu"));
             }
             if (ctx.getStringArg(0).equalsIgnoreCase("uuid")) {
                 Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).forEach(completions::add);
