@@ -110,6 +110,18 @@ public class ItemUtils {
         return make(player, material, displayName, format, loreLines.toArray(new String[0]));
     }
 
+    public static ItemStack make(OfflinePlayer player, String material, String displayName, boolean format, Collection<String> loreLines) {
+        return make(player, material, displayName, format, loreLines.toArray(new String[0]));
+    }
+
+    public static ItemStack make(OfflinePlayer player, Material material, String displayName, Collection<String> loreLines) {
+        return make(player, material, displayName, true, loreLines.toArray(new String[0]));
+    }
+
+    public static ItemStack make(OfflinePlayer player, String material, String displayName, Collection<String> loreLines) {
+        return make(player, material, displayName, true, loreLines.toArray(new String[0]));
+    }
+
     public static ItemStack make(OfflinePlayer player, Material material, String displayName, boolean format, String... loreLines) {
         ItemStack item = new ItemStack(material);
 
@@ -132,7 +144,23 @@ public class ItemUtils {
         return item;
     }
 
+    public static ItemStack make(OfflinePlayer player, String material, String displayName, boolean format, String... loreLines) {
+        return make(player, material, displayName, format, loreLines);
+    }
+
+    public static ItemStack make(OfflinePlayer player, Material material, String displayName, String... loreLines) {
+        return make(player, material, displayName, true, loreLines);
+    }
+
+    public static ItemStack make(OfflinePlayer player, String material, String displayName, String... loreLines) {
+        return make(player, material, displayName, true, loreLines);
+    }
+
     public static ItemStack make(Material material, String displayName, Collection<String> loreLines) {
+        return make(material, displayName, loreLines.toArray(new String[0]));
+    }
+
+    public static ItemStack make(String material, String displayName, Collection<String> loreLines) {
         return make(material, displayName, loreLines.toArray(new String[0]));
     }
 
@@ -156,6 +184,19 @@ public class ItemUtils {
         }
 
         return item;
+    }
+
+    public static ItemStack make(String material, String displayName, String... loreLines) {
+        return make(getMaterial(material).orElse(Material.AIR), displayName, loreLines);
+    }
+
+    public static Optional<Material> getMaterial(String material) {
+        try {
+            return Optional.of(Material.valueOf(material.toUpperCase()));
+        } catch (Exception e) {
+            BukkitOfUtils.getInstance().logWarning("Failed to get material: ", e);
+            return Optional.empty();
+        }
     }
 
     public static void setTag(ItemStack stack, JavaPlugin plugin, String key, String value) {

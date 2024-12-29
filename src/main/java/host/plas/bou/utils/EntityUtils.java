@@ -204,10 +204,14 @@ public class EntityUtils {
 
         @Override
         public void run() {
-            if (isCancelled()) return;
+            try {
+                if (isCancelled()) return;
 
-            tickCache();
-            if (getPeriod() != BaseManager.getBaseConfig().getEntityCollectionFrequency()) setPeriod(BaseManager.getBaseConfig().getEntityCollectionFrequency());
+                tickCache();
+                if (getPeriod() != BaseManager.getBaseConfig().getEntityCollectionFrequency()) setPeriod(BaseManager.getBaseConfig().getEntityCollectionFrequency());
+            } catch (Exception e) {
+                BukkitOfUtils.getInstance().logWarning("An error occurred while ticking the entity cache.", e);
+            }
         }
     }
 

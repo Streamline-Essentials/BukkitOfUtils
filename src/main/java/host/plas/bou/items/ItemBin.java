@@ -17,7 +17,7 @@ public class ItemBin {
     @Getter @Setter
     private static ConcurrentSkipListSet<ConvertableItemStack> bin = new ConcurrentSkipListSet<>();
     @Getter @Setter
-    private static AtomicInteger nextId = new AtomicInteger(0);
+    private static AtomicInteger atomicNextId = new AtomicInteger(0);
 
     public static void add(ConvertableItemStack itemStack) {
         bin.add(itemStack);
@@ -106,7 +106,7 @@ public class ItemBin {
     }
 
     public static int getNextId() {
-        return nextId.getAndIncrement();
+        return atomicNextId.getAndIncrement();
     }
 
     public static ConcurrentSkipListSet<Integer> getStashedIds() {

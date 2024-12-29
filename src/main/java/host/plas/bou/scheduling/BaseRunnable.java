@@ -1,10 +1,15 @@
 package host.plas.bou.scheduling;
 
+import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.MessageUtils;
 import lombok.Getter;
 import lombok.Setter;
+import tv.quaint.async.AsyncUtils;
 
+import javax.swing.*;
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
 
 @Setter
 @Getter
@@ -16,6 +21,8 @@ public abstract class BaseRunnable implements Runnable {
     private boolean paused;
 
     private long ticksLived;
+
+    private Timer timer;
 
     /**
      * Constructor for all Streamline API-ed Runnables.
@@ -31,22 +38,53 @@ public abstract class BaseRunnable implements Runnable {
         this.paused = false;
         this.ticksLived = 0;
 
+        this.timer = createTimer();
+
         TaskManager.start(this);
     }
 
-    public void tick() {
-        if (this.paused) return;
+    public void start() {
+        if (timer.isRunning()) return;
 
+        timer.start();
+    }
+
+    public void stop() {
+        if (! timer.isRunning()) return;
+
+        timer.stop();
+    }
+
+    public void restart() {
+        timer.restart();
+    }
+
+    public Timer createTimer() {
+        return new Timer(BaseManager.getBaseConfig().getTickingFrequency(), e -> {
+            try {
+                tick();
+            } catch (Throwable t) {
+                MessageUtils.logDebug("Error while ticking runnable: " + this, t);
+            }
+        });
+    }
+
+    public CompletableFuture<Void> tick() {
+        if (this.paused) return CompletableFuture.completedFuture(null);
+
+        CompletableFuture<Void> future = new CompletableFuture<>();
         if (this.currentTickCount >= this.period) {
             this.currentTickCount = 0;
             try {
-                this.run();
+                future = AsyncUtils.executeAsync(this);
             } catch (Throwable e) {
                 MessageUtils.logDebug("Error while ticking runnable: " + this, e);
             }
         }
 
         countTicks();
+
+        return future;
     }
 
     public void countTicks() {

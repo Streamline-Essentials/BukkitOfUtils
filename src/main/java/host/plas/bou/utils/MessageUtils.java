@@ -24,7 +24,7 @@ public class MessageUtils {
 
     public static void doReplaceAndSend(CommandSender to, String message, String prefix) {
         if (message == null) return;
-        if (NotificationTimer.hasNotification(getNotificationIdentifier(message), to)) return;
+//        if (NotificationTimer.hasNotification(getNotificationIdentifier(message), to)) return;
 
         message = message.replace("%newline%", "\n");
         for (String line : message.split("\n")) {
