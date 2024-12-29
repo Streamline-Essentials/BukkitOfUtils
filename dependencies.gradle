@@ -1,24 +1,21 @@
 ext {
     IMPL = [
-            'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
             'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
+            'com.google.code.gson:gson:2.11.0',
     ]
     SHADOW = [
-            'com.github.hamza-cskn.obliviate-invs:core:4.1.12',
             'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
+            'com.google.code.gson:gson:2.11.0',
     ]
     ANNO = [
-            'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT:',
-//            'dev.folia:folia-api:1.20.6-R0.1-SNAPSHOT',
+            'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT',
     ]
     COMP_ONLY = [
             'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT',
-//            'dev.folia:folia-api:1.20.6-R0.1-SNAPSHOT',
     ]
     FILES = [
-//            'libs/folia-1.20.4.jar',
     ]
     OTHER_PLUGINS = [
             'me.clip:placeholderapi:2.11.5',

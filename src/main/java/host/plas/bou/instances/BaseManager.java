@@ -76,6 +76,7 @@ public class BaseManager {
     }
 
     public static void stop() {
+        EntityUtils.getLookupTimer().cancel();
         TaskManager.stop();
     }
 

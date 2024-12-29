@@ -14,27 +14,31 @@ import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
+import tv.quaint.async.AsyncTask;
+import tv.quaint.async.AsyncUtils;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class TaskManager {
     @Getter @Setter
     private static ConcurrentSkipListMap<Integer, BaseRunnable> currentRunnables = new ConcurrentSkipListMap<>();
 
-    @Getter @Setter
-    private static Timer timer;
-
     public static void start(BaseRunnable runnable) {
         currentRunnables.put(runnable.getIndex(), runnable);
+        runnable.start();
     }
 
     public static void cancel(BaseRunnable runnable) {
+        runnable.stop();
         cancel(runnable.getIndex());
     }
 
@@ -42,14 +46,43 @@ public class TaskManager {
         return currentRunnables.size();
     }
 
-    public static void tick() {
-        for (BaseRunnable runnable : currentRunnables.values()) {
-            try {
-                runnable.tick();
-            } catch (Throwable e) {
-                BukkitOfUtils.getInstance().logDebug("Error while ticking runnable: " + runnable, e);
-            }
-        }
+//    @Getter @Setter
+//    private static Timer task;
+
+    public static void setupTask() {
+//        if (task != null) {
+//            task.stop();
+//        }
+//
+//        task = new Timer(BaseManager.getBaseConfig().getTickingFrequency(), TaskManager::tick); // 1 tick or 50ms
+//        task.start();
+//
+//        BukkitOfUtils.getInstance().logInfo("&cTaskManager &fmain task has been set up.");
+    }
+
+    public static void tick(ActionEvent listener) {
+//        try {
+//            if (! isTickingEnabled()) return;
+//
+//            try {
+//                int frequency = BaseManager.getBaseConfig().getTickingFrequency();
+//                if (getTask().getDelay() != frequency) {
+//                    getTask().setDelay(frequency);
+//                }
+//            } catch (Throwable e) {
+//                BukkitOfUtils.getInstance().logDebug("Error while ticking runnables.", e);
+//            }
+//
+//            currentRunnables.forEach((index, runnable) -> {
+//                try {
+//                    AsyncUtils.executeAsync(runnable::tick);
+//                } catch (Throwable e) {
+//                    BukkitOfUtils.getInstance().logDebug("Error while ticking runnable: " + runnable, e);
+//                }
+//            });
+//        } catch (Throwable e) {
+//            BukkitOfUtils.getInstance().logDebug("Error while ticking runnables.", e);
+//        }
     }
 
     public static boolean isCancelled(int index) {
@@ -65,22 +98,36 @@ public class TaskManager {
     }
 
     public static void init() {
-        int tickingFrequency = BaseManager.getBaseConfig().getTickingFrequency();
-        timer = new Timer(tickingFrequency, e -> {
-            if (getTimer().getDelay() != BaseManager.getBaseConfig().getTickingFrequency()) {
-                getTimer().setDelay(BaseManager.getBaseConfig().getTickingFrequency());
-            }
+        try {
+            AsyncUtils.init();
+        } catch (Throwable t) {
+            BukkitOfUtils.getInstance().logWarning("Failed to initialize AsyncUtils.", t);
+        }
 
-            tick();
-        });
-        timer.start();
+        updateTickingEnabled(true);
+        setupTask();
+
+        setupMenuUpdater();
 
         BukkitOfUtils.getInstance().logInfo("&cTaskManager &fis now initialized!");
     }
 
+    @Getter @Setter
+    private static AtomicBoolean tickingEnabled = new AtomicBoolean(false);
+
+    public static void updateTickingEnabled(boolean bool) {
+        tickingEnabled.set(bool);
+    }
+
+    public static boolean isTickingEnabled() {
+        return tickingEnabled.get();
+    }
+
     public static void stop() {
-        timer.stop();
+        updateTickingEnabled(false);
+//        if (task != null) task.stop();
         currentRunnables.forEach((index, runnable) -> runnable.cancel());
+        AsyncUtils.getQueuedTasks().forEach(AsyncTask::remove);
 
         BukkitOfUtils.getInstance().logInfo("&cTaskManager &fis now stopped!");
     }
@@ -304,14 +351,22 @@ public class TaskManager {
     public static ItemStack getTaskItem(int index) {
         Material material = Material.COAL;
 
-        String name = "&cTask &f#&b" + index;
+        String name = "&cTask &f(&dIndex&7: &b" + index + "&f)";
+
+        BaseRunnable runnable = getRunnable(index);
+        if (runnable == null) {
+            return ItemUtils.make(material, name, "&cTask not found.");
+        }
+
+        String className = runnable.getClass().getSimpleName();
+        name = "&c" + className + " &f(&dIndex&7: &b" + index + "&f)";
 
         List<String> lore = new ArrayList<>();
-        lore.add("&dPeriod&7: &a" + getRunnable(index).getPeriod());
-        lore.add("&dTicks Lived&7: &a" + getRunnable(index).getTicksLived());
-        lore.add("&dCurrent Tick Count&7: &a" + getRunnable(index).getCurrentTickCount());
-        lore.add("&dPaused&7? &a" + (getRunnable(index).isPaused() ? "&aYes" : "&cNo"));
-        lore.add("&dCancelled&7? &a" + (getRunnable(index).isCancelled() ? "&aYes" : "&cNo"));
+        lore.add("&dPeriod&7: &a" + runnable.getPeriod());
+        lore.add("&dTicks Lived&7: &a" + runnable.getTicksLived());
+        lore.add("&dCurrent Tick Count&7: &a" + runnable.getCurrentTickCount());
+        lore.add("&dPaused&7? &a" + (runnable.isPaused() ? "&aYes" : "&cNo"));
+        lore.add("&dCancelled&7? &a" + (runnable.isCancelled() ? "&aYes" : "&cNo"));
 
         return ItemUtils.make(material, name, lore);
     }
@@ -320,5 +375,51 @@ public class TaskManager {
         ConcurrentSkipListMap<Integer, ItemStack> taskItems = new ConcurrentSkipListMap<>();
         currentRunnables.forEach((index, runnable) -> taskItems.put(index, getTaskItem(index)));
         return taskItems;
+    }
+
+    public static ItemStack getAsyncItem(long index) {
+        Material material = Material.DIAMOND;
+
+        String name = "&cTask &f(&dIndex&7: &b" + index + "&f)";
+
+        Optional<AsyncTask> optional = AsyncUtils.getTask(index);
+        if (optional.isEmpty()) {
+            return ItemUtils.make(material, name, "&cTask not found.");
+        }
+        AsyncTask asyncTask = optional.get();
+
+        String className = asyncTask.getClass().getSimpleName();
+        name = "&c" + className + " &f(&dIndex&7: &b" + index + "&f)";
+
+        List<String> lore = new ArrayList<>();
+        lore.add("&dPeriod&7: &a" + asyncTask.getPeriod());
+        lore.add("&dTicks Lived&7: &a" + asyncTask.getTicksLived());
+        lore.add("&dCurrent Delay&7: &a" + asyncTask.getCurrentDelay());
+        lore.add("&dNeeded Ticks&7: &a" + asyncTask.getNeededTicks());
+        lore.add("&dCompleted&7? &a" + (asyncTask.isCompleted() ? "&aYes" : "&cNo"));
+        lore.add("&dRepeatable&7? &a" + (asyncTask.isRepeatable() ? "&aYes" : "&cNo"));
+
+        return ItemUtils.make(material, name, lore);
+    }
+
+    public static ConcurrentSkipListMap<Integer, ItemStack> getAsyncItems() {
+        ConcurrentSkipListMap<Integer, ItemStack> taskItems = new ConcurrentSkipListMap<>();
+        AsyncUtils.getQueuedTasks().forEach((task) -> taskItems.put((int) task.getId(), getAsyncItem(task.getId())));
+        return taskItems;
+    }
+
+    @Getter @Setter
+    private static BaseRunnable taskMenuUpdater;
+
+    public static void setupMenuUpdater() {
+        try {
+            if (taskMenuUpdater != null) {
+                taskMenuUpdater.cancel();
+            }
+
+            taskMenuUpdater = new TaskMenuUpdater();
+        } catch (Throwable t) {
+            BukkitOfUtils.getInstance().logWarning("Failed to setup task menu updater.", t);
+        }
     }
 }
