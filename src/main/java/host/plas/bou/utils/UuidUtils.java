@@ -1,7 +1,6 @@
 package host.plas.bou.utils;
 
 import host.plas.bou.instances.BaseManager;
-import org.bukkit.Bukkit;
 
 import java.util.UUID;
 
@@ -19,23 +18,40 @@ public class UuidUtils {
         if (isUuid(name)) {
             return name;
         } else {
-            if (name.equals(BaseManager.getBaseConfig().getConsoleName()) || name.equals(BaseManager.getBaseConfig().getConsoleUUID())) {
-                return BaseManager.getBaseConfig().getConsoleUUID();
+            if (isConsole(name)) {
+                return getConsoleUUID();
             } else {
-                return Bukkit.getOfflinePlayer(name).getUniqueId().toString();
+                UUID uuid = UUIDFetcher.getUUID(name);
+                if (uuid == null) {
+                    return null;
+                } else {
+                    return uuid.toString();
+                }
             }
         }
     }
 
     public static String toName(String uuid) {
         if (isUuid(uuid)) {
-            return Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName();
+            return UUIDFetcher.getName(uuid);
         } else {
-            if (uuid.equals(BaseManager.getBaseConfig().getConsoleName()) || uuid.equals(BaseManager.getBaseConfig().getConsoleUUID())) {
-                return BaseManager.getBaseConfig().getConsoleUUID(); // We use the Console UUID internally.
+            if (isConsole(uuid)) {
+                return getConsoleName();
             } else {
-                return Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName();
+                return null;
             }
         }
+    }
+
+    public static boolean isConsole(String thing) {
+        return thing.equals(getConsoleName()) || thing.equals(getConsoleUUID());
+    }
+
+    public static String getConsoleName() {
+        return BaseManager.getBaseConfig().getConsoleName();
+    }
+
+    public static String getConsoleUUID() {
+        return BaseManager.getBaseConfig().getConsoleUUID();
     }
 }
