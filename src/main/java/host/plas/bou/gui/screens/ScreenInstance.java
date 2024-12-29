@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import mc.obliviate.inventory.Gui;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
@@ -16,7 +17,10 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import tv.quaint.objects.Identified;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 @Getter @Setter
 public class ScreenInstance extends Gui implements Identified {
@@ -132,5 +136,22 @@ public class ScreenInstance extends Gui implements Identified {
 
     public void close() {
         player.closeInventory();
+    }
+
+    public void redraw() {
+        build(inventorySheet);
+    }
+
+    public ConcurrentSkipListMap<String, HumanEntity> getViewers() {
+        ConcurrentSkipListMap<String, HumanEntity> map = new ConcurrentSkipListMap<>();
+        List<HumanEntity> viewers = new ArrayList<>(getInventory().getViewers());
+
+        viewers.forEach(v -> {
+            if (v instanceof Player) {
+                map.put(v.getUniqueId().toString(), v);
+            }
+        });
+
+        return map;
     }
 }

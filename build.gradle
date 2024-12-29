@@ -57,8 +57,12 @@ dependencies {
     shadow(SHADOW)
 
     // TheBase
-    implementation('com.github.Server-Utilities:TheBase:master-SNAPSHOT').exclude(group: 'com.zaxxer', module: 'HikariCP')
-    shadow('com.github.Server-Utilities:TheBase:master-SNAPSHOT').exclude(group: 'com.zaxxer', module: 'HikariCP')
+    implementation("com.github.server-utilities:TheBase:${rootProject.properties['base-version']}").exclude(group: 'com.zaxxer', module: 'HikariCP')
+    shadow("com.github.server-utilities:TheBase:${rootProject.properties['base-version']}").exclude(group: 'com.zaxxer', module: 'HikariCP')
+
+    // OblivateInvs
+    implementation("com.github.hamza-cskn.obliviate-invs:core:4.1.12").exclude(group: 'com.google.code.gson', module: 'gson')
+    shadow("com.github.hamza-cskn.obliviate-invs:core:4.1.12").exclude(group: 'com.google.code.gson', module: 'gson')
 
     // Other Plugins
     compileOnly(OTHER_PLUGINS)
@@ -96,6 +100,7 @@ shadowJar {
 
     relocate('com.github.Anon8281.universalScheduler', 'host.plas.bou.libs.universalScheduler')
     relocate('com.github.benmanes.caffeine', 'host.plas.bou.libs.caffeine')
+    relocate('com.google.gson', 'host.plas.bou.libs.gson')
 }
 
 artifacts {

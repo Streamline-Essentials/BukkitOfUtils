@@ -5,6 +5,7 @@ import host.plas.bou.gui.screens.blocks.ScreenBlock;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -26,6 +27,20 @@ public class ScreenManager {
 
         screens.forEach(s -> {
             if (s.getIdentifier().equals(player.getUniqueId().toString())) {
+                screen.set(Optional.of(s));
+            }
+        });
+
+        return screen.get();
+    }
+
+    public static Optional<ScreenInstance> getScreen(Inventory inventory) {
+        AtomicReference<Optional<ScreenInstance>> screen = new AtomicReference<>(Optional.empty());
+
+        screens.forEach(s -> {
+            if (screen.get().isPresent()) return;
+
+            if (s.getInventory().equals(inventory)) {
                 screen.set(Optional.of(s));
             }
         });

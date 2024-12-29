@@ -315,6 +315,10 @@ public class DebugCMD extends SimplifiedCommand {
                         TaskMenu.open(player);
                         ctx.sendMessage("&7Task menu opened.");
                         break;
+                    case "restart-ticker":
+                        TaskManager.setupTask();
+                        ctx.sendMessage("&7Main ticker restarted.");
+                        break;
                 }
         }
 
@@ -337,7 +341,7 @@ public class DebugCMD extends SimplifiedCommand {
                 completions.addAll(ItemBin.getStashedIdsAsStrings());
             }
             if (ctx.getStringArg(0).equalsIgnoreCase("tasks")) {
-                completions.addAll(List.of("list", "cancel", "pause", "resume", "menu"));
+                completions.addAll(List.of("list", "cancel", "pause", "resume", "menu", "restart-ticker"));
             }
             if (ctx.getStringArg(0).equalsIgnoreCase("uuid")) {
                 Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).forEach(completions::add);
