@@ -1,10 +1,10 @@
 package host.plas.bou.utils;
 
+import com.google.re2j.Matcher;
+import com.google.re2j.Pattern;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
-import tv.quaint.thebase.lib.re2j.Matcher;
-import tv.quaint.thebase.lib.re2j.Pattern;
 import tv.quaint.utils.MatcherUtils;
 
 import java.awt.*;
