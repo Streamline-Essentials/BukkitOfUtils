@@ -1,15 +1,13 @@
 package host.plas.bou.sql;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import host.plas.bou.BetterPlugin;
-import host.plas.bou.events.callbacks.DisableCallback;
-import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.DatabaseUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
-import tv.quaint.thebase.lib.hikari.HikariConfig;
-import tv.quaint.thebase.lib.hikari.HikariDataSource;
 
 import java.io.File;
 import java.sql.Connection;
@@ -20,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -79,7 +76,7 @@ public abstract class DBOperator implements Comparable<DBOperator> {
         switch (connectorSet.getType()) {
             case MYSQL:
                 String mysqlJdbcUrl = connectorSet.getUri();
-                if (!mysqlJdbcUrl.contains("?")) {
+                if (! mysqlJdbcUrl.contains("?")) {
                     mysqlJdbcUrl += "?autoReconnect=true";
                 } else {
                     mysqlJdbcUrl += "&autoReconnect=true";
