@@ -10,6 +10,7 @@ import org.bukkit.inventory.Inventory;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 public class ScreenManager {
     @Getter @Setter
@@ -76,5 +77,44 @@ public class ScreenManager {
         });
 
         return players;
+    }
+
+    @Getter @Setter
+    private static ConcurrentSkipListSet<ScreenBlock> loadedBlocks = new ConcurrentSkipListSet<>();
+
+    public static void addBlock(ScreenBlock block) {
+        loadedBlocks.add(block);
+    }
+
+    public static void removeBlock(Predicate<ScreenBlock> predicate) {
+        loadedBlocks.removeIf(predicate);
+    }
+
+    public static Optional<ScreenBlock> getScreenBlock(ScreenInstance instance) {
+        AtomicReference<Optional<ScreenBlock>> block = new AtomicReference<>(Optional.empty());
+
+        loadedBlocks.forEach(b -> {
+            if (block.get().isPresent()) return;
+
+            if (instance.getScreenBlock().isPresent() && instance.getScreenBlock().get().equals(b)) {
+                block.set(Optional.of(b));
+            }
+        });
+
+        return block.get();
+    }
+
+    public static Optional<ScreenBlock> getScreenBlockOf(Player player) {
+        AtomicReference<Optional<ScreenBlock>> block = new AtomicReference<>(Optional.empty());
+
+        getScreen(player).ifPresent(screen -> {
+            block.set(getScreenBlock(screen));
+        });
+
+        return block.get();
+    }
+
+    public static boolean hasBlock(ScreenBlock block) {
+        return loadedBlocks.contains(block);
     }
 }

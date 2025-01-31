@@ -52,11 +52,12 @@ public abstract class ScreenBlock implements Identifiable {
     public void onOpen(BlockOpenEvent event) {
         Player player = event.getPlayer();
 
-        if (ScreenManager.hasScreen(player)) {
+        if (ScreenManager.hasScreen(player) && ! event.isOverride()) {
             ScreenManager.getScreen(player).ifPresent(ScreenInstance::open);
-        } else {
-            buildScreen(event).open();
+            return;
         }
+
+        buildScreen(event).open();
     }
 
     public void onClose(BlockCloseEvent event) {
@@ -86,9 +87,10 @@ public abstract class ScreenBlock implements Identifiable {
     public void onRedraw(BlockRedrawEvent event) {
         ScreenBlock block = event.getScreenBlock();
 
-        ScreenManager.getPlayersOf(block).forEach(s -> {
-            s.close();
-            s.open();
-        });
+        ScreenManager.getPlayersOf(block).forEach(ScreenInstance::redraw);
+    }
+
+    public void redraw() {
+        BlockRedrawEvent event = new BlockRedrawEvent(this).fire();
     }
 }
