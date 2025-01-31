@@ -126,6 +126,8 @@ shadowJar {
     relocate('com.github.Anon8281.universalScheduler', 'host.plas.bou.libs.universalScheduler')
     relocate('com.github.benmanes.caffeine', 'host.plas.bou.libs.caffeine')
     relocate('com.google.gson', 'host.plas.bou.libs.gson')
+
+    relocate('de.leonhard', 'tv.quaint.thebase.lib.leonhard')
 }
 
 artifacts {
