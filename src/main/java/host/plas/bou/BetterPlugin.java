@@ -12,6 +12,7 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import tv.quaint.async.SyncInstance;
 import tv.quaint.async.ThreadHolder;
@@ -25,7 +26,7 @@ import tv.quaint.objects.handling.derived.IModifierEventable;
 import java.util.function.Consumer;
 
 @Getter @Setter
-public class BetterPlugin extends JavaPlugin implements IModifierEventable, Identified, WithSync, BaseEventListener {
+public class BetterPlugin extends JavaPlugin implements IModifierEventable, Identified, WithSync, BaseEventListener, ListenerConglomerate {
     @Getter
     private final ModifierType modifierType;
 
@@ -66,6 +67,8 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
 
     @Override
     public void onEnable() {
+        registerSelfListener();
+
         onBaseEnabling();
 
         if (! (this instanceof BukkitOfUtils)) {
@@ -80,6 +83,18 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
         onBaseDisable();
 
         PluginDisableEvent event = new PluginDisableEvent(this).fire();
+
+        unregisterSelfListener();
+    }
+
+    public void registerSelfListener() {
+        registerListener((Listener) this);
+        registerListener((BaseEventListener) this);
+    }
+
+    public void unregisterSelfListener() {
+        unregisterListener((Listener) this);
+        unregisterListener((BaseEventListener) this);
     }
 
     public void registerListenerConglomerate(ListenerConglomerate listener) {
@@ -113,7 +128,7 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     }
 
     public void unregisterAllBukkitListeners() {
-        HandlerList.unregisterAll(this);
+        HandlerList.unregisterAll((Plugin) this);
     }
 
     public void unregisterAllListeners() {

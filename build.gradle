@@ -57,8 +57,33 @@ dependencies {
     shadow(SHADOW)
 
     // TheBase
-    implementation("com.github.server-utilities:TheBase:${rootProject.properties['base-version']}").exclude(group: 'com.zaxxer', module: 'HikariCP')
-    shadow("com.github.server-utilities:TheBase:${rootProject.properties['base-version']}").exclude(group: 'com.zaxxer', module: 'HikariCP')
+    implementation('com.github.simplix-softworks:simplixstorage:3.2.7')
+    shadow('com.github.simplix-softworks:simplixstorage:3.2.7')
+
+    implementation('mysql:mysql-connector-java:8.0.33')
+    shadow('mysql:mysql-connector-java:8.0.33')
+
+    implementation('org.xerial:sqlite-jdbc:3.46.1.0')
+            .exclude(group: 'org.slf4j', module: 'slf4j-api')
+    shadow('org.xerial:sqlite-jdbc:3.46.1.0')
+            .exclude(group: 'org.slf4j', module: 'slf4j-api')
+
+    implementation('com.zaxxer:HikariCP:5.1.0')
+            .exclude(group: 'org.slf4j', module: 'slf4j-api')
+            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-api')
+            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-core')
+            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl')
+    shadow('com.zaxxer:HikariCP:5.1.0')
+            .exclude(group: 'org.slf4j', module: 'slf4j-api')
+            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-api')
+            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-core')
+            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl')
+
+    implementation('net.objecthunter:exp4j:0.4.8')
+    shadow('net.objecthunter:exp4j:0.4.8')
+
+    implementation('com.google.re2j:re2j:1.7')
+    shadow('com.google.re2j:re2j:1.7')
 
     // OblivateInvs
     implementation("com.github.hamza-cskn.obliviate-invs:core:4.1.12").exclude(group: 'com.google.code.gson', module: 'gson')
@@ -101,6 +126,8 @@ shadowJar {
     relocate('com.github.Anon8281.universalScheduler', 'host.plas.bou.libs.universalScheduler')
     relocate('com.github.benmanes.caffeine', 'host.plas.bou.libs.caffeine')
     relocate('com.google.gson', 'host.plas.bou.libs.gson')
+
+    relocate('de.leonhard', 'tv.quaint.thebase.lib.leonhard')
 }
 
 artifacts {
