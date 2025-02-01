@@ -1,6 +1,7 @@
 package host.plas.bou.gui.screens.events;
 
 import host.plas.bou.events.self.BouEvent;
+import host.plas.bou.gui.GuiType;
 import host.plas.bou.gui.screens.blocks.ScreenBlock;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,5 +24,9 @@ public class ScreenBlockEvent extends BouEvent {
 
     public Location getLocation() {
         return screenBlock.getLocation();
+    }
+
+    public GuiType getType() {
+        return screenBlock.getType();
     }
 }

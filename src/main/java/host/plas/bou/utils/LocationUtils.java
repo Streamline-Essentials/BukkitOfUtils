@@ -1,5 +1,6 @@
 package host.plas.bou.utils;
 
+import com.google.re2j.Matcher;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.scheduling.TaskManager;
 import org.bukkit.Bukkit;
@@ -12,7 +13,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import tv.quaint.thebase.lib.re2j.Matcher;
 import tv.quaint.utils.MatcherUtils;
 
 import java.util.List;

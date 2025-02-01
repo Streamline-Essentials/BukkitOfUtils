@@ -1,10 +1,12 @@
 ext {
     IMPL = [
+            'com.github.Server-Utilities:TheBase:6e4c8814',
             'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
             'com.google.code.gson:gson:2.11.0',
     ]
     SHADOW = [
+            'com.github.Server-Utilities:TheBase:6e4c8814',
             'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
             'com.google.code.gson:gson:2.11.0',

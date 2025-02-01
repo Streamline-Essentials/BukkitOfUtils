@@ -139,7 +139,20 @@ public class ScreenInstance extends Gui implements Identified {
     }
 
     public void redraw() {
+        redraw(true);
+    }
+
+    public void redraw(boolean reshow) {
         build(inventorySheet);
+
+        if (reshow) {
+            reshow();
+        }
+    }
+
+    public void reshow() {
+        close();
+        open();
     }
 
     public ConcurrentSkipListMap<String, HumanEntity> getViewers() {

@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import tv.quaint.objects.Identifiable;
 import tv.quaint.objects.SingleSet;
-import tv.quaint.thebase.lib.re2j.Matcher;
 import tv.quaint.utils.MatcherUtils;
+import com.google.re2j.Matcher;
 
 import java.util.List;
 
