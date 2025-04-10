@@ -11,8 +11,6 @@ import host.plas.bou.owncmd.TitleCMD;
 import host.plas.bou.utils.ClassHelper;
 import lombok.Getter;
 import lombok.Setter;
-import tv.quaint.async.AsyncUtils;
-import tv.quaint.async.WithSync;
 
 public class BukkitOfUtils extends BetterPlugin {
     @Getter @Setter
@@ -23,8 +21,16 @@ public class BukkitOfUtils extends BetterPlugin {
     }
 
     @Override
-    public void onBaseEnabled() {
+    public void onLoad() {
+        setInstance(this);
+
         BaseManager.init(this);
+    }
+
+    @Override
+    public void onBaseEnabled() {
+        BaseManager.initOnEnabled();
+
         // Plugin startup logic
 //        instance = this; // Set earlier.
         new DebugCMD();

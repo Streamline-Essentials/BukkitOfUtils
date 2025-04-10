@@ -40,12 +40,20 @@ public class ConvertableItemStack implements Comparable<ConvertableItemStack> {
 
     public ConvertableItemStack convert() {
         if (itemStackOptional.isPresent() && itemStringOptional.isEmpty()) {
-            itemStringOptional = Optional.of(ItemUtils.getItemNBT(itemStackOptional.get()));
+            itemStringOptional = Optional.of(ItemUtils.getItemNBTStrict(itemStackOptional.get()));
         } else if (itemStackOptional.isEmpty() && itemStringOptional.isPresent()) {
-            itemStackOptional = ItemUtils.getItem(itemStringOptional.get());
+            if (isNbtStrict()) {
+                itemStackOptional = ItemUtils.getItemStrict(itemStringOptional.get());
+            } else {
+                itemStackOptional = ItemUtils.getItem(itemStringOptional.get());
+            }
         }
 
         return this;
+    }
+
+    public boolean isNbtStrict() {
+        return itemStringOptional.isPresent() && ! itemStringOptional.get().startsWith("{") && ! itemStringOptional.get().endsWith("}");
     }
 
     public ConvertableItemStack setItemStack(ItemStack itemStack) {

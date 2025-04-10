@@ -1,6 +1,5 @@
 package host.plas.bou.scheduling;
 
-import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.MessageUtils;
 import lombok.Getter;
@@ -11,8 +10,7 @@ import javax.swing.*;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 
-@Setter
-@Getter
+@Setter @Getter
 public abstract class BaseRunnable implements Runnable {
     private Date startedAt;
     private long currentTickCount;
@@ -24,12 +22,6 @@ public abstract class BaseRunnable implements Runnable {
 
     private Timer timer;
 
-    /**
-     * Constructor for all Streamline API-ed Runnables.
-     *
-     * @param delay the delay of the task (in ticks)
-     * @param period the period of the task (in ticks)
-     */
     public BaseRunnable(long delay, long period) {
         this.startedAt = new Date();
         this.currentTickCount = delay * -1;
@@ -41,6 +33,18 @@ public abstract class BaseRunnable implements Runnable {
         this.timer = createTimer();
 
         TaskManager.start(this);
+    }
+
+    public BaseRunnable(long period) {
+        this(0, period);
+    }
+
+    public void load() {
+        TaskManager.load(this);
+    }
+
+    public void unload() {
+        TaskManager.unload(this);
     }
 
     public void start() {

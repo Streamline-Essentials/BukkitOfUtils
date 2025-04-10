@@ -3,6 +3,7 @@ version: '${version}'
 main: '${main}'
 folia-supported: true
 authors: [ Drak ]
+api-version: 1.21
 
 commands:
   entity-count:
