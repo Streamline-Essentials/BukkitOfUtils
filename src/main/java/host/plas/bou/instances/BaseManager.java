@@ -24,8 +24,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class BaseManager {
-    @Getter @Setter
-    private static BukkitOfUtils baseInstance;
+    public static BukkitOfUtils getBaseInstance() {
+        return BukkitOfUtils.getInstance();
+    }
 
     @Setter
     private static BaseConfig baseConfig;
@@ -44,23 +45,22 @@ public class BaseManager {
 
         CallbackManager.init();
 
-        EntityUtils.init();
-
-        mainListener = new MainListener();
-
         VersionTool.init();
     }
 
     public static void preInit(BukkitOfUtils baseInstance) {
-        if (BukkitOfUtils.getInstance() == null) {
-            BukkitOfUtils.setInstance(baseInstance);
-        }
-        setBaseInstance(baseInstance);
         ensureConfig();
 
         BetterPlugin.setScheduler(UniversalScheduler.getScheduler(baseInstance));
-        new InventoryAPI(baseInstance).init();
+    }
+
+    public static void initOnEnabled() {
+        new InventoryAPI(getBaseInstance()).init();
+
+        mainListener = new MainListener();
         TaskManager.init();
+
+        EntityUtils.init();
     }
 
     public static void ensureConfig() {

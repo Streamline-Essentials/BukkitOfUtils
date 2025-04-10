@@ -1,10 +1,10 @@
 package host.plas.bou.utils;
 
-import com.google.re2j.Matcher;
-import com.google.re2j.Pattern;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import tv.quaint.thebase.lib.re2j.Matcher;
+import tv.quaint.thebase.lib.re2j.Pattern;
 import tv.quaint.utils.MatcherUtils;
 
 import java.awt.*;
@@ -75,7 +75,7 @@ public class ColorUtils {
             }
 
             // Extract the color and apply it to the next component
-            String hex = matcher.group(1);
+            String hex = matcher.group(2);
             int r = Integer.parseInt(hex.substring(0, 2), 16);
             int g = Integer.parseInt(hex.substring(2, 4), 16);
             int b = Integer.parseInt(hex.substring(4, 6), 16);

@@ -25,11 +25,11 @@ public class TaskMenu extends PaginatedMenu {
         try {
             AtomicInteger slot = new AtomicInteger(0);
             taskItems.forEach((key, value) -> {
-                inventory.getSlots().put(slot.getAndIncrement(), value);
+                inventory.setItem(slot.getAndIncrement(), value);
             });
 
             asyncItems.forEach((key, value) -> {
-                inventory.getSlots().put(slot.getAndIncrement(), value);
+                inventory.setItem(slot.getAndIncrement(), value);
             });
         } catch (Exception e) {
             BukkitOfUtils.getInstance().logWarning("Error while building task list: " + e.getMessage(), e);

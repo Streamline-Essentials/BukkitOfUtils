@@ -1,6 +1,5 @@
 package host.plas.bou.events.callbacks;
 
-import host.plas.bou.BetterPlugin;
 import host.plas.bou.BukkitOfUtils;
 import lombok.Getter;
 import lombok.Setter;
