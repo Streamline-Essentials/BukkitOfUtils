@@ -5,7 +5,6 @@ import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskSchedule
 import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.BetterPlugin;
-import host.plas.bou.instances.BaseManager;
 import host.plas.bou.items.ItemUtils;
 import host.plas.bou.utils.ClassHelper;
 import host.plas.bou.utils.VersionTool;
@@ -17,7 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import tv.quaint.async.AsyncTask;
 import tv.quaint.async.AsyncUtils;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,65 +30,44 @@ public class TaskManager {
     @Getter @Setter
     private static ConcurrentSkipListMap<Integer, BaseRunnable> currentRunnables = new ConcurrentSkipListMap<>();
 
+    public static void load(BaseRunnable runnable) {
+        getCurrentRunnables().put(runnable.getIndex(), runnable);
+    }
+
+    public static void unload(int index) {
+        getCurrentRunnables().remove(index);
+    }
+
+    public static void unload(BaseRunnable runnable) {
+        unload(runnable.getIndex());
+    }
+
     public static void start(BaseRunnable runnable) {
-        currentRunnables.put(runnable.getIndex(), runnable);
+        load(runnable);
         runnable.start();
+    }
+
+    public static void cancel(int index) {
+        BaseRunnable runnable = getRunnable(index);
+        if (runnable == null) {
+            BukkitOfUtils.getInstance().logWarning("Failed to cancel runnable with index: " + index);
+            return;
+        }
+
+        cancel(runnable);
     }
 
     public static void cancel(BaseRunnable runnable) {
         runnable.stop();
-        cancel(runnable.getIndex());
+        unload(runnable.getIndex());
     }
 
     public static int getNextIndex() {
         return currentRunnables.size();
     }
 
-//    @Getter @Setter
-//    private static Timer task;
-
-    public static void setupTask() {
-//        if (task != null) {
-//            task.stop();
-//        }
-//
-//        task = new Timer(BaseManager.getBaseConfig().getTickingFrequency(), TaskManager::tick); // 1 tick or 50ms
-//        task.start();
-//
-//        BukkitOfUtils.getInstance().logInfo("&cTaskManager &fmain task has been set up.");
-    }
-
-    public static void tick(ActionEvent listener) {
-//        try {
-//            if (! isTickingEnabled()) return;
-//
-//            try {
-//                int frequency = BaseManager.getBaseConfig().getTickingFrequency();
-//                if (getTask().getDelay() != frequency) {
-//                    getTask().setDelay(frequency);
-//                }
-//            } catch (Throwable e) {
-//                BukkitOfUtils.getInstance().logDebug("Error while ticking runnables.", e);
-//            }
-//
-//            currentRunnables.forEach((index, runnable) -> {
-//                try {
-//                    AsyncUtils.executeAsync(runnable::tick);
-//                } catch (Throwable e) {
-//                    BukkitOfUtils.getInstance().logDebug("Error while ticking runnable: " + runnable, e);
-//                }
-//            });
-//        } catch (Throwable e) {
-//            BukkitOfUtils.getInstance().logDebug("Error while ticking runnables.", e);
-//        }
-    }
-
     public static boolean isCancelled(int index) {
         return ! currentRunnables.containsKey(index);
-    }
-
-    public static void cancel(int index) {
-        currentRunnables.remove(index);
     }
 
     public static BaseRunnable getRunnable(int index) {
@@ -104,8 +81,7 @@ public class TaskManager {
             BukkitOfUtils.getInstance().logWarning("Failed to initialize AsyncUtils.", t);
         }
 
-        updateTickingEnabled(true);
-        setupTask();
+        enableTicking();
 
         setupMenuUpdater();
 
@@ -119,13 +95,21 @@ public class TaskManager {
         tickingEnabled.set(bool);
     }
 
+    public static void enableTicking() {
+        updateTickingEnabled(true);
+    }
+
+    public static void disableTicking() {
+        updateTickingEnabled(false);
+    }
+
     public static boolean isTickingEnabled() {
         return tickingEnabled.get();
     }
 
     public static void stop() {
-        updateTickingEnabled(false);
-//        if (task != null) task.stop();
+        disableTicking();
+
         currentRunnables.forEach((index, runnable) -> runnable.cancel());
         AsyncUtils.getQueuedTasks().forEach(AsyncTask::remove);
 
