@@ -1,12 +1,10 @@
 package host.plas.bou.commands;
 
-import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.obj.ContextedString;
 import lombok.Getter;
 import lombok.Setter;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -84,6 +82,22 @@ public class CommandContext extends ContextedString<CommandArgument> {
 
     public Player getPlayerOrNull() {
         return getPlayer().orElse(null);
+    }
+
+    public String getFullCommand() {
+        return command.getName() + " " + getArgsAsString();
+    }
+
+    public String getArgsAsString() {
+        return String.join(" ", getArgsAsStringArray());
+    }
+
+    public String[] getArgsAsStringArray() {
+        String[] args = new String[getArgs().size()];
+        for (int i = 0; i < getArgs().size(); i++) {
+            args[i] = getArg(i).getContent();
+        }
+        return args;
     }
 
     public static ConcurrentSkipListSet<CommandArgument> getArgsFrom(String... args) {

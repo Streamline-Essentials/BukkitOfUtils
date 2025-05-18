@@ -2,10 +2,13 @@ package host.plas.bou.items;
 
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.compat.papi.PAPICompat;
+import host.plas.bou.serialization.items.ItemStackSerializer;
 import host.plas.bou.utils.ColorUtils;
 import host.plas.bou.utils.EntityUtils;
 import host.plas.bou.utils.PluginUtils;
 import host.plas.bou.utils.VersionTool;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -72,6 +75,28 @@ public class ItemUtils {
         }
     }
 
+    @Getter @Setter
+    private static ItemStackSerializer stackSerializer = new ItemStackSerializer();
+
+    public static Optional<ItemStack> getItemStrict(String serialized) {
+        try {
+            ItemStack stack = getStackSerializer().fromString(serialized);
+            return Optional.ofNullable(stack);
+        } catch (Exception e) {
+            BukkitOfUtils.getInstance().logWarning("Failed to get item from NBT: ", e);
+            return Optional.empty();
+        }
+    }
+
+    public static String getItemNBTStrict(ItemStack item) {
+        try {
+            return getStackSerializer().toString(item);
+        } catch (Exception e) {
+            BukkitOfUtils.getInstance().logWarning("Failed to get NBT from item: ", e);
+            return "{}";
+        }
+    }
+
     public static boolean isItemEqual(ItemStack item1, ItemStack item2) {
         return getItemNBT(item1).equals(getItemNBT(item2));
     }
@@ -79,7 +104,6 @@ public class ItemUtils {
     public static boolean isNothingItem(ItemStack stack) {
         return stack == null || stack.getType() == Material.AIR;
     }
-
 
     public static ConcurrentSkipListMap<Integer, String> loreToMap(String... loreLines) {
         ConcurrentSkipListMap<Integer, String> lore = new ConcurrentSkipListMap<>();

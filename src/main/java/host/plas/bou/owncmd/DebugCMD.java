@@ -71,6 +71,33 @@ public class DebugCMD extends SimplifiedCommand {
 
                 ctx.sendMessage("&bItem NBT&8: &7" + nbtN);
                 break;
+            case "item-nbt-strict":
+                if (player == null) {
+                    ctx.sendMessage("&cOnly players can use this command.");
+                    return false;
+                }
+
+                ItemStack itemNs = player.getInventory().getItemInMainHand();
+                if (itemNs.getType() == Material.AIR) {
+                    itemNs = player.getInventory().getItemInOffHand();
+                }
+
+                if (itemNs.getType() == Material.AIR) {
+                    ctx.sendMessage("&cYou must be holding an item.");
+                    return false;
+                }
+
+                String nbtNs = ItemUtils.getItemNBTStrict(itemNs);
+
+                String messageS = "&bItem NBT&8: &7" + nbtNs + " &e&lCLICK TO COPY";
+                messageS = ColorUtils.colorizeHard(messageS);
+                messageS = ColorUtils.colorAsString(messageS);
+                ComponentBuilder componentBuilderS = new ComponentBuilder(messageS);
+                ClickEvent clickEventS = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, nbtNs);
+                componentBuilderS.event(clickEventS);
+
+                ctx.sendMessage(messageS, componentBuilderS.create());
+                break;
             case "list-bou-plugins":
                 StringBuilder sbL = new StringBuilder("&bBOU Plugins&8: &7");
 
@@ -179,6 +206,34 @@ public class DebugCMD extends SimplifiedCommand {
                 }
 
                 player.getInventory().addItem(item);
+
+                ctx.sendMessage("&7Item added to your inventory&8!");
+                break;
+            case "make-item-strict":
+                if (player == null) {
+                    ctx.sendMessage("&cOnly players can use this command.");
+                    return false;
+                }
+                if (! ctx.isArgUsable(1)) {
+                    ctx.sendMessage("&cUsage: /boudebug make-item <nbt>");
+                    return false;
+                }
+
+                String serialized = ctx.concat(1, ctx.getArgs().size());
+
+                Optional<ItemStack> itemOptionalStrict = ItemUtils.getItemStrict(serialized);
+                if (itemOptionalStrict.isEmpty()) {
+                    ctx.sendMessage("&cItem could not be parsed.");
+                    return false;
+                }
+                ItemStack itemStrict = itemOptionalStrict.get();
+
+                if (player.getInventory().firstEmpty() == -1) {
+                    ctx.sendMessage("&cYour inventory is full.");
+                    return false;
+                }
+
+                player.getInventory().addItem(itemStrict);
 
                 ctx.sendMessage("&7Item added to your inventory&8!");
                 break;
@@ -315,10 +370,6 @@ public class DebugCMD extends SimplifiedCommand {
                         TaskMenu.open(player);
                         ctx.sendMessage("&7Task menu opened.");
                         break;
-                    case "restart-ticker":
-                        TaskManager.setupTask();
-                        ctx.sendMessage("&7Main ticker restarted.");
-                        break;
                 }
         }
 
@@ -332,7 +383,7 @@ public class DebugCMD extends SimplifiedCommand {
         if (ctx.getArgs().size() <= 1) {
             completions.addAll(List.of(
                     "item-nbt", "list-bou-plugins", "store-item", "get-item", "make-item", "uuid",
-                    "up", "down", "top", "tasks"
+                    "up", "down", "top", "tasks", "item-nbt-strict", "make-item-strict"
             ));
         }
 
