@@ -20,8 +20,8 @@ public class FireStringCMD extends SimplifiedCommand {
 
     @Override
     public boolean command(CommandContext ctx) {
-        if (! ctx.isArgUsable(1)) {
-            ctx.sendMessage("&cUsage: /firestring (<fire-string-identifier>) <args>");
+        if (! ctx.isArgUsable(0)) {
+            ctx.sendMessage("&cUsage: /firestring <help|(<fire-string-identifier>) <args...>>");
             return false;
         }
 
@@ -41,6 +41,11 @@ public class FireStringCMD extends SimplifiedCommand {
             ctx.sendMessage(sb.toString(), componentBuilder);
 
             return true;
+        }
+
+        if (! ctx.isArgUsable(1)) {
+            ctx.sendMessage("&cUsage: /firestring <help|(<fire-string-identifier>) <args...>>");
+            return false;
         }
 
         String content = ctx.getArgsAsString();
