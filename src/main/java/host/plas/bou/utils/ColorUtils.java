@@ -1,8 +1,8 @@
 package host.plas.bou.utils;
 
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.jetbrains.annotations.Nullable;
 import tv.quaint.thebase.lib.re2j.Matcher;
 import tv.quaint.thebase.lib.re2j.Pattern;
 import tv.quaint.utils.MatcherUtils;
@@ -57,6 +57,36 @@ public class ColorUtils {
     }
 
     public static BaseComponent[] color(String message) {
+        return colorWithEvents(message, null, null);
+    }
+
+    public static BaseComponent[] colorWithClickable(String message, @Nullable ClickEvent clickEvent) {
+        return colorWithEvents(message, clickEvent, null);
+    }
+
+    public static BaseComponent[] colorWithHoverable(String message, @Nullable HoverEvent hoverEvent) {
+        return colorWithEvents(message, null, hoverEvent);
+    }
+
+    public static BaseComponent[] colorWithEvents(String message, @Nullable ClickEvent clickEvent, @Nullable HoverEvent hoverEvent) {
+        if (message == null) return new ComponentBuilder().create();
+
+        if (message.contains("\n")) {
+            String[] lines = message.split("\n");
+
+            ComponentBuilder builder = new ComponentBuilder();
+            int i = 0;
+            for (String line : lines) {
+                boolean isLast = i == lines.length - 1;
+                i ++;
+
+                builder.append(colorWithEvents(line, clickEvent, hoverEvent));
+                if (! isLast) builder.append("\n");
+            }
+
+            return builder.create();
+        }
+
         message = colorize(message);
 
         // hex format is &#RRGGBB
@@ -83,6 +113,15 @@ public class ColorUtils {
             TextComponent coloredText = new TextComponent(message.substring(end));
             coloredText.setColor(net.md_5.bungee.api.ChatColor.of(new Color(r, g, b)));
 
+            // Set the click event if provided
+            if (clickEvent != null) {
+                coloredText.setClickEvent(clickEvent);
+            }
+            // Set the hover event if provided
+            if (hoverEvent != null) {
+                coloredText.setHoverEvent(hoverEvent);
+            }
+
             // Reset lastEnd to the end of the current match
             lastEnd = end;
 
@@ -93,7 +132,18 @@ public class ColorUtils {
 
         // Append any remaining text after the last color code
         if (lastEnd < message.length()) {
-            builder.append(new TextComponent(message.substring(lastEnd)));
+            TextComponent component = new TextComponent(message.substring(lastEnd));
+
+            // Set the click event if provided
+            if (clickEvent != null) {
+                component.setClickEvent(clickEvent);
+            }
+            // Set the hover event if provided
+            if (hoverEvent != null) {
+                component.setHoverEvent(hoverEvent);
+            }
+
+            builder.append(component);
         }
 
         return builder.create();
