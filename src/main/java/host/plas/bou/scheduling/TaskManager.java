@@ -116,6 +116,10 @@ public class TaskManager {
         BukkitOfUtils.getInstance().logInfo("&cTaskManager &fis now stopped!");
     }
 
+    public static boolean isAbleToRun() {
+        return BukkitOfUtils.getInstance().isEnabled() && isTickingEnabled();
+    }
+
     public static TaskScheduler getScheduler() {
         return BetterPlugin.getScheduler();
     }
@@ -173,54 +177,80 @@ public class TaskManager {
     }
 
     public static MyScheduledTask runTask(Runnable runnable) {
+        if (! isAbleToRun()) return null;
+
         return getScheduler().runTask(runnable);
     }
 
     public static MyScheduledTask runTaskLater(Runnable runnable, long delay) {
+        if (! isAbleToRun()) return null;
+
         return getScheduler().runTaskLater(runnable, delay);
     }
 
     public static MyScheduledTask runTaskTimer(Runnable runnable, long delay, long period) {
+        if (! isAbleToRun()) return null;
+
         return getScheduler().runTaskTimer(runnable, delay, period);
     }
 
     public static MyScheduledTask runTask(Entity entity, Runnable runnable) {
+        if (! isAbleToRun()) return null;
+
         return getScheduler().runTask(entity, runnable);
     }
 
     public static MyScheduledTask runTaskLater(Entity entity, Runnable runnable, long delay) {
+        if (! isAbleToRun()) return null;
+
         return getScheduler().runTaskLater(entity, runnable, delay);
     }
 
     public static MyScheduledTask runTaskTimer(Entity entity, Runnable runnable, long delay, long period) {
+        if (! isAbleToRun()) return null;
+
         return getScheduler().runTaskTimer(entity, runnable, delay, period);
     }
 
     public static MyScheduledTask runTask(World world, int x, int z, Runnable runnable) {
+        if (! isAbleToRun()) return null;
+
         return getScheduler().runTask(world, x, z, runnable);
     }
 
     public static MyScheduledTask runTask(Chunk chunk, Runnable runnable) {
+        if (! isAbleToRun()) return null;
+
         return runTask(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable);
     }
 
     public static MyScheduledTask runTaskLater(World world, int x, int z, Runnable runnable, long delay) {
+        if (! isAbleToRun()) return null;
+
         return getScheduler().runTaskLater(world, x, z, runnable, delay);
     }
 
     public static MyScheduledTask runTaskLater(Chunk chunk, Runnable runnable, long delay) {
+        if (! isAbleToRun()) return null;
+
         return runTaskLater(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable, delay);
     }
 
     public static MyScheduledTask runTaskTimer(World world, int x, int z, Runnable runnable, long delay, long period) {
+        if (! isAbleToRun()) return null;
+
         return getScheduler().runTaskTimer(world, x, z, runnable, delay, period);
     }
 
     public static MyScheduledTask runTaskTimer(Chunk chunk, Runnable runnable, long delay, long period) {
+        if (! isAbleToRun()) return null;
+
         return runTaskTimer(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable, delay, period);
     }
 
     public static MyScheduledTask teleport(Entity entityToTeleport, Location location) {
+        if (! isAbleToRun()) return null;
+
         try {
             return getScheduler().teleport(entityToTeleport, location);
         } catch (Throwable e) {
