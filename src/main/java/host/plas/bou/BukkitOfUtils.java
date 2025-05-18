@@ -4,10 +4,7 @@ import host.plas.bou.compat.CompatManager;
 import host.plas.bou.firestring.FireStringManager;
 import host.plas.bou.gui.ScreenManager;
 import host.plas.bou.instances.BaseManager;
-import host.plas.bou.owncmd.DebugCMD;
-import host.plas.bou.owncmd.EntityCountCMD;
-import host.plas.bou.owncmd.MessageCMD;
-import host.plas.bou.owncmd.TitleCMD;
+import host.plas.bou.owncmd.*;
 import host.plas.bou.utils.ClassHelper;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,6 +32,7 @@ public class BukkitOfUtils extends BetterPlugin {
 //        instance = this; // Set earlier.
         new DebugCMD();
         new EntityCountCMD();
+        new FireStringCMD();
         new MessageCMD();
         new TitleCMD();
 
