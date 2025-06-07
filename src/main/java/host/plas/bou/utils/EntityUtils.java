@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class EntityUtils {
     @Getter @Setter
@@ -162,12 +163,10 @@ public class EntityUtils {
 
     public static void collectEntitiesThenDoSet(Consumer<Collection<Entity>> consumer) {
         TaskManager.runTask(() -> {
-            getEntities(true).forEach((s, entity) -> {
-                TaskManager.runTask(entity.get(), () -> {
-                    if (entity.get() == null) return;
-                    ThingyUtils.withThing(consumer, List.of(entity.get()));
-                });
-            });
+            consumer.accept(getEntities(true).values().stream()
+                    .map(WeakReference::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
         });
     }
 
