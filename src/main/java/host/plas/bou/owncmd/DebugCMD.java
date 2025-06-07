@@ -403,7 +403,7 @@ public class DebugCMD extends SimplifiedCommand {
         if (ctx.getArgs().size() <= 1) {
             completions.addAll(List.of(
                     "item-nbt", "list-bou-plugins", "store-item", "get-item", "make-item", "uuid",
-                    "up", "down", "top", "tasks", "item-nbt-strict", "make-item-strict"
+                    "up", "down", "top", "tasks", "item-nbt-strict", "make-item-strict", "worlds"
             ));
         }
 
