@@ -289,6 +289,26 @@ public class DebugCMD extends SimplifiedCommand {
 
                 ctx.sendMessage("&7Teleported you to the top-most space available above you.");
                 break;
+            case "worlds":
+                StringBuilder worldsList = new StringBuilder();
+
+                WorldUtils.getWorldNames().forEach(world -> {
+                    if (worldsList.length() > 0) {
+                        worldsList.append("&7, ");
+                    }
+                    worldsList.append("&c").append(world);
+                });
+
+                if (worldsList.length() > 0) {
+                    worldsList.delete(worldsList.length() - "&7, ".length(), worldsList.length()); // Remove "&7, " at the end
+
+                    ctx.sendMessage("&bWorlds&8: &7" + worldsList);
+                } else {
+                    ctx.sendMessage("&cNo worlds found.");
+                }
+
+                ctx.sendMessage("&7Teleported you to the top-most space available above you.");
+                break;
             case "tasks":
                 if (! ctx.isArgUsable(1)) {
                     ctx.sendMessage("&cUsage: /boudebug tasks <action>");

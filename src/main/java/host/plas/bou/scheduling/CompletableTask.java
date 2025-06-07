@@ -28,8 +28,20 @@ public class CompletableTask {
         this.completionRunnables = new ConcurrentSkipListMap<>();
 
         this.future = CompletableFuture.runAsync(() -> {
-            while (! isDone() && ! isCancelled()) {
+            boolean invalid = ! isTaskValid();
+
+            while (! (isDone() || isCancelled() || isTaskCompleted() || invalid)) {
+                if (! isTaskValid()) {
+                    invalid = true;
+                    break;
+                }
+
                 Thread.onSpinWait();
+            }
+
+            if (invalid) {
+                cancel();
+                return;
             }
 
             if (isCancelled()) cancel();
@@ -91,7 +103,7 @@ public class CompletableTask {
     }
 
     public void cancel() {
-        task.cancel();
+        if (task != null) task.cancel();
         cancelled = true;
 
         completionRunnables.clear();
@@ -121,6 +133,22 @@ public class CompletableTask {
         getCompletionRunnables().put(getCompletionRunnables().size(), runnable);
 
         return this;
+    }
+
+    public boolean isTaskCompleted() {
+        if (isTaskValid()) {
+            if (task.isCancelled()) {
+                cancel();
+                return true;
+            }
+            return ! task.isCurrentlyRunning();
+        }
+
+        return false;
+    }
+
+    public boolean isTaskValid() {
+        return task != null;
     }
 
     public static CompletableTask of(Runnable runnable) {

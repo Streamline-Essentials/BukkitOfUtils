@@ -7,7 +7,6 @@ import host.plas.bou.firestring.FireStringManager;
 import host.plas.bou.utils.ColorUtils;
 import host.plas.bou.utils.EntityUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 
 import java.util.List;
@@ -20,8 +19,8 @@ public class FireStringCMD extends SimplifiedCommand {
 
     @Override
     public boolean command(CommandContext ctx) {
-        if (! ctx.isArgUsable(1)) {
-            ctx.sendMessage("&cUsage: /firestring (<fire-string-identifier>) <args>");
+        if (! ctx.isArgUsable(0)) {
+            ctx.sendMessage("&cUsage: /firestring <help|(<fire-string-identifier>) <args...>>");
             return false;
         }
 
@@ -34,13 +33,17 @@ public class FireStringCMD extends SimplifiedCommand {
             sb.append("&cBukkitOfUtils &ewiki&8: &7https://wiki.plas.host/bukkitofutils/#fire-strings\n");
             sb.append("&b&oClick anywhere on this message to open the link&8.");
 
-            ComponentBuilder componentBuilder = new ComponentBuilder(sb.toString());
-            componentBuilder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://wiki.plas.host/bukkitofutils/#fire-strings"));
-            componentBuilder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, ColorUtils.color("&7Click to open the wiki")));
+            ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.OPEN_URL, "https://wiki.plas.host/bukkitofutils/#fire-strings");
+            HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ColorUtils.color("&7Click to open the wiki"));
 
-            ctx.sendMessage(sb.toString(), componentBuilder);
+            ctx.sendMessage(sb.toString(), ColorUtils.colorWithEvents(sb.toString(), clickEvent, hoverEvent));
 
             return true;
+        }
+
+        if (! ctx.isArgUsable(1)) {
+            ctx.sendMessage("&cUsage: /firestring <help|(<fire-string-identifier>) <args...>>");
+            return false;
         }
 
         String content = ctx.getArgsAsString();
@@ -73,7 +76,7 @@ public class FireStringCMD extends SimplifiedCommand {
         if (ctx.getArgs().size() == 2) {
             String arg1 = ctx.getStringArg(0).toLowerCase();
             if (arg1.equalsIgnoreCase("(player)") || arg1.equalsIgnoreCase("(playerchat)") ||
-                    arg1.equalsIgnoreCase("(title)")) {
+                    arg1.equalsIgnoreCase("(message)") || arg1.equalsIgnoreCase("(title)")) {
                 completions.addAll(EntityUtils.getOnlinePlayerNames());
             }
         }
