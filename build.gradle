@@ -56,16 +56,16 @@ dependencies {
     compileOnly(COMP_ONLY)
     shadow(SHADOW)
 
-//    implementation('org.xerial:sqlite-jdbc:3.46.1.0')
-//            .exclude(group: 'org.slf4j', module: 'slf4j-api')
+    implementation('org.xerial:sqlite-jdbc:3.46.1.0')
+            .exclude(group: 'org.slf4j', module: 'slf4j-api')
     shadow('org.xerial:sqlite-jdbc:3.46.1.0')
             .exclude(group: 'org.slf4j', module: 'slf4j-api')
 
-//    implementation('com.zaxxer:HikariCP:5.1.0')
-//            .exclude(group: 'org.slf4j', module: 'slf4j-api')
-//            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-api')
-//            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-core')
-//            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl')
+    implementation('com.zaxxer:HikariCP:5.1.0')
+            .exclude(group: 'org.slf4j', module: 'slf4j-api')
+            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-api')
+            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-core')
+            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl')
     shadow('com.zaxxer:HikariCP:5.1.0')
             .exclude(group: 'org.slf4j', module: 'slf4j-api')
             .exclude(group: 'org.apache.logging.log4j', module: 'log4j-api')
@@ -73,7 +73,7 @@ dependencies {
             .exclude(group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl')
 
     // OblivateInvs
-//    implementation("com.github.hamza-cskn.obliviate-invs:core:4.1.12").exclude(group: 'com.google.code.gson', module: 'gson')
+    implementation("com.github.hamza-cskn.obliviate-invs:core:4.1.12").exclude(group: 'com.google.code.gson', module: 'gson')
     shadow("com.github.hamza-cskn.obliviate-invs:core:4.1.12").exclude(group: 'com.google.code.gson', module: 'gson')
 
     // Other Plugins
