@@ -4,12 +4,18 @@ ext {
             'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
             'com.google.code.gson:gson:2.11.0',
+            'com.google.re2j:re2j:1.7',
+            'net.objecthunter:exp4j:0.4.8',
+            'mysql:mysql-connector-java:8.0.33',
     ]
     SHADOW = [
             'com.github.Server-Utilities:TheBase:master-SNAPSHOT',
             'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
             'com.google.code.gson:gson:2.11.0',
+            'com.google.re2j:re2j:1.7',
+            'net.objecthunter:exp4j:0.4.8',
+            'mysql:mysql-connector-java:8.0.33',
     ]
     ANNO = [
             'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT',

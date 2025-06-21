@@ -3,16 +3,20 @@ package host.plas.bou.utils;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.jetbrains.annotations.Nullable;
-import tv.quaint.thebase.lib.re2j.Matcher;
-import tv.quaint.thebase.lib.re2j.Pattern;
-import tv.quaint.utils.MatcherUtils;
+import gg.drak.thebase.lib.re2j.Matcher;
+import gg.drak.thebase.lib.re2j.Pattern;
+import gg.drak.thebase.utils.MatcherUtils;
 
 import java.awt.*;
 import java.util.List;
 
 public class ColorUtils {
+    public static String newlined(String message) {
+        return message.replace("%newline%", "\n");
+    }
+
     public static String colorize(String message) {
-        return org.bukkit.ChatColor.translateAlternateColorCodes('&', message);
+        return org.bukkit.ChatColor.translateAlternateColorCodes('&', newlined(message));
     }
 
     public static String colorizeHard(String message) {

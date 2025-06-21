@@ -1,6 +1,6 @@
 package host.plas.bou.events.callbacks;
 
-import tv.quaint.objects.Indexable;
+import gg.drak.thebase.objects.Indexable;
 
 import java.util.function.Consumer;
 
