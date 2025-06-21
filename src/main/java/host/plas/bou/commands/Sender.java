@@ -3,8 +3,6 @@ package host.plas.bou.commands;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.ColorUtils;
-import host.plas.bou.utils.MessageUtils;
-import host.plas.bou.BetterPlugin;
 import host.plas.bou.utils.SenderUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +13,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
-import tv.quaint.objects.AtomicString;
+import gg.drak.thebase.objects.AtomicString;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;

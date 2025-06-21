@@ -42,4 +42,8 @@ public class PluginUtils {
     public static NamespacedKey getPluginKey(JavaPlugin plugin, String key) {
         return new NamespacedKey(plugin, key);
     }
+
+    public static int getLoadedBOUPluginCount() {
+        return getLoadedBOUPlugins().size();
+    }
 }

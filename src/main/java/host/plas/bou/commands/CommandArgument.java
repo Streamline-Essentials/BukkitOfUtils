@@ -2,11 +2,7 @@ package host.plas.bou.commands;
 
 import host.plas.bou.utils.obj.StringArgument;
 import lombok.Getter;
-import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Objects;
 
 @Getter
 public class CommandArgument extends StringArgument {

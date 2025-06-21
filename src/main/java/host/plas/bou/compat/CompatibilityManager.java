@@ -2,7 +2,7 @@ package host.plas.bou.compat;
 
 import lombok.Getter;
 import lombok.Setter;
-import tv.quaint.objects.handling.IEventable;
+import gg.drak.thebase.objects.handling.IEventable;
 
 @Getter @Setter
 public abstract class CompatibilityManager {

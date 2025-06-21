@@ -1,6 +1,8 @@
 package host.plas.bou.utils;
 
 import host.plas.bou.instances.BaseManager;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
 import java.util.UUID;
 
@@ -53,5 +55,37 @@ public class UuidUtils {
 
     public static String getConsoleUUID() {
         return BaseManager.getBaseConfig().getConsoleUUID();
+    }
+
+    public static boolean isValidPlayer(OfflinePlayer player) {
+        if (player == null) return false;
+        if (player.getName() == null || player.getName().isBlank()) return false;
+
+        String name = UUIDFetcher.getName(player.getUniqueId());
+        return name != null && !name.isBlank() && player.getName() != null && !player.getName().isBlank();
+    }
+
+    public static boolean isValidPlayerName(String playerName) {
+        if (playerName == null) return false;
+        if (playerName.isBlank()) return false;
+
+        UUID uuid = UUIDFetcher.getUUID(playerName);
+        try {
+            return uuid != null && isValidPlayer(Bukkit.getOfflinePlayer(uuid));
+        } catch (Throwable e) {
+            return false; // If the player is not found or has no valid profile
+        }
+    }
+
+    public static boolean isValidPlayerUUID(String uuid) {
+        if (uuid == null) return false;
+        if (uuid.isBlank()) return false;
+
+        String name = UUIDFetcher.getName(UUID.fromString(uuid));
+        try {
+            return name != null && isValidPlayer(Bukkit.getOfflinePlayer(name));
+        } catch (Throwable e) {
+            return false; // If the player is not found or has no valid profile
+        }
     }
 }

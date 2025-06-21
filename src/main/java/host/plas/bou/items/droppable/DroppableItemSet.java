@@ -4,7 +4,7 @@ import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.math.CosmicMath;
 import lombok.Getter;
 import lombok.Setter;
-import tv.quaint.objects.Identifiable;
+import gg.drak.thebase.objects.Identifiable;
 
 import java.util.Arrays;
 import java.util.Optional;

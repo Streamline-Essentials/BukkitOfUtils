@@ -2,7 +2,7 @@ package host.plas.bou.compat;
 
 import lombok.Getter;
 import lombok.Setter;
-import tv.quaint.objects.Identifiable;
+import gg.drak.thebase.objects.Identifiable;
 
 import java.util.function.Supplier;
 

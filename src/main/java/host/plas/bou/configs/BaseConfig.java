@@ -1,7 +1,7 @@
 package host.plas.bou.configs;
 
 import host.plas.bou.BetterPlugin;
-import tv.quaint.storage.resources.flat.simple.SimpleConfiguration;
+import gg.drak.thebase.storage.resources.flat.simple.SimpleConfiguration;
 
 public class BaseConfig extends SimpleConfiguration {
     public BaseConfig(BetterPlugin betterPlugin) {

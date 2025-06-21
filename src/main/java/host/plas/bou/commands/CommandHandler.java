@@ -1,9 +1,7 @@
 package host.plas.bou.commands;
 
-import host.plas.bou.utils.PluginUtils;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Optional;

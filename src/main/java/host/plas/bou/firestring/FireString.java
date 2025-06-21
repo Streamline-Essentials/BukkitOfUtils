@@ -2,10 +2,10 @@ package host.plas.bou.firestring;
 
 import lombok.Getter;
 import lombok.Setter;
-import tv.quaint.objects.Identifiable;
-import tv.quaint.objects.SingleSet;
-import tv.quaint.thebase.lib.re2j.Matcher;
-import tv.quaint.utils.MatcherUtils;
+import gg.drak.thebase.objects.Identifiable;
+import gg.drak.thebase.objects.SingleSet;
+import gg.drak.thebase.lib.re2j.Matcher;
+import gg.drak.thebase.utils.MatcherUtils;
 
 import java.util.List;
 

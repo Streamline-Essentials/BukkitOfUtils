@@ -2,15 +2,11 @@ package host.plas.bou.owncmd;
 
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.commands.CommandContext;
-import host.plas.bou.commands.Sender;
 import host.plas.bou.commands.SimplifiedCommand;
-import host.plas.bou.utils.ClassHelper;
 import host.plas.bou.utils.EntityUtils;
 import host.plas.bou.utils.SenderUtils;
-import org.bukkit.entity.Player;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class MessageCMD extends SimplifiedCommand {
