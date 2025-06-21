@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '7.1.2' // for shadowing
+    id 'com.gradleup.shadow' version '8.3.6' // for shadowing
     id "io.freefair.lombok" version "8.6"
 }
 
@@ -56,37 +56,24 @@ dependencies {
     compileOnly(COMP_ONLY)
     shadow(SHADOW)
 
-    // TheBase
-    implementation('com.github.simplix-softworks:simplixstorage:3.2.7')
-    shadow('com.github.simplix-softworks:simplixstorage:3.2.7')
-
-    implementation('mysql:mysql-connector-java:8.0.33')
-    shadow('mysql:mysql-connector-java:8.0.33')
-
-    implementation('org.xerial:sqlite-jdbc:3.46.1.0')
-            .exclude(group: 'org.slf4j', module: 'slf4j-api')
+//    implementation('org.xerial:sqlite-jdbc:3.46.1.0')
+//            .exclude(group: 'org.slf4j', module: 'slf4j-api')
     shadow('org.xerial:sqlite-jdbc:3.46.1.0')
             .exclude(group: 'org.slf4j', module: 'slf4j-api')
 
-    implementation('com.zaxxer:HikariCP:5.1.0')
-            .exclude(group: 'org.slf4j', module: 'slf4j-api')
-            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-api')
-            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-core')
-            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl')
+//    implementation('com.zaxxer:HikariCP:5.1.0')
+//            .exclude(group: 'org.slf4j', module: 'slf4j-api')
+//            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-api')
+//            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-core')
+//            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl')
     shadow('com.zaxxer:HikariCP:5.1.0')
             .exclude(group: 'org.slf4j', module: 'slf4j-api')
             .exclude(group: 'org.apache.logging.log4j', module: 'log4j-api')
             .exclude(group: 'org.apache.logging.log4j', module: 'log4j-core')
             .exclude(group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl')
 
-    implementation('net.objecthunter:exp4j:0.4.8')
-    shadow('net.objecthunter:exp4j:0.4.8')
-
-    implementation('com.google.re2j:re2j:1.7')
-    shadow('com.google.re2j:re2j:1.7')
-
     // OblivateInvs
-    implementation("com.github.hamza-cskn.obliviate-invs:core:4.1.12").exclude(group: 'com.google.code.gson', module: 'gson')
+//    implementation("com.github.hamza-cskn.obliviate-invs:core:4.1.12").exclude(group: 'com.google.code.gson', module: 'gson')
     shadow("com.github.hamza-cskn.obliviate-invs:core:4.1.12").exclude(group: 'com.google.code.gson', module: 'gson')
 
     // Other Plugins
@@ -128,6 +115,8 @@ shadowJar {
     relocate('com.google.gson', 'host.plas.bou.libs.gson')
 
     relocate('de.leonhard', 'host.plas.bou.libs.de.leonhard')
+
+    relocate('org.bstats', 'host.plas.bou.libs.org.bstats')
 }
 
 artifacts {

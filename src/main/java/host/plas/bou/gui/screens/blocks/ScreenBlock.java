@@ -12,7 +12,7 @@ import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import tv.quaint.objects.Identifiable;
+import gg.drak.thebase.objects.Identifiable;
 
 @Getter @Setter
 public abstract class ScreenBlock implements Identifiable {

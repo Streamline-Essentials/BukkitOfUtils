@@ -4,7 +4,7 @@ import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.MessageUtils;
 import lombok.Getter;
 import lombok.Setter;
-import tv.quaint.async.AsyncUtils;
+import gg.drak.thebase.async.AsyncUtils;
 
 import javax.swing.*;
 import java.util.Date;

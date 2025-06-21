@@ -10,8 +10,8 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import tv.quaint.objects.Identified;
-import tv.quaint.utils.StringUtils;
+import gg.drak.thebase.objects.Identified;
+import gg.drak.thebase.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;

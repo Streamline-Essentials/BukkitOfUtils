@@ -3,10 +3,10 @@ package host.plas.bou.events.callbacks;
 import host.plas.bou.BukkitOfUtils;
 import lombok.Getter;
 import lombok.Setter;
-import tv.quaint.events.BaseEventHandler;
-import tv.quaint.events.BaseEventListener;
-import tv.quaint.events.components.BaseEvent;
-import tv.quaint.events.processing.BaseProcessor;
+import gg.drak.thebase.events.BaseEventHandler;
+import gg.drak.thebase.events.BaseEventListener;
+import gg.drak.thebase.events.components.BaseEvent;
+import gg.drak.thebase.events.processing.BaseProcessor;
 
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
