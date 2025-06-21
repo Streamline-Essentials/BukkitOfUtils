@@ -15,7 +15,7 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import tv.quaint.objects.Identified;
+import gg.drak.thebase.objects.Identified;
 
 import java.util.ArrayList;
 import java.util.List;

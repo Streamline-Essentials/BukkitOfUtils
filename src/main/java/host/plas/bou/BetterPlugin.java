@@ -14,14 +14,14 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import tv.quaint.async.SyncInstance;
-import tv.quaint.async.ThreadHolder;
-import tv.quaint.async.WithSync;
-import tv.quaint.events.BaseEventHandler;
-import tv.quaint.events.BaseEventListener;
-import tv.quaint.objects.Identified;
-import tv.quaint.objects.handling.IEventable;
-import tv.quaint.objects.handling.derived.IModifierEventable;
+import gg.drak.thebase.async.SyncInstance;
+import gg.drak.thebase.async.ThreadHolder;
+import gg.drak.thebase.async.WithSync;
+import gg.drak.thebase.events.BaseEventHandler;
+import gg.drak.thebase.events.BaseEventListener;
+import gg.drak.thebase.objects.Identified;
+import gg.drak.thebase.objects.handling.IEventable;
+import gg.drak.thebase.objects.handling.derived.IModifierEventable;
 
 import java.util.function.Consumer;
 

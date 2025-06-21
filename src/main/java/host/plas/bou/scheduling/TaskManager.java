@@ -13,10 +13,9 @@ import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
-import tv.quaint.async.AsyncTask;
-import tv.quaint.async.AsyncUtils;
+import gg.drak.thebase.async.AsyncTask;
+import gg.drak.thebase.async.AsyncUtils;
 
-import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

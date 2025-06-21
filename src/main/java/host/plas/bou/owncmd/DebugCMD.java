@@ -300,14 +300,10 @@ public class DebugCMD extends SimplifiedCommand {
                 });
 
                 if (worldsList.length() > 0) {
-                    worldsList.delete(worldsList.length() - "&7, ".length(), worldsList.length()); // Remove "&7, " at the end
-
                     ctx.sendMessage("&bWorlds&8: &7" + worldsList);
                 } else {
                     ctx.sendMessage("&cNo worlds found.");
                 }
-
-                ctx.sendMessage("&7Teleported you to the top-most space available above you.");
                 break;
             case "tasks":
                 if (! ctx.isArgUsable(1)) {
@@ -403,7 +399,7 @@ public class DebugCMD extends SimplifiedCommand {
         if (ctx.getArgs().size() <= 1) {
             completions.addAll(List.of(
                     "item-nbt", "list-bou-plugins", "store-item", "get-item", "make-item", "uuid",
-                    "up", "down", "top", "tasks", "item-nbt-strict", "make-item-strict"
+                    "up", "down", "top", "tasks", "item-nbt-strict", "make-item-strict", "worlds"
             ));
         }
 

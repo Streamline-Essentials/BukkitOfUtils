@@ -2,7 +2,7 @@ package host.plas.bou.configs.bits;
 
 import lombok.Getter;
 import lombok.Setter;
-import tv.quaint.objects.Identifiable;
+import gg.drak.thebase.objects.Identifiable;
 
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Predicate;

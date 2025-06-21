@@ -1,11 +1,9 @@
 package host.plas.bou.utils.obj;
 
-import host.plas.bou.commands.Sender;
 import host.plas.bou.instances.BaseManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

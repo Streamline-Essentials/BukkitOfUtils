@@ -7,7 +7,6 @@ import host.plas.bou.gui.ScreenManager;
 import host.plas.bou.gui.icons.BasicIcon;
 import host.plas.bou.gui.screens.ScreenInstance;
 import host.plas.bou.items.ItemUtils;
-import host.plas.bou.math.CosmicMath;
 import host.plas.bou.utils.obj.ManagedInventory;
 import lombok.Getter;
 import lombok.Setter;

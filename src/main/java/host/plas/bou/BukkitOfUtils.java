@@ -1,5 +1,6 @@
 package host.plas.bou;
 
+import host.plas.bou.bstats.BStats;
 import host.plas.bou.compat.CompatManager;
 import host.plas.bou.firestring.FireStringManager;
 import host.plas.bou.gui.ScreenManager;
@@ -41,10 +42,14 @@ public class BukkitOfUtils extends BetterPlugin {
         FireStringManager.init();
 
         CompatManager.init();
+
+        BStats.onEnable();
     }
 
     @Override
     public void onBaseDisable() {
+        BStats.onDisable();
+
         BaseManager.stop();
     }
 }

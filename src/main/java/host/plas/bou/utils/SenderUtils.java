@@ -1,6 +1,5 @@
 package host.plas.bou.utils;
 
-import host.plas.bou.BetterPlugin;
 import host.plas.bou.commands.Sender;
 import host.plas.bou.instances.BaseManager;
 import org.bukkit.Bukkit;
@@ -84,5 +83,21 @@ public class SenderUtils {
         } catch (Throwable e) {
             return Optional.empty();
         }
+    }
+
+    public static void broadcast(String message) {
+        broadcast(message, true);
+    }
+
+    public static void broadcast(String message, boolean includeConsole) {
+        broadcast(message, includeConsole, true);
+    }
+
+    public static void broadcast(String message, boolean includeConsole, boolean format) {
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            getSender(player).sendMessage(message, format);
+        });
+
+        if (includeConsole) getConsoleAsSender().sendMessage(message, format);
     }
 }
