@@ -116,6 +116,17 @@ public class DebugCMD extends SimplifiedCommand {
                 ctx.sendMessage(sbL.toString());
 
                 break;
+            case "dump":
+                StringBuilder sbDump = new StringBuilder("&bBOU Plugin Info&8: &7");
+
+                for (BetterPlugin plugin : PluginUtils.getLoadedBOUPlugins()) {
+                    sbDump.append("\n");
+                    sbDump.append(plugin.getAsInfoComponent());
+                }
+
+                ctx.sendMessage(sbDump.toString());
+
+                break;
             case "store-item":
                 if (player == null) {
                     ctx.sendMessage("&cOnly players can use this command.");
@@ -399,7 +410,7 @@ public class DebugCMD extends SimplifiedCommand {
         if (ctx.getArgs().size() <= 1) {
             completions.addAll(List.of(
                     "item-nbt", "list-bou-plugins", "store-item", "get-item", "make-item", "uuid",
-                    "up", "down", "top", "tasks", "item-nbt-strict", "make-item-strict", "worlds"
+                    "up", "down", "top", "tasks", "item-nbt-strict", "make-item-strict", "worlds", "dump"
             ));
         }
 
