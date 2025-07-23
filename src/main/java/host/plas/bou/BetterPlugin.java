@@ -6,6 +6,7 @@ import host.plas.bou.events.callbacks.DisableCallback;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.scheduling.TaskManager;
+import host.plas.bou.utils.DatabaseUtils;
 import host.plas.bou.utils.MessageUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -152,6 +153,21 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
         } else {
             return "&c" + getIdentifier();
         }
+    }
+
+    public String getAsInfoComponent() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("&7- &b").append(getIdentifier()).append(" &7(").append(isEnabled() ? "&aEnabled" : "&cDisabled").append("&7)").append("\n");
+        builder.append("  &f> &eVersion&7: &b").append(getDescription().getVersion()).append("\n");
+        builder.append("  &f> &eDatabase&7(&es&7)&7:").append("\n");
+        if (! DatabaseUtils.hasAny(getIdentifier())) builder.append("   &f- &cNo databases.");
+        else {
+            DatabaseUtils.get(getIdentifier()).forEach(db -> {
+                builder.append("    &f+ &bID&7: &a").append(db.getId());
+                builder.append("    &f+ &bType&7: &c").append(db.getConnectorSet().getType());
+            });
+        }
+        return builder.toString();
     }
 
     @Override

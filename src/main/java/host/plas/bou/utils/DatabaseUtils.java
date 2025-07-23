@@ -51,6 +51,14 @@ public class DatabaseUtils {
         return operators;
     }
 
+    public static int count(String identifier) {
+        return get(identifier).size();
+    }
+
+    public static boolean hasAny(String identifier) {
+        return count(identifier) > 0;
+    }
+
     public static ConcurrentSkipListSet<DBOperator> get(BetterPlugin plugin) {
         return get(plugin.getIdentifier());
     }
