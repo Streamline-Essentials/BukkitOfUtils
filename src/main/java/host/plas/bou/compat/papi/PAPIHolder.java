@@ -135,13 +135,11 @@ public class PAPIHolder extends ApiHolder<PlaceholderAPIPlugin> {
     }
 
     public void shutdown() {
-        if (! isEnabled()) return;
+        if (! isEnabledRaw()) return;
 
         flushAll();
 
         ownExpansion.unregister();
-
-        ownExpansion = null;
 
         loadedExpansions.clear();
 
