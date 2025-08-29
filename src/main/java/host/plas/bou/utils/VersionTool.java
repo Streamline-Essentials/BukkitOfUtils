@@ -2,19 +2,25 @@ package host.plas.bou.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.authlib.GameProfile;
 import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.commands.CommandHandler;
+import host.plas.bou.utils.obj.Versioning;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.Command;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.checkerframework.checker.units.qual.N;
 
 import java.awt.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -223,11 +229,31 @@ public class VersionTool {
     // FAST REFLECTION METHODS
 
     public static void init() {
+        Versioning.introspect(); // Initialize server version
+
+        CommandHandler.init();
+
         initClasses();
         initMethods();
+        initFields();
     }
 
     public static void initClasses() {
+        try {
+            getBukkitServerClass();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getPlayerListClass();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getCraftPlayerClass();
+        } catch (Throwable e) {
+            // do nothing
+        }
         try {
             getCraftItemStackClass();
         } catch (Throwable e) {
@@ -262,6 +288,21 @@ public class VersionTool {
 
     public static void initMethods() {
         try {
+            getBukkitServerSyncCommandsMethod();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getCraftPlayerGetGameProfileMethod();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getCraftPlayerGetHandleMethod();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
             getMojangsonParserParseMethod();
         } catch (Throwable e) {
             // do nothing
@@ -283,11 +324,83 @@ public class VersionTool {
         }
     }
 
+    public static void initFields() {
+        try {
+            getGameProfileNameField();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getPlayerListField();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getPlayersByNameField();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getPlayersMap();
+        } catch (Throwable e) {
+            // do nothing
+        }
+        try {
+            getCommandMapKnownCommandsField();
+        } catch (Throwable e) {
+            // do nothing
+        }
+    }
+
+    public static String getNMSPackage() {
+        return getNMSPackage(false);
+    }
+
+    public static String getNMSPackage(boolean withTrailingDot) {
+        return "net.minecraft.server" + getServerVersionDotted() + (withTrailingDot ? "." : "");
+    }
+
+    public static String getCraftPackage() {
+        return getCraftPackage(false);
+    }
+
+    public static String getCraftPackage(boolean withTrailingDot) {
+        return "org.bukkit.craftbukkit" + getServerVersionDotted() + (withTrailingDot ? "." : "");
+    }
+
+    private static Class<?> CLASS_BUKKIT_SERVER = null;
+
+    public static Class<?> getBukkitServerClass() {
+        if (CLASS_BUKKIT_SERVER == null) {
+            CLASS_BUKKIT_SERVER = Bukkit.getServer().getClass();
+        }
+        return CLASS_BUKKIT_SERVER;
+    }
+
+    private static Class<?> CLASS_PLAYER_LIST = null;
+
+    public static Class<?> getPlayerListClass() throws Throwable {
+        if (CLASS_PLAYER_LIST == null) {
+            boolean is17OrOver = Versioning.getServerVersion().isAfter(17 - 1); // 1.17+
+            CLASS_PLAYER_LIST = Class.forName((is17OrOver ? getNMSPackage() + ".players" : getNMSPackage()) + ".PlayerList");
+        }
+        return CLASS_PLAYER_LIST;
+    }
+
+    private static Class<?> CLASS_CRAFT_PLAYER = null;
+
+    public static Class<?> getCraftPlayerClass() throws Throwable {
+        if (CLASS_CRAFT_PLAYER == null) {
+            CLASS_CRAFT_PLAYER = Class.forName(getCraftPackage() + ".entity.CraftPlayer");
+        }
+        return CLASS_CRAFT_PLAYER;
+    }
+
     private static Class<?> CLASS_CRAFT_ITEM_STACK = null;
 
     public static Class<?> getCraftItemStackClass() throws Throwable {
         if (CLASS_CRAFT_ITEM_STACK == null) {
-            CLASS_CRAFT_ITEM_STACK = Class.forName("org.bukkit.craftbukkit" + getServerVersionDotted() + ".inventory.CraftItemStack");
+            CLASS_CRAFT_ITEM_STACK = Class.forName(getCraftPackage() + ".inventory.CraftItemStack");
         }
         return CLASS_CRAFT_ITEM_STACK;
     }
@@ -343,6 +456,34 @@ public class VersionTool {
         return CLASS_FOLIA_LOCATION;
     }
 
+    private static Method METHOD_BUKKIT_SERVER_SYNC_COMMANDS = null;
+
+    public static Method getBukkitServerSyncCommandsMethod() throws Throwable {
+        if (METHOD_BUKKIT_SERVER_SYNC_COMMANDS == null) {
+            METHOD_BUKKIT_SERVER_SYNC_COMMANDS = getBukkitServerClass().getDeclaredMethod("syncCommands");
+            METHOD_BUKKIT_SERVER_SYNC_COMMANDS.setAccessible(true);
+        }
+        return METHOD_BUKKIT_SERVER_SYNC_COMMANDS;
+    }
+
+    private static Method METHOD_CRAFT_PLAYER_GET_GAME_PROFILE = null;
+
+    public static Method getCraftPlayerGetGameProfileMethod() throws Throwable {
+        if (METHOD_CRAFT_PLAYER_GET_GAME_PROFILE == null) {
+            METHOD_CRAFT_PLAYER_GET_GAME_PROFILE = getCraftPlayerClass().getMethod("getProfile");
+        }
+        return METHOD_CRAFT_PLAYER_GET_GAME_PROFILE;
+    }
+
+    private static Method METHOD_CRAFT_PLAYER_GET_HANDLE = null;
+
+    public static Method getCraftPlayerGetHandleMethod() throws Throwable {
+        if (METHOD_CRAFT_PLAYER_GET_HANDLE == null) {
+            METHOD_CRAFT_PLAYER_GET_HANDLE = getCraftPlayerClass().getMethod("getHandle");
+        }
+        return METHOD_CRAFT_PLAYER_GET_HANDLE;
+    }
+
     private static Method MOJANGSON_PARSER_PARSE_METHOD = null;
 
     public static Method getMojangsonParserParseMethod() throws Throwable {
@@ -379,7 +520,83 @@ public class VersionTool {
         return FOLIA_ENTITY_TELEPORT_ASYNC_METHOD;
     }
 
+    private static Field FIELD_GAME_PROFILE_NAME = null;
+
+    public static Field getGameProfileNameField() throws Throwable {
+        if (FIELD_GAME_PROFILE_NAME == null) {
+            FIELD_GAME_PROFILE_NAME = GameProfile.class.getDeclaredField("name");
+            FIELD_GAME_PROFILE_NAME.setAccessible(true);
+        }
+        return FIELD_GAME_PROFILE_NAME;
+    }
+
+    private static Field FIELD_PLAYER_LIST = null;
+
+    public static Field getPlayerListField() throws Throwable {
+        if (FIELD_PLAYER_LIST == null) {
+            FIELD_PLAYER_LIST = Bukkit.getServer().getClass().getDeclaredField("playerList");
+            FIELD_PLAYER_LIST.setAccessible(true);
+        }
+        return FIELD_PLAYER_LIST;
+    }
+
+    private static Field FIELD_PLAYERS_BY_NAME = null;
+
+    public static Field getPlayersByNameField() throws Throwable {
+        if (FIELD_PLAYERS_BY_NAME == null) {
+            final Object playerList = getPlayerListField().get(Bukkit.getServer());
+
+            FIELD_PLAYERS_BY_NAME = getPlayerListClass().getDeclaredField("playersByName");
+            FIELD_PLAYERS_BY_NAME.setAccessible(true);
+        }
+        return FIELD_PLAYERS_BY_NAME;
+    }
+
+    private static Map MAP_PLAYERS = null;
+
+    public static Map getPlayersMap() throws Throwable {
+        if (MAP_PLAYERS == null) {
+            final Object playerList = getPlayerListField().get(Bukkit.getServer());
+
+            MAP_PLAYERS = (Map) getPlayersByNameField().get(playerList);
+        }
+        return MAP_PLAYERS;
+    }
+
+    private static Field FIELD_COMMAND_MAP_KNOWN_COMMANDS = null;
+
+    public static Field getCommandMapKnownCommandsField() throws Throwable {
+        if (FIELD_COMMAND_MAP_KNOWN_COMMANDS == null) {
+            FIELD_COMMAND_MAP_KNOWN_COMMANDS = CommandHandler.getCommandMap().getClass().getDeclaredField("knownCommands");
+            FIELD_COMMAND_MAP_KNOWN_COMMANDS.setAccessible(true);
+        }
+        return FIELD_COMMAND_MAP_KNOWN_COMMANDS;
+    }
+
     // WORKER METHODS
+
+    public static void syncCommands() {
+        try {
+            getBukkitServerSyncCommandsMethod().invoke(Bukkit.getServer());
+        } catch (NoSuchMethodException e) {
+            BukkitOfUtils.getInstance().logWarningWithInfo("syncCommands method not found: ", e);
+        } catch (Throwable e) {
+            BukkitOfUtils.getInstance().logWarningWithInfo("Failed to invoke syncCommands method: ", e);
+        }
+    }
+
+    public static void unregisterKnownCommand(Command command) {
+        try {
+            @SuppressWarnings("unchecked") final Map<String, Command> knownCommands = (Map<String, Command>) getCommandMapKnownCommandsField().get(CommandHandler.getCommandMap());
+
+            knownCommands.remove(command.getName());
+            for (String alias : command.getAliases()) {
+                knownCommands.remove(alias);
+            }
+        } catch (Throwable e) {
+            BukkitOfUtils.getInstance().logWarningWithInfo("Failed to unregister command: ", e);
+        }
+    }
 
     public static Object parseNBT(String nbtJson) throws Throwable {
         return getMojangsonParserParseMethod().invoke(null, nbtJson);
@@ -450,5 +667,48 @@ public class VersionTool {
 
     public static String getNewServerVersion() {
         return "";
+    }
+
+    public static Versioning getVersion() {
+        String version = getServerVersion();
+        if (version.isEmpty()) {
+            return Versioning.getEmpty();
+        }
+
+        String[] parts = version.split("_");
+        if (parts.length < 3) {
+            return Versioning.getModern();
+        }
+
+        String first = parts[0];
+        String second = parts[1];
+        String third = parts[2];
+
+        first = first.replaceAll("[^0-9]", "");
+        second = second.replaceAll("[^0-9]", "");
+        third = third.replaceAll("[^0-9]", "");
+
+        int firstInt = 0;
+        int secondInt = 0;
+        int thirdInt = 0;
+
+        try {
+            firstInt = Integer.parseInt(first);
+        } catch (Throwable e) {
+            return Versioning.getEmpty();
+        }
+        try {
+            secondInt = Integer.parseInt(second);
+        } catch (Throwable e) {
+            return Versioning.getEmpty();
+        }
+        try {
+            thirdInt = Integer.parseInt(third);
+//            thirdInt += 1; // Due to the "R" being 0-based.
+        } catch (Throwable e) {
+            return Versioning.getEmpty();
+        }
+
+        return new Versioning(firstInt, secondInt, thirdInt);
     }
 }

@@ -18,10 +18,10 @@ ext {
             'mysql:mysql-connector-java:8.0.33',
     ]
     ANNO = [
-            'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT',
+            'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT',
     ]
     COMP_ONLY = [
-            'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT',
+            'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT',
     ]
     FILES = [
     ]
