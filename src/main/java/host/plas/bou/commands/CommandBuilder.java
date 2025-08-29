@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @Getter
 public class CommandBuilder {
     public static final String NOT_DEFINED = "Not defined.";
+    public static final String NULL = "--NULL--";
 
     private String commandName;
     private String label;

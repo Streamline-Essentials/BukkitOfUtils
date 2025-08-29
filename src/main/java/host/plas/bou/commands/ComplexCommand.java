@@ -15,8 +15,9 @@ public abstract class ComplexCommand extends BukkitCommand implements BetterComm
     private boolean registered;
     private CommandExecution executionHandler;
     private CommandTabCompleter tabCompleter;
+    private String basePermission;
 
-    public ComplexCommand(String commandName, String label, JavaPlugin provider) {
+    public ComplexCommand(String commandName, String label, JavaPlugin provider, String basePermission) {
         super(commandName);
         this.identifier = CommandHandler.getIdentifier(commandName, provider);
         this.commandName = commandName;
@@ -28,11 +29,21 @@ public abstract class ComplexCommand extends BukkitCommand implements BetterComm
         this.executionHandler = CommandExecution.emptyFalse();
         this.tabCompleter = CommandTabCompleter.empty();
 
+        this.basePermission = basePermission;
+
         registerAndSet();
     }
 
+    public ComplexCommand(String commandName, JavaPlugin provider, String basePermission) {
+        this(commandName, provider.getName().toLowerCase(), provider, basePermission);
+    }
+
+    public ComplexCommand(String commandName, String label, JavaPlugin provider) {
+        this(commandName, label, provider, CommandBuilder.NULL);
+    }
+
     public ComplexCommand(String commandName, JavaPlugin provider) {
-        this(commandName, provider.getName().toLowerCase(), provider);
+        this(commandName, provider, CommandBuilder.NULL);
     }
 
     @Override

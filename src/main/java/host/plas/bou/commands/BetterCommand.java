@@ -4,6 +4,7 @@ import gg.drak.thebase.objects.Identifiable;
 import gg.drak.thebase.utils.StringUtils;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.utils.SenderUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -14,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public interface BetterCommand extends TabExecutor, Identifiable {
     String getCommandName();
@@ -28,6 +28,9 @@ public interface BetterCommand extends TabExecutor, Identifiable {
 
     String getUsage();
     Command setUsage(String usage);
+
+    String getBasePermission();
+    void setBasePermission(String basePermission);
 
     List<String> getAliases();
     Command setAliases(List<String> aliases);
@@ -177,6 +180,41 @@ public interface BetterCommand extends TabExecutor, Identifiable {
         return true;
     }
 
+    default boolean isPermissionValid() {
+        return getBasePermission() != null && ! getBasePermission().isBlank() && ! getBasePermission().equalsIgnoreCase(CommandBuilder.NULL);
+    }
+
+    default boolean hasPermission(CommandSender sender) {
+        if (! isPermissionValid()) return defaultPermissionFallback();
+
+        return sender.hasPermission(getBasePermission());
+    }
+
+    default boolean defaultPermissionFallback() {
+        return true;
+    }
+
+    default boolean success() {
+        return CommandResult.SUCCESS;
+    }
+
+    default boolean failure() {
+        return CommandResult.FAILURE;
+    }
+
+    default boolean error() {
+        return CommandResult.ERROR;
+    }
+
+    default boolean defaultNoPermission() {
+        return failure();
+    }
+
+    default boolean handleNoPermission(CommandSender sender) {
+        SenderUtils.getSender(sender).sendMessage("&cYou do not have permission to execute this command.");
+        return defaultNoPermission();
+    }
+
     default boolean execute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         if (! (this instanceof Command)) return false;
         Command cmd = (Command) this;
@@ -186,6 +224,10 @@ public interface BetterCommand extends TabExecutor, Identifiable {
 
     @Override
     default boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if (! hasPermission(sender)) {
+            return handleNoPermission(sender);
+        }
+
         if (useNewCommandContext()) {
             return command(new CommandContext(sender, command, label, args));
         } else {
