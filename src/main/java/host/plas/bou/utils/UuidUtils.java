@@ -61,17 +61,17 @@ public class UuidUtils {
         if (player == null) return false;
         if (player.getName() == null || player.getName().isBlank()) return false;
 
-        String name = UUIDFetcher.getName(player.getUniqueId());
-        return name != null && !name.isBlank() && player.getName() != null && !player.getName().isBlank();
+        return true;
     }
 
     public static boolean isValidPlayerName(String playerName) {
         if (playerName == null) return false;
         if (playerName.isBlank()) return false;
 
-        UUID uuid = UUIDFetcher.getUUID(playerName);
+        if (isOfflineMode()) return true;
+
         try {
-            return uuid != null && isValidPlayer(Bukkit.getOfflinePlayer(uuid));
+            return UUIDFetcher.getUUID(playerName) != null;
         } catch (Throwable e) {
             return false; // If the player is not found or has no valid profile
         }
@@ -81,11 +81,16 @@ public class UuidUtils {
         if (uuid == null) return false;
         if (uuid.isBlank()) return false;
 
-        String name = UUIDFetcher.getName(UUID.fromString(uuid));
+        if (isOfflineMode()) return true;
+
         try {
-            return name != null && isValidPlayer(Bukkit.getOfflinePlayer(name));
+            return UUIDFetcher.getName(uuid) != null;
         } catch (Throwable e) {
             return false; // If the player is not found or has no valid profile
         }
+    }
+
+    public static boolean isOfflineMode() {
+        return ! Bukkit.getOnlineMode();
     }
 }
