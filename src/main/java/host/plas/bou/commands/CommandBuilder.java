@@ -63,6 +63,14 @@ public class CommandBuilder {
         this(commandName, label, provider, true, CommandTabCompleter.empty(), basePermission);
     }
 
+    public CommandBuilder(String commandName, String label, JavaPlugin provider) {
+        this(commandName, label, provider, NULL);
+    }
+
+    public CommandBuilder(String commandName, JavaPlugin provider) {
+        this(commandName, provider.getName().toLowerCase(), provider, NULL);
+    }
+
     public CommandBuilder setCommandName(String commandName) {
         this.commandName = commandName;
         return this;

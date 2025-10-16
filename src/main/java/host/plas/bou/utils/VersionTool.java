@@ -669,46 +669,46 @@ public class VersionTool {
         return "";
     }
 
-    public static Versioning getVersion() {
-        String version = getServerVersion();
-        if (version.isEmpty()) {
-            return Versioning.getEmpty();
-        }
-
-        String[] parts = version.split("_");
-        if (parts.length < 3) {
-            return Versioning.getModern();
-        }
-
-        String first = parts[0];
-        String second = parts[1];
-        String third = parts[2];
-
-        first = first.replaceAll("[^0-9]", "");
-        second = second.replaceAll("[^0-9]", "");
-        third = third.replaceAll("[^0-9]", "");
-
-        int firstInt = 0;
-        int secondInt = 0;
-        int thirdInt = 0;
-
-        try {
-            firstInt = Integer.parseInt(first);
-        } catch (Throwable e) {
-            return Versioning.getEmpty();
-        }
-        try {
-            secondInt = Integer.parseInt(second);
-        } catch (Throwable e) {
-            return Versioning.getEmpty();
-        }
-        try {
-            thirdInt = Integer.parseInt(third);
-//            thirdInt += 1; // Due to the "R" being 0-based.
-        } catch (Throwable e) {
-            return Versioning.getEmpty();
-        }
-
-        return new Versioning(firstInt, secondInt, thirdInt);
-    }
+//    public static Versioning getVersion() {
+//        String version = getServerVersion();
+//        if (version.isEmpty()) {
+//            return Versioning.getEmpty();
+//        }
+//
+//        String[] parts = version.split("_");
+//        if (parts.length < 3) {
+//            return Versioning.getModern();
+//        }
+//
+//        String first = parts[0];
+//        String second = parts[1];
+//        String third = parts[2];
+//
+//        first = first.replaceAll("[^0-9]", "");
+//        second = second.replaceAll("[^0-9]", "");
+//        third = third.replaceAll("[^0-9]", "");
+//
+//        int firstInt = 0;
+//        int secondInt = 0;
+//        int thirdInt = 0;
+//
+//        try {
+//            firstInt = Integer.parseInt(first);
+//        } catch (Throwable e) {
+//            return Versioning.getEmpty();
+//        }
+//        try {
+//            secondInt = Integer.parseInt(second);
+//        } catch (Throwable e) {
+//            return Versioning.getEmpty();
+//        }
+//        try {
+//            thirdInt = Integer.parseInt(third);
+////            thirdInt += 1; // Due to the "R" being 0-based.
+//        } catch (Throwable e) {
+//            return Versioning.getEmpty();
+//        }
+//
+//        return new Versioning(firstInt, secondInt, thirdInt);
+//    }
 }

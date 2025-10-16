@@ -44,12 +44,15 @@ repositories {
     }
     maven { url 'https://repo.papermc.io/repository/maven-snapshots/' }
     maven { url 'https://repo.papermc.io/repository/maven-public/' }
+    // NMS
     maven {
         url = uri("https://repo.codemc.org/repository/nms/")
     }
+    // Streamline Essentials
+    maven {
+        url = uri("https://repo.codemc.org/repository/streamline-essentials/")
+    }
 }
-
-disableAutoTargetJvm()
 
 dependencies {
     // Defaults.
@@ -106,6 +109,9 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11)) // Change this to your desired version
     }
+
+    withSourcesJar()
+    withJavadocJar()
 }
 
 shadowJar {

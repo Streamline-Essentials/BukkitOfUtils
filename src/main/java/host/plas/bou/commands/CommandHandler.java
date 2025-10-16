@@ -102,7 +102,7 @@ public class CommandHandler {
             // Register all the commands into the map
             for (final C command : commands) {
                 try {
-                    getCommandMap().register(command.getLabel(), command.getCommandName(), command);
+                    getCommandMap().register(command.getCommandName(), command.getLabel(), command);
                 } catch (Throwable e) {
                     BukkitOfUtils.getInstance().logDebugWithInfo("Failed to register command: " + command.getLabel(), e);
                 }
