@@ -166,4 +166,8 @@ public class ColorUtils {
     public static String simpleColorBoolean(boolean bool) {
         return bool  ? "&aYes" : "&cNo";
     }
+
+    public static String stripFormatting(String from) {
+        return from != null ? from.replaceAll("(?i)§[0-9A-FK-OR]", "").replaceAll("(?i)&[0-9A-FK-OR]", "") : "";
+    }
 }

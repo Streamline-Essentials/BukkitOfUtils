@@ -24,6 +24,9 @@ public class PAPIHolder extends ApiHolder<PlaceholderAPIPlugin> {
     @Getter @Setter
     private static BouExpansion ownExpansion;
 
+    @Getter @Setter
+    private int enableOverride;
+
     public static void loadExpansion(BetterExpansion expansion) {
         unloadExpansion(expansion);
 
@@ -54,6 +57,8 @@ public class PAPIHolder extends ApiHolder<PlaceholderAPIPlugin> {
         } catch (Throwable e) {
             BukkitOfUtils.getInstance().logWarning("Failed to initialize PlaceholderAPI holder.");
         }
+
+        enableOverride = -1; // not set
     }
 
     public void register(PlaceholderExpansion expansion) {
@@ -109,6 +114,42 @@ public class PAPIHolder extends ApiHolder<PlaceholderAPIPlugin> {
                 BukkitOfUtils.getInstance().logWarning("Failed to unregister expansion " + expansion.getIdentifier() + " from PlaceholderAPI.", e);
             }
         });
+    }
+
+    public void flushAll() {
+        getLoadedExpansions().forEach(expansion -> {
+            try {
+                unregister(expansion);
+                if (! expansion.unregister()) {
+//                    BukkitOfUtils.getInstance().logWarning("Failed to unregister expansion " + expansion.getIdentifier() + " from PlaceholderAPI.");
+                }
+            } catch (Throwable e) {
+                BukkitOfUtils.getInstance().logWarning("Failed to unregister expansion " + expansion.getIdentifier() + " from PlaceholderAPI.", e);
+            }
+        });
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return super.isEnabled() && (getEnableOverride() == -1 || getEnableOverride() == 1);
+    }
+
+    public void shutdown() {
+        if (! isEnabledRaw()) return;
+
+        flushAll();
+
+        ownExpansion.unregister();
+
+        loadedExpansions.clear();
+
+        enableOverride = 0; // set to false
+
+        BukkitOfUtils.getInstance().logInfo("&cPlaceholderAPI &fholder has been shut down.");
+    }
+
+    public boolean isEnabledRaw() {
+        return super.isEnabled();
     }
 
     public String replace(OfflinePlayer player, String from) {

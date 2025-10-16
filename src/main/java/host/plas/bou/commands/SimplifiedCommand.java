@@ -8,8 +8,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public abstract class SimplifiedCommand extends ComplexCommand {
-    public SimplifiedCommand(String identifier, JavaPlugin provider) {
-        super(identifier, provider);
+    public SimplifiedCommand(String commandName, JavaPlugin provider) {
+        super(commandName, provider);
+    }
+
+    public SimplifiedCommand(String commandName, String label, JavaPlugin provider) {
+        super(commandName, label, provider);
     }
 
     @Override
