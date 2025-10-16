@@ -121,4 +121,9 @@ public class BuildableCommand extends BukkitCommand implements BetterCommand {
     public ConcurrentSkipListSet<String> tabComplete(CommandContext ctx) {
         return tabCompleter.apply(ctx);
     }
+
+    @Override
+    public boolean isBuildable() {
+        return true;
+    }
 }

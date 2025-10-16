@@ -1,8 +1,10 @@
 package host.plas.bou.utils.obj;
 
+import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.utils.VersionTool;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 @Getter @Setter
@@ -92,16 +94,35 @@ public class Versioning implements Comparable<Versioning> {
         return first == 0 && second == 0 && third == 0;
     }
 
-    public boolean isModern() {
+    public boolean isModernErrored() {
         return first == -2 && second == 0 && third == 0;
     }
 
+    public boolean isModern() {
+        if (isModernErrored()) return true;
+
+        return isAfter(new Versioning(1, 20, 4));
+    }
+
     public static Versioning fromString(String version) {
-        String[] parts = version.split("\\.");
-        long first = parts.length > 0 ? Long.parseLong(parts[0]) : 0;
-        long second = parts.length > 1 ? Long.parseLong(parts[1]) : 0;
-        long third = parts.length > 2 ? Long.parseLong(parts[2]) : 0;
-        return new Versioning(first, second, third);
+        try {
+            if (version.contains("-")) {
+                version = version.split("-")[0];
+            }
+
+            String[] parts = version.split("\\.");
+            long first = parts.length > 0 ? Long.parseLong(grabOnlyNumbers(parts[0])) : 0;
+            long second = parts.length > 1 ? Long.parseLong(grabOnlyNumbers(parts[1])) : 0;
+            long third = parts.length > 2 ? Long.parseLong(grabOnlyNumbers(parts[2])) : 0;
+            return new Versioning(first, second, third);
+        } catch (Exception e) {
+            BukkitOfUtils.getInstance().logWarningWithInfo("Failed to parse version string: " + version, e);
+            return getEmpty();
+        }
+    }
+
+    public static String grabOnlyNumbers(String from) {
+        return from.replaceAll("[^0-9.]", "");
     }
 
     public static Versioning getEmpty() {
@@ -113,7 +134,7 @@ public class Versioning implements Comparable<Versioning> {
     }
 
     public static Versioning introspect() {
-        SERVER_VERSION = VersionTool.getVersion();
+        SERVER_VERSION = parseFromBukkit();
 
         return SERVER_VERSION;
     }
@@ -124,5 +145,13 @@ public class Versioning implements Comparable<Versioning> {
         }
 
         return SERVER_VERSION;
+    }
+
+    public static String getBukkitVersion() {
+        return Bukkit.getBukkitVersion();
+    }
+
+    public static Versioning parseFromBukkit() {
+        return fromString(getBukkitVersion());
     }
 }
