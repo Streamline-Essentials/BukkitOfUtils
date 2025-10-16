@@ -86,4 +86,4 @@ On top of that, it also has a few abilities it does by itself:
 ## How do I get started using this?
 
 Head on over to the plugin's wiki to see how you can use it in your own plugin's project.
-Wiki: [https://wiki.plas.host/bukkitofutils](https://wiki.plas.host/bukkitofutils)
+Wiki: [https://wiki.drak.gg/bukkitofutils](https://wiki.plas.host/bukkitofutils)
