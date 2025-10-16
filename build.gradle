@@ -1,7 +1,8 @@
 plugins {
     id 'java'
     id 'com.gradleup.shadow' version '8.3.6' // for shadowing
-    id "io.freefair.lombok" version "8.6"
+    id 'io.freefair.lombok' version '8.6'
+    id 'maven-publish'
 }
 
 apply from: rootDir.toString() + '/dependencies.gradle'
@@ -135,4 +136,32 @@ artifacts {
 wrapper {
     gradleVersion = '8.9'
     distributionType = Wrapper.DistributionType.ALL
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId project.group
+            artifactId "$project.name"
+            version project.version
+
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url = "https://repo.codemc.io/repository/streamline-essentials/"
+
+            def mavenUsername = System.getenv("JENKINS_NEXUS_USERNAME")
+            def mavenPassword = System.getenv("JENKINS_NEXUS_PASSWORD")
+
+            if (mavenUsername != null && mavenPassword != null) {
+                credentials {
+                    username = mavenUsername
+                    password = mavenPassword
+                }
+            }
+        }
+    }
 }
