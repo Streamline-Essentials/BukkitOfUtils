@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EntityUtils {
     @Getter @Setter
@@ -192,6 +193,24 @@ public class EntityUtils {
     public static ConcurrentSkipListSet<String> getOnlinePlayerUuids() {
         ConcurrentSkipListSet<String> uuids = new ConcurrentSkipListSet<>();
         Bukkit.getOnlinePlayers().forEach(player -> uuids.add(player.getUniqueId().toString()));
+
+        return uuids;
+    }
+
+    public static Stream<OfflinePlayer> getOfflinePlayersStream() {
+        return Arrays.stream(Bukkit.getOfflinePlayers());
+    }
+
+    public static ConcurrentSkipListSet<String> getOfflinePlayerNames() {
+        ConcurrentSkipListSet<String> names = new ConcurrentSkipListSet<>();
+        getOfflinePlayersStream().forEach(player -> names.add(player.getName()));
+
+        return names;
+    }
+
+    public static ConcurrentSkipListSet<String> getOfflinePlayerUuids() {
+        ConcurrentSkipListSet<String> uuids = new ConcurrentSkipListSet<>();
+        getOfflinePlayersStream().forEach(player -> uuids.add(player.getUniqueId().toString()));
 
         return uuids;
     }
