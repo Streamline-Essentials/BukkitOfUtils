@@ -2,6 +2,7 @@ package host.plas.bou.commands;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -113,13 +114,28 @@ public class BuildableCommand extends BukkitCommand implements BetterCommand {
     }
 
     @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        return command(new CommandContext(sender, command, label, args));
+    }
+
+    @Override
     public boolean command(CommandContext ctx) {
-        return executionHandler.apply(ctx);
+        CommandExecution execution = getExecutionHandler();
+        if (execution == null || execution.isEmpty()) {
+            return BetterCommand.super.command(ctx);
+        } else {
+            return execution.apply(ctx);
+        }
     }
 
     @Override
     public ConcurrentSkipListSet<String> tabComplete(CommandContext ctx) {
-        return tabCompleter.apply(ctx);
+        CommandTabCompleter execution = getTabCompleter();
+        if (execution == null || execution.isEmpty()) {
+            return BetterCommand.super.tabComplete(ctx);
+        } else {
+            return execution.apply(ctx);
+        }
     }
 
     @Override
