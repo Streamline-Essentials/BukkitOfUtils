@@ -1,11 +1,11 @@
 package host.plas.bou.commands;
 
 public interface CommandExecution extends WithCommandContext<Boolean> {
-    static CommandExecution emptyFalse() {
+    static EmptyCommandExecution emptyFalse() {
         return ctx -> false;
     }
 
-    static CommandExecution emptyTrue() {
+    static EmptyCommandExecution emptyTrue() {
         return ctx -> true;
     }
 }

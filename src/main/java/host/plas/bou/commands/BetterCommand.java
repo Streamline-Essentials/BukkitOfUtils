@@ -239,7 +239,9 @@ public interface BetterCommand extends TabExecutor, Identifiable {
         return command(new CommandContext(sender, command, label, args));
     }
 
-    boolean command(CommandContext ctx);
+    default boolean command(CommandContext ctx) {
+        return false;
+    }
 
     @Nullable @Override
     default List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -270,9 +272,15 @@ public interface BetterCommand extends TabExecutor, Identifiable {
         return list;
     }
 
-    ConcurrentSkipListSet<String> tabComplete(CommandContext ctx);
+    default ConcurrentSkipListSet<String> tabComplete(CommandContext ctx) {
+        return new ConcurrentSkipListSet<>();
+    }
 
     default ConcurrentSkipListSet<String> tabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         return tabComplete(new CommandContext(sender, command, label, args));
+    }
+
+    default ConcurrentSkipListSet<String> getPlayerNamesForArg(CommandContext ctx, int argIndex) {
+        return CommandHandler.getPlayerNamesForArg(ctx, argIndex);
     }
 }
