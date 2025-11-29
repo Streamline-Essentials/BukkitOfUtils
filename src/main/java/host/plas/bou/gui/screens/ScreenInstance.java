@@ -4,6 +4,7 @@ import host.plas.bou.gui.GuiType;
 import host.plas.bou.gui.InventorySheet;
 import host.plas.bou.gui.ScreenManager;
 import host.plas.bou.gui.screens.blocks.ScreenBlock;
+import host.plas.bou.scheduling.TaskManager;
 import host.plas.bou.utils.ColorUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -65,6 +66,10 @@ public class ScreenInstance extends Gui implements Identified {
         sheet.getSlots().forEach(s -> {
             addItem(s.getIndex(), s.getIcon());
         });
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     @Override
@@ -151,6 +156,11 @@ public class ScreenInstance extends Gui implements Identified {
     }
 
     public void reshow() {
+        if (! TaskManager.isThreadSync()) {
+            TaskManager.runTask(player, this::reshow);
+            return;
+        }
+
         close();
         open();
     }

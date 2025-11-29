@@ -109,6 +109,8 @@ public class TaskManager {
     public static void stop() {
         disableTicking();
 
+        if (getTaskMenuUpdater() != null) getTaskMenuUpdater().cancel();
+
         currentRunnables.forEach((index, runnable) -> runnable.cancel());
         AsyncUtils.getQueuedTasks().forEach(AsyncTask::remove);
 

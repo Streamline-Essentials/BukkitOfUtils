@@ -2,10 +2,14 @@ package host.plas.bou.utils;
 
 import com.mojang.authlib.GameProfile;
 import host.plas.bou.utils.obj.Versioning;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Stream;
 
 public class PlayerUtils {
     public static void updatePlayerName(Player player, String name, boolean format, boolean tabAsWell) {
@@ -56,5 +60,25 @@ public class PlayerUtils {
         } catch (Throwable e) {
             e.printStackTrace();
         }
+    }
+
+    public static ConcurrentSkipListSet<String> getOnlinePlayerNames() {
+        return EntityUtils.getOnlinePlayerNames();
+    }
+
+    public static ConcurrentSkipListSet<String> getOnlinePlayerUUIDs() {
+        return EntityUtils.getOnlinePlayerUuids();
+    }
+
+    public static Stream<OfflinePlayer> getOfflinePlayersStream() {
+        return EntityUtils.getOfflinePlayersStream();
+    }
+
+    public static ConcurrentSkipListSet<String> getOfflinePlayerNames() {
+        return EntityUtils.getOfflinePlayerNames();
+    }
+
+    public static ConcurrentSkipListSet<String> getOfflinePlayerUUIDs() {
+        return EntityUtils.getOfflinePlayerUuids();
     }
 }
