@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
@@ -155,5 +156,18 @@ public class CommandHandler {
         } catch (Exception e) {
             BukkitOfUtils.getInstance().logDebugWithInfo("An unknown error occurred while syncing commands: ", e);
         }
+    }
+
+    public static ConcurrentSkipListSet<String> getPlayerNamesForArg(CommandContext ctx, int argIndex) {
+        ConcurrentSkipListSet<String> results = new ConcurrentSkipListSet<>();
+
+        String partial = ctx.getStringArg(argIndex).toLowerCase();
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (p.getName().toLowerCase().startsWith(partial)) {
+                results.add(p.getName());
+            }
+        }
+
+        return results;
     }
 }
