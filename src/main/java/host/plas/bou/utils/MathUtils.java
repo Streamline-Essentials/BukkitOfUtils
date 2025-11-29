@@ -16,4 +16,14 @@ public class MathUtils {
     public static long clamp(long value, long min, long max) {
         return Math.max(min, Math.min(max, value));
     }
+
+    public static boolean isNumber(String str) {
+        if (str == null || str.isBlank()) return false;
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch (Throwable e) {
+            return false;
+        }
+    }
 }
