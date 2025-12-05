@@ -10,17 +10,16 @@ apply from: rootDir.toString() + '/dependencies.gradle'
 group = properties['group']
 version = properties['version']
 
-java.sourceCompatibility = JavaVersion.VERSION_11
-java.targetCompatibility = JavaVersion.VERSION_11
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 ext {
     pluginMain = properties['plugin.main'] == 'default' ?
             "${project.group}.${project.name.toLowerCase()}.${project.name}" :
             properties['plugin.main']
 }
-
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
 
 repositories {
     mavenCentral()
