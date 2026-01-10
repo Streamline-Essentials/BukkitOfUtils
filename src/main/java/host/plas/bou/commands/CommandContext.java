@@ -1,5 +1,6 @@
 package host.plas.bou.commands;
 
+import host.plas.bou.utils.UuidUtils;
 import host.plas.bou.utils.obj.ContextedString;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,6 +39,10 @@ public class CommandContext extends ContextedString<CommandArgument> {
     public Optional<Player> getPlayer() {
         if (isPlayer()) return Optional.of((Player) commandSender);
         else return Optional.empty();
+    }
+
+    public String getUuid() {
+        return sender.getUuid();
     }
 
     public boolean isConsole() {
