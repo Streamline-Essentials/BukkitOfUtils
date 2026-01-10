@@ -1,9 +1,11 @@
 package host.plas.bou.owncmd;
 
+import gg.drak.thebase.objects.SingleSet;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.commands.CommandContext;
 import host.plas.bou.commands.SimplifiedCommand;
+import host.plas.bou.drakapi.DrakAPI;
 import host.plas.bou.gui.menus.TaskMenu;
 import host.plas.bou.items.ConvertableItemStack;
 import host.plas.bou.items.ItemBin;
@@ -316,6 +318,105 @@ public class DebugCMD extends SimplifiedCommand {
                     ctx.sendMessage("&cNo worlds found.");
                 }
                 break;
+            case "drakapi":
+                if (! ctx.isArgUsable(1)) {
+                    ctx.sendMessage("&cUsage: /boudebug drakapi <action>");
+                    return false;
+                }
+
+                String apiAction = ctx.getStringArg(1).toLowerCase();
+                switch (apiAction) {
+                    case "get":
+                        if (! ctx.isArgUsable(2)) {
+                            ctx.sendMessage("&cUsage: /boudebug drakapi get <key>");
+                            return false;
+                        }
+
+                        String key = ctx.getStringArg(2);
+                        switch (key) {
+                            case "heights":
+                                String heightsData;
+                                if (! ctx.isArgUsable(3)) {
+                                    heightsData = ctx.getUuid();
+                                } else {
+                                    String hdPlayerName = ctx.getStringArg(3);
+                                    if (UuidUtils.isValidPlayerName(hdPlayerName)) {
+                                        OfflinePlayer hdOfflinePlayer = Bukkit.getOfflinePlayer(hdPlayerName);
+                                        heightsData = hdOfflinePlayer.getUniqueId().toString();
+                                    } else {
+                                        Player p = Bukkit.getPlayer(hdPlayerName);
+                                        if (p != null) { // offline mode support
+                                            heightsData = p.getUniqueId().toString();
+                                        } else {
+                                            ctx.sendMessage("&cInvalid player name.");
+                                            return false;
+                                        }
+                                    }
+                                }
+
+                                SingleSet<Boolean, Double> gotten = DrakAPI.getScale(heightsData);
+                                boolean found = gotten.getKey();
+                                double gottenValue = gotten.getValue();
+                                if (found) {
+                                    ctx.sendMessage("&bHeight API data found for &b" + heightsData + "&8: &7Scale = &a" + gottenValue);
+                                } else {
+                                    ctx.sendMessage("&cNo API data found for that player.");
+                                }
+                                break;
+                        }
+                        break;
+                    case "post":
+                        if (! ctx.isArgUsable(2)) {
+                            ctx.sendMessage("&cUsage: /boudebug drakapi post <key>");
+                            return false;
+                        }
+
+                        String postKey = ctx.getStringArg(2);
+                        switch (postKey) {
+                            case "heights":
+                                double scale;
+                                if (! ctx.isArgUsable(3)) {
+                                    scale = 1.0d;
+                                } else {
+                                    Double dScale = ctx.getDoubleArg(3).orElse(null);
+                                    if (dScale != null) {
+                                        scale = dScale;
+                                    } else {
+                                        ctx.sendMessage("&cInvalid scale value.");
+                                        return false;
+                                    }
+                                }
+                                String heightsData;
+                                if (! ctx.isArgUsable(4)) {
+                                    heightsData = ctx.getUuid();
+                                } else {
+                                    String hdPlayerName = ctx.getStringArg(4);
+                                    if (UuidUtils.isValidPlayerName(hdPlayerName)) {
+                                        OfflinePlayer hdOfflinePlayer = Bukkit.getOfflinePlayer(hdPlayerName);
+                                        heightsData = hdOfflinePlayer.getUniqueId().toString();
+                                    } else {
+                                        Player p = Bukkit.getPlayer(hdPlayerName);
+                                        if (p != null) { // offline mode support
+                                            heightsData = p.getUniqueId().toString();
+                                        } else {
+                                            ctx.sendMessage("&cInvalid player name.");
+                                            return false;
+                                        }
+                                    }
+                                }
+
+                                SingleSet<Boolean, Double> gotten = DrakAPI.setScale(heightsData, scale);
+                                boolean found = gotten.getKey();
+                                double gottenValue = gotten.getValue();
+                                if (found) {
+                                    ctx.sendMessage("&bHeight API data set for &b" + heightsData + "&8: &7Scale = &a" + gottenValue);
+                                } else {
+                                    ctx.sendMessage("&cError setting API data for that player.");
+                                }
+                                break;
+                        }
+                        break;
+                }
             case "tasks":
                 if (! ctx.isArgUsable(1)) {
                     ctx.sendMessage("&cUsage: /boudebug tasks <action>");
@@ -410,7 +511,7 @@ public class DebugCMD extends SimplifiedCommand {
         if (ctx.getArgs().size() <= 1) {
             completions.addAll(List.of(
                     "item-nbt", "list-bou-plugins", "store-item", "get-item", "make-item", "uuid",
-                    "up", "down", "top", "tasks", "item-nbt-strict", "make-item-strict", "worlds", "dump"
+                    "up", "down", "top", "tasks", "item-nbt-strict", "make-item-strict", "worlds", "dump", "drakapi"
             ));
         }
 
@@ -424,6 +525,12 @@ public class DebugCMD extends SimplifiedCommand {
             if (ctx.getStringArg(0).equalsIgnoreCase("uuid")) {
                 Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).forEach(completions::add);
             }
+//            if (ctx.getStringArg(0).equalsIgnoreCase("up")) {
+//                completions.addAll(List.of());
+//            }
+            if (ctx.getStringArg(0).equalsIgnoreCase("drakapi")) {
+                completions.addAll(List.of("get", "post"));
+            }
         }
 
         if (ctx.getArgs().size() == 3) {
@@ -431,6 +538,31 @@ public class DebugCMD extends SimplifiedCommand {
                     ctx.getStringArg(1).equalsIgnoreCase("pause") ||
                     ctx.getStringArg(1).equalsIgnoreCase("resume")) {
                 completions.addAll(TaskManager.getTaskIdsAsStrings());
+            }
+            if (ctx.getStringArg(1).equalsIgnoreCase("get")) {
+                completions.addAll(List.of("heights"));
+            }
+            if (ctx.getStringArg(1).equalsIgnoreCase("post")) {
+                completions.addAll(List.of("heights"));
+            }
+        }
+
+        if (ctx.getArgs().size() == 4) {
+            if (ctx.getStringArg(2).equalsIgnoreCase("heights")) {
+                if (ctx.getStringArg(1).equalsIgnoreCase("get")) {
+                    Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).forEach(completions::add);
+                }
+                if (ctx.getStringArg(2).equalsIgnoreCase("post")) {
+                    completions.addAll(List.of("1.0", "0.5", "2.0"));
+                }
+            }
+        }
+
+        if (ctx.getArgs().size() == 5) {
+            if (ctx.getStringArg(2).equalsIgnoreCase("heights")) {
+                if (ctx.getStringArg(1).equalsIgnoreCase("post")) {
+                    Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).forEach(completions::add);
+                }
             }
         }
 
