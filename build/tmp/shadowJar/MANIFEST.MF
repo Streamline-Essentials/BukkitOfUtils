@@ -5,14 +5,14 @@ Class-Path: TheBase-master-SNAPSHOT.jar UniversalScheduler-main-SNAPSHOT
  4.1.12.jar SimplixStorage-master-SNAPSHOT.jar annotations-24.0.1.jar ch
  ecker-qual-3.37.0.jar error_prone_annotations-2.27.0.jar mysql-connecto
  r-j-8.0.33.jar httpmime-4.5.13.jar httpclient-4.5.13.jar httpcore-nio-4
- .4.13.jar httpasyncclient-4.1.5.jar commons-codec-1.15.jar adventure-te
- xt-serializer-gson-4.13.1.jar adventure-key-4.13.1.jar adventure-text-s
- erializer-legacy-4.13.1.jar adventure-api-4.13.1.jar obliviate-utils-2.
- 0.6.jar yamlbeans-1.17.jar json-20231013.jar junit-jupiter-params-5.10.
+ .4.13.jar httpasyncclient-4.1.5.jar commons-codec-1.15.jar obliviate-ut
+ ils-2.0.6.jar adventure-text-serializer-gson-4.13.1.jar adventure-key-4
+ .13.1.jar adventure-text-serializer-legacy-4.13.1.jar adventure-api-4.1
+ 3.1.jar yamlbeans-1.17.jar json-20231013.jar junit-jupiter-params-5.10.
  0.jar junit-jupiter-engine-5.10.0.jar junit-jupiter-api-5.10.0.jar juni
  t-platform-engine-1.10.0.jar junit-platform-commons-1.10.0.jar junit-ju
  piter-5.10.0.jar protobuf-java-3.21.9.jar httpcore-4.4.13.jar commons-l
- ogging-1.2.jar examination-string-1.3.0.jar examination-api-1.3.0.jar d
- atabase-2.0.6.jar placeholder-2.0.6.jar string-2.0.6.jar version-detect
- ion-2.0.6.jar opentest4j-1.3.0.jar
+ ogging-1.2.jar database-2.0.6.jar placeholder-2.0.6.jar string-2.0.6.ja
+ r version-detection-2.0.6.jar examination-string-1.3.0.jar examination-
+ api-1.3.0.jar opentest4j-1.3.0.jar
 

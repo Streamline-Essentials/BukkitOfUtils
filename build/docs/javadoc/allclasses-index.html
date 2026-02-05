@@ -10,7 +10,7 @@
 <link rel="stylesheet" type="text/css" href="stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="script-dir/jquery-ui.min.css" title="Style">
 <script type="text/javascript" src="script.js"></script>
-<script type="text/javascript" src="script-dir/jquery-3.7.1.min.js"></script>
+<script type="text/javascript" src="script-dir/jquery-3.6.1.min.js"></script>
 <script type="text/javascript" src="script-dir/jquery-ui.min.js"></script>
 </head>
 <body class="all-classes-index-page">
@@ -52,11 +52,15 @@ loadScripts(document, 'script');</script>
 </div>
 <div id="all-classes-table">
 <div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="all-classes-table-tab0" role="tab" aria-selected="true" aria-controls="all-classes-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('all-classes-table', 'all-classes-table', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="all-classes-table-tab1" role="tab" aria-selected="false" aria-controls="all-classes-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('all-classes-table', 'all-classes-table-tab1', 2)" class="table-tab">Interfaces</button><button id="all-classes-table-tab2" role="tab" aria-selected="false" aria-controls="all-classes-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('all-classes-table', 'all-classes-table-tab2', 2)" class="table-tab">Classes</button><button id="all-classes-table-tab3" role="tab" aria-selected="false" aria-controls="all-classes-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('all-classes-table', 'all-classes-table-tab3', 2)" class="table-tab">Enum Classes</button></div>
-<div id="all-classes-table.tabpanel" role="tabpanel" aria-labelledby="all-classes-table-tab0">
-<div class="summary-table two-column-summary">
+<div id="all-classes-table.tabpanel" role="tabpanel">
+<div class="summary-table two-column-summary" aria-labelledby="all-classes-table-tab0">
 <div class="table-header col-first">Class</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/callbacks/AbstractCallback.html" title="class in host.plas.bou.events.callbacks">AbstractCallback&lt;T&gt;</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/icons/AirIcon.html" title="class in host.plas.bou.gui.icons">AirIcon</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/icons/AirSlot.html" title="class in host.plas.bou.gui.icons">AirSlot</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/drakapi/ApiEndpoint.html" title="enum class in host.plas.bou.drakapi">ApiEndpoint</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
@@ -100,119 +104,139 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/gui/type/BouGuiTypes.html" title="enum class in host.plas.bou.gui.type">BouGuiTypes</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/BOUListener.html" title="class in host.plas.bou.events">BOUListener</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/BouHelpCMD.html" title="class in host.plas.bou.owncmd">BouHelpCMD</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/BStats.html" title="class in host.plas.bou.bstats">BStats</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/BOUListener.html" title="class in host.plas.bou.events">BOUListener</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/BuildableCommand.html" title="class in host.plas.bou.commands">BuildableCommand</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/BStats.html" title="class in host.plas.bou.bstats">BStats</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/firestring/BuiltIn.html" title="enum class in host.plas.bou.firestring">BuiltIn</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/BukkitOfUtils.html" title="class in host.plas.bou">BukkitOfUtils</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/callbacks/CallbackManager.html" title="class in host.plas.bou.events.callbacks">CallbackManager</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/BuildableCommand.html" title="class in host.plas.bou.commands">BuildableCommand</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/callbacks/CallbackManager.CallbackListener.html" title="class in host.plas.bou.events.callbacks">CallbackManager.CallbackListener</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/utils/obj/CapitalizationType.html" title="enum class in host.plas.bou.utils.obj">CapitalizationType</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/ClassHelper.html" title="class in host.plas.bou.utils">ClassHelper</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/ColorUtils.html" title="class in host.plas.bou.utils">ColorUtils</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/firestring/BuiltIn.html" title="enum class in host.plas.bou.firestring">BuiltIn</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/BukkitOfUtils.html" title="class in host.plas.bou">BukkitOfUtils</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/CommandArgument.html" title="class in host.plas.bou.commands">CommandArgument</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/callbacks/CallbackManager.html" title="class in host.plas.bou.events.callbacks">CallbackManager</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/CommandBuilder.html" title="class in host.plas.bou.commands">CommandBuilder</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/callbacks/CallbackManager.CallbackListener.html" title="class in host.plas.bou.events.callbacks">CallbackManager.CallbackListener</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/CommandContext.html" title="class in host.plas.bou.commands">CommandContext</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/commands/CommandExecution.html" title="interface in host.plas.bou.commands">CommandExecution</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/CommandHandler.html" title="class in host.plas.bou.commands">CommandHandler</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/CommandResult.html" title="class in host.plas.bou.commands">CommandResult</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/utils/obj/CapitalizationType.html" title="enum class in host.plas.bou.utils.obj">CapitalizationType</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/ClassHelper.html" title="class in host.plas.bou.utils">ClassHelper</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/commands/CommandTabCompleter.html" title="interface in host.plas.bou.commands">CommandTabCompleter</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/ColorUtils.html" title="class in host.plas.bou.utils">ColorUtils</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/CommandArgument.html" title="class in host.plas.bou.commands">CommandArgument</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/CommandBuilder.html" title="class in host.plas.bou.commands">CommandBuilder</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/CommandContext.html" title="class in host.plas.bou.commands">CommandContext</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/commands/CommandExecution.html" title="interface in host.plas.bou.commands">CommandExecution</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/CompatibilityManager.html" title="class in host.plas.bou.compat">CompatibilityManager</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/CommandHandler.html" title="class in host.plas.bou.commands">CommandHandler</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/CompatManager.html" title="class in host.plas.bou.compat">CompatManager</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/CommandResult.html" title="class in host.plas.bou.commands">CommandResult</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/scheduling/CompletableTask.html" title="class in host.plas.bou.scheduling">CompletableTask</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/ComplexCommand.html" title="class in host.plas.bou.commands">ComplexCommand</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/commands/CommandTabCompleter.html" title="interface in host.plas.bou.commands">CommandTabCompleter</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/CompatibilityManager.html" title="class in host.plas.bou.compat">CompatibilityManager</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/configs/bits/ConfigurableWhitelist.html" title="class in host.plas.bou.configs.bits">ConfigurableWhitelist&lt;T&gt;</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/CompatManager.html" title="class in host.plas.bou.compat">CompatManager</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/sql/ConnectorSet.html" title="class in host.plas.bou.sql">ConnectorSet</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/scheduling/CompletableTask.html" title="class in host.plas.bou.scheduling">CompletableTask</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/ComplexCommand.html" title="class in host.plas.bou.commands">ComplexCommand</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/configs/bits/ConfigurableWhitelist.html" title="class in host.plas.bou.configs.bits">ConfigurableWhitelist&lt;T&gt;</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/sql/ConnectorSet.html" title="class in host.plas.bou.sql">ConnectorSet</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">A class that holds the information for a database connection.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/obj/ContextedString.html" title="class in host.plas.bou.utils.obj">ContextedString&lt;A&gt;</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/ConvertableItemStack.html" title="class in host.plas.bou.items">ConvertableItemStack</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/obj/ContextedString.html" title="class in host.plas.bou.utils.obj">ContextedString&lt;A&gt;</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/math/CosmicMath.html" title="class in host.plas.bou.math">CosmicMath</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/ConvertableItemStack.html" title="class in host.plas.bou.items">ConvertableItemStack</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/CraftingConfig.html" title="class in host.plas.bou.items">CraftingConfig</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/math/CosmicMath.html" title="class in host.plas.bou.math">CosmicMath</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/sql/DatabaseType.html" title="enum class in host.plas.bou.sql">DatabaseType</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/CraftingConfig.html" title="class in host.plas.bou.items">CraftingConfig</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/sql/DatabaseType.html" title="enum class in host.plas.bou.sql">DatabaseType</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/DatabaseUtils.html" title="class in host.plas.bou.utils">DatabaseUtils</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/sql/DBAction.html" title="interface in host.plas.bou.sql">DBAction</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/sql/DbArg.html" title="class in host.plas.bou.sql">DbArg</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/sql/DBOperator.html" title="class in host.plas.bou.sql">DBOperator</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/DebugCMD.html" title="class in host.plas.bou.owncmd">DebugCMD</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/gui/type/DefaultTypes.html" title="enum class in host.plas.bou.gui.type">DefaultTypes</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/callbacks/DisableCallback.html" title="class in host.plas.bou.events.callbacks">DisableCallback</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/comparators/DistanceComparator.html" title="class in host.plas.bou.utils.comparators">DistanceComparator</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/drakapi/DrakAPI.html" title="class in host.plas.bou.drakapi">DrakAPI</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/droppable/DroppableItem.html" title="class in host.plas.bou.items.droppable">DroppableItem</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/items/droppable/DroppableItemKeyedType.html" title="enum class in host.plas.bou.items.droppable">DroppableItemKeyedType</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/DatabaseUtils.html" title="class in host.plas.bou.utils">DatabaseUtils</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/droppable/DroppableItemSet.html" title="class in host.plas.bou.items.droppable">DroppableItemSet</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/sql/DBAction.html" title="interface in host.plas.bou.sql">DBAction</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/sql/DbArg.html" title="class in host.plas.bou.sql">DbArg</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/sql/DBOperator.html" title="class in host.plas.bou.sql">DBOperator</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/DebugCMD.html" title="class in host.plas.bou.owncmd">DebugCMD</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/gui/type/DefaultTypes.html" title="enum class in host.plas.bou.gui.type">DefaultTypes</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/items/droppable/DroppableItemType.html" title="enum class in host.plas.bou.items.droppable">DroppableItemType</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/callbacks/DisableCallback.html" title="class in host.plas.bou.events.callbacks">DisableCallback</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/droppable/DroppableItemUtils.html" title="class in host.plas.bou.items.droppable">DroppableItemUtils</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/comparators/DistanceComparator.html" title="class in host.plas.bou.utils.comparators">DistanceComparator</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/drakapi/DrakAPI.html" title="class in host.plas.bou.drakapi">DrakAPI</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/droppable/DroppableItem.html" title="class in host.plas.bou.items.droppable">DroppableItem</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/items/droppable/DroppableItemKeyedType.html" title="enum class in host.plas.bou.items.droppable">DroppableItemKeyedType</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/droppable/DroppableItemSet.html" title="class in host.plas.bou.items.droppable">DroppableItemSet</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/items/droppable/DroppableItemType.html" title="enum class in host.plas.bou.items.droppable">DroppableItemType</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/droppable/DroppableItemUtils.html" title="class in host.plas.bou.items.droppable">DroppableItemUtils</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/commands/EmptyCommandExecution.html" title="interface in host.plas.bou.commands">EmptyCommandExecution</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/EmptyHolder.html" title="class in host.plas.bou.compat">EmptyHolder</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/commands/EmptyTabCompleter.html" title="interface in host.plas.bou.commands">EmptyTabCompleter</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/EntityCountCMD.html" title="class in host.plas.bou.owncmd">EntityCountCMD</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/EntityUtils.html" title="class in host.plas.bou.utils">EntityUtils</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/EntityUtils.EntityLookupTimer.html" title="class in host.plas.bou.utils">EntityUtils.EntityLookupTimer</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/sql/ExecutionResult.html" title="enum class in host.plas.bou.sql">ExecutionResult</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/firestring/FireString.html" title="class in host.plas.bou.firestring">FireString</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/FireStringCMD.html" title="class in host.plas.bou.owncmd">FireStringCMD</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/firestring/FireStringConsumer.html" title="interface in host.plas.bou.firestring">FireStringConsumer</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/commands/EmptyCommandExecution.html" title="interface in host.plas.bou.commands">EmptyCommandExecution</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/firestring/FireStringManager.html" title="class in host.plas.bou.firestring">FireStringManager</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/EmptyHolder.html" title="class in host.plas.bou.compat">EmptyHolder</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/GuiMaintenanceListener.html" title="class in host.plas.bou.gui">GuiMaintenanceListener</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/commands/EmptyTabCompleter.html" title="interface in host.plas.bou.commands">EmptyTabCompleter</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/EntityCountCMD.html" title="class in host.plas.bou.owncmd">EntityCountCMD</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/EntityUtils.html" title="class in host.plas.bou.utils">EntityUtils</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/gui/GuiType.html" title="interface in host.plas.bou.gui">GuiType</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/EntityUtils.EntityLookupTimer.html" title="class in host.plas.bou.utils">EntityUtils.EntityLookupTimer</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/sql/ExecutionResult.html" title="enum class in host.plas.bou.sql">ExecutionResult</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/firestring/FireString.html" title="class in host.plas.bou.firestring">FireString</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/FireStringCMD.html" title="class in host.plas.bou.owncmd">FireStringCMD</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/firestring/FireStringConsumer.html" title="interface in host.plas.bou.firestring">FireStringConsumer</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/HeldHolder.html" title="class in host.plas.bou.compat">HeldHolder</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/firestring/FireStringManager.html" title="class in host.plas.bou.firestring">FireStringManager</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/GetItemCMD.html" title="class in host.plas.bou.owncmd">GetItemCMD</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/GuiHelper.html" title="class in host.plas.bou.gui">GuiHelper</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/GuiMaintenanceListener.html" title="class in host.plas.bou.gui">GuiMaintenanceListener</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/gui/GuiType.html" title="interface in host.plas.bou.gui">GuiType</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/HeldHolder.html" title="class in host.plas.bou.compat">HeldHolder</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/helpful/data/Helpful.html" title="class in host.plas.bou.helpful.data">Helpful</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/helpful/data/HelpfulGui.html" title="class in host.plas.bou.helpful.data">HelpfulGui</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/helpful/data/HelpfulGuiType.html" title="class in host.plas.bou.helpful.data">HelpfulGuiType</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/helpful/data/HelpfulIdentified.html" title="interface in host.plas.bou.helpful.data">HelpfulIdentified</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/helpful/data/HelpfulInfo.html" title="class in host.plas.bou.helpful.data">HelpfulInfo</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/helpful/HelpfulPlugin.html" title="interface in host.plas.bou.helpful">HelpfulPlugin</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/helpful/HelpfulUtils.html" title="class in host.plas.bou.helpful">HelpfulUtils</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
 <div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/compat/HolderCreator.html" title="interface in host.plas.bou.compat">HolderCreator</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
@@ -236,142 +260,152 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
 <div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/items/ItemData.html" title="class in host.plas.bou.gui.items">ItemData</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/serialization/items/ItemStackSerializer.html" title="class in host.plas.bou.serialization.items">ItemStackSerializer</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/ItemFactory.html" title="class in host.plas.bou.items">ItemFactory</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/ItemUtils.html" title="class in host.plas.bou.items">ItemUtils</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/serialization/items/ItemStackSerializer.html" title="class in host.plas.bou.serialization.items">ItemStackSerializer</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/events/ListenerConglomerate.html" title="interface in host.plas.bou.events">ListenerConglomerate</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/LocationUtils.html" title="class in host.plas.bou.utils">LocationUtils</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/luckperms/LPHeld.html" title="class in host.plas.bou.compat.luckperms">LPHeld</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/ItemUtils.html" title="class in host.plas.bou.items">ItemUtils</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/luckperms/LPHolder.html" title="class in host.plas.bou.compat.luckperms">LPHolder</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/luckperms/LPHolderCreator.html" title="class in host.plas.bou.compat.luckperms">LPHolderCreator</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/events/ListenerConglomerate.html" title="interface in host.plas.bou.events">ListenerConglomerate</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/LocationUtils.html" title="class in host.plas.bou.utils">LocationUtils</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/MainListener.html" title="class in host.plas.bou.events">MainListener</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/luckperms/LPHeld.html" title="class in host.plas.bou.compat.luckperms">LPHeld</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/obj/ManagedInventory.html" title="class in host.plas.bou.utils.obj">ManagedInventory</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/luckperms/LPHolder.html" title="class in host.plas.bou.compat.luckperms">LPHolder</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/MathUtils.html" title="class in host.plas.bou.utils">MathUtils</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/luckperms/LPHolderCreator.html" title="class in host.plas.bou.compat.luckperms">LPHolderCreator</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/MenuUtils.html" title="class in host.plas.bou.gui">MenuUtils</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/MainListener.html" title="class in host.plas.bou.events">MainListener</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/MessageCMD.html" title="class in host.plas.bou.owncmd">MessageCMD</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/obj/ManagedInventory.html" title="class in host.plas.bou.utils.obj">ManagedInventory</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/MessageUtils.html" title="class in host.plas.bou.utils">MessageUtils</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/MathUtils.html" title="class in host.plas.bou.utils">MathUtils</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.html" title="class in host.plas.bou.bstats">Metrics</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/MenuUtils.html" title="class in host.plas.bou.gui">MenuUtils</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.AdvancedBarChart.html" title="class in host.plas.bou.bstats">Metrics.AdvancedBarChart</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/MessageCMD.html" title="class in host.plas.bou.owncmd">MessageCMD</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.AdvancedPie.html" title="class in host.plas.bou.bstats">Metrics.AdvancedPie</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/MessageUtils.html" title="class in host.plas.bou.utils">MessageUtils</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.CustomChart.html" title="class in host.plas.bou.bstats">Metrics.CustomChart</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.html" title="class in host.plas.bou.bstats">Metrics</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.DrilldownPie.html" title="class in host.plas.bou.bstats">Metrics.DrilldownPie</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.AdvancedBarChart.html" title="class in host.plas.bou.bstats">Metrics.AdvancedBarChart</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.JsonObjectBuilder.html" title="class in host.plas.bou.bstats">Metrics.JsonObjectBuilder</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.AdvancedPie.html" title="class in host.plas.bou.bstats">Metrics.AdvancedPie</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.CustomChart.html" title="class in host.plas.bou.bstats">Metrics.CustomChart</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.DrilldownPie.html" title="class in host.plas.bou.bstats">Metrics.DrilldownPie</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.JsonObjectBuilder.html" title="class in host.plas.bou.bstats">Metrics.JsonObjectBuilder</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
 <div class="block">An extremely simple JSON builder.</div>
 </div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.JsonObjectBuilder.JsonObject.html" title="class in host.plas.bou.bstats">Metrics.JsonObjectBuilder.JsonObject</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.JsonObjectBuilder.JsonObject.html" title="class in host.plas.bou.bstats">Metrics.JsonObjectBuilder.JsonObject</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">
 <div class="block">A super simple representation of a JSON object.</div>
 </div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.MetricsBase.html" title="class in host.plas.bou.bstats">Metrics.MetricsBase</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.MultiLineChart.html" title="class in host.plas.bou.bstats">Metrics.MultiLineChart</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.MetricsBase.html" title="class in host.plas.bou.bstats">Metrics.MetricsBase</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.SimpleBarChart.html" title="class in host.plas.bou.bstats">Metrics.SimpleBarChart</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.MultiLineChart.html" title="class in host.plas.bou.bstats">Metrics.MultiLineChart</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.SimplePie.html" title="class in host.plas.bou.bstats">Metrics.SimplePie</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.SimpleBarChart.html" title="class in host.plas.bou.bstats">Metrics.SimpleBarChart</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.SingleLineChart.html" title="class in host.plas.bou.bstats">Metrics.SingleLineChart</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.SimplePie.html" title="class in host.plas.bou.bstats">Metrics.SimplePie</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/notifications/NotificationTimer.html" title="class in host.plas.bou.notifications">NotificationTimer</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/bstats/Metrics.SingleLineChart.html" title="class in host.plas.bou.bstats">Metrics.SingleLineChart</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/serialization/ObjectSerializer.html" title="class in host.plas.bou.serialization">ObjectSerializer&lt;V&gt;</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/notifications/NotificationTimer.html" title="class in host.plas.bou.notifications">NotificationTimer</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/menus/PaginatedMenu.html" title="class in host.plas.bou.gui.menus">PaginatedMenu</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/serialization/ObjectSerializer.html" title="class in host.plas.bou.serialization">ObjectSerializer&lt;V&gt;</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/PAPICompat.html" title="class in host.plas.bou.compat.papi">PAPICompat</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/menus/PaginatedMenu.html" title="class in host.plas.bou.gui.menus">PaginatedMenu</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/PAPIHeld.html" title="class in host.plas.bou.compat.papi">PAPIHeld</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/PAPICompat.html" title="class in host.plas.bou.compat.papi">PAPICompat</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/PAPIHolder.html" title="class in host.plas.bou.compat.papi">PAPIHolder</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/PAPIHeld.html" title="class in host.plas.bou.compat.papi">PAPIHeld</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/PAPIHolderCreator.html" title="class in host.plas.bou.compat.papi">PAPIHolderCreator</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/PAPIHolder.html" title="class in host.plas.bou.compat.papi">PAPIHolder</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/expansion/PlaceholderArgument.html" title="class in host.plas.bou.compat.papi.expansion">PlaceholderArgument</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/PAPIHolderCreator.html" title="class in host.plas.bou.compat.papi">PAPIHolderCreator</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/expansion/PlaceholderContext.html" title="class in host.plas.bou.compat.papi.expansion">PlaceholderContext</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/expansion/PlaceholderArgument.html" title="class in host.plas.bou.compat.papi.expansion">PlaceholderArgument</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/PlayerUtils.html" title="class in host.plas.bou.utils">PlayerUtils</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/compat/papi/expansion/PlaceholderContext.html" title="class in host.plas.bou.compat.papi.expansion">PlaceholderContext</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/callbacks/PluginCallback.html" title="class in host.plas.bou.events.callbacks">PluginCallback</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/PlayerUtils.html" title="class in host.plas.bou.utils">PlayerUtils</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/self/plugin/PluginDisableEvent.html" title="class in host.plas.bou.events.self.plugin">PluginDisableEvent</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/callbacks/PluginCallback.html" title="class in host.plas.bou.events.callbacks">PluginCallback</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/PluginUtils.html" title="class in host.plas.bou.utils">PluginUtils</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/events/self/plugin/PluginDisableEvent.html" title="class in host.plas.bou.events.self.plugin">PluginDisableEvent</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/drakapi/RequestType.html" title="enum class in host.plas.bou.drakapi">RequestType</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/PluginUtils.html" title="class in host.plas.bou.utils">PluginUtils</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/drakapi/RequestType.html" title="enum class in host.plas.bou.drakapi">RequestType</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/items/retreivables/RetreivableItem.html" title="interface in host.plas.bou.items.retreivables">RetreivableItem</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/items/retreivables/RetrievableKey.html" title="class in host.plas.bou.items.retreivables">RetrievableKey</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/screens/blocks/ScreenBlock.html" title="class in host.plas.bou.gui.screens.blocks">ScreenBlock</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/screens/events/ScreenBlockEvent.html" title="class in host.plas.bou.gui.screens.events">ScreenBlockEvent</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/screens/ScreenInstance.html" title="class in host.plas.bou.gui.screens">ScreenInstance</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/ScreenManager.html" title="class in host.plas.bou.gui">ScreenManager</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/Sender.html" title="class in host.plas.bou.commands">Sender</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/SenderUtils.html" title="class in host.plas.bou.utils">SenderUtils</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/SimplifiedCommand.html" title="class in host.plas.bou.commands">SimplifiedCommand</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/gui/slots/SlotType.html" title="enum class in host.plas.bou.gui.slots">SlotType</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/screens/blocks/ScreenBlock.html" title="class in host.plas.bou.gui.screens.blocks">ScreenBlock</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/obj/StringArgument.html" title="class in host.plas.bou.utils.obj">StringArgument</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/screens/events/ScreenBlockEvent.html" title="class in host.plas.bou.gui.screens.events">ScreenBlockEvent</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/screens/ScreenInstance.html" title="class in host.plas.bou.gui.screens">ScreenInstance</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/ScreenManager.html" title="class in host.plas.bou.gui">ScreenManager</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/Sender.html" title="class in host.plas.bou.commands">Sender</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/SenderUtils.html" title="class in host.plas.bou.utils">SenderUtils</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/commands/SimplifiedCommand.html" title="class in host.plas.bou.commands">SimplifiedCommand</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/gui/slots/SlotType.html" title="enum class in host.plas.bou.gui.slots">SlotType</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/obj/StringArgument.html" title="class in host.plas.bou.utils.obj">StringArgument</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/utils/obj/StringArgument.ContentType.html" title="enum class in host.plas.bou.utils.obj">StringArgument.ContentType</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/utils/obj/StringArgument.ContextType.html" title="enum class in host.plas.bou.utils.obj">StringArgument.ContextType</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/utils/obj/StringArgument.ContentType.html" title="enum class in host.plas.bou.utils.obj">StringArgument.ContentType</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/StringUtils.html" title="class in host.plas.bou.utils">StringUtils</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/configs/bits/StringWhitelist.html" title="class in host.plas.bou.configs.bits">StringWhitelist</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/scheduling/TaskAnswer.html" title="enum class in host.plas.bou.scheduling">TaskAnswer</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/utils/obj/StringArgument.ContextType.html" title="enum class in host.plas.bou.utils.obj">StringArgument.ContextType</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/scheduling/TaskManager.html" title="class in host.plas.bou.scheduling">TaskManager</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/StringUtils.html" title="class in host.plas.bou.utils">StringUtils</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/menus/TaskMenu.html" title="class in host.plas.bou.gui.menus">TaskMenu</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/configs/bits/StringWhitelist.html" title="class in host.plas.bou.configs.bits">StringWhitelist</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/scheduling/TaskMenuUpdater.html" title="class in host.plas.bou.scheduling">TaskMenuUpdater</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/ThingyUtils.html" title="class in host.plas.bou.utils">ThingyUtils</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab3"><a href="host/plas/bou/scheduling/TaskAnswer.html" title="enum class in host.plas.bou.scheduling">TaskAnswer</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab3">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/scheduling/TaskManager.html" title="class in host.plas.bou.scheduling">TaskManager</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/TitleCMD.html" title="class in host.plas.bou.owncmd">TitleCMD</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/gui/menus/TaskMenu.html" title="class in host.plas.bou.gui.menus">TaskMenu</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/UUIDFetcher.html" title="class in host.plas.bou.utils">UUIDFetcher</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/scheduling/TaskMenuUpdater.html" title="class in host.plas.bou.scheduling">TaskMenuUpdater</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/UuidUtils.html" title="class in host.plas.bou.utils">UuidUtils</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/text/TextDocument.html" title="class in host.plas.bou.text">TextDocument</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/obj/Versioning.html" title="class in host.plas.bou.utils.obj">Versioning</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/text/TextPage.html" title="class in host.plas.bou.text">TextPage</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/VersionTool.html" title="class in host.plas.bou.utils">VersionTool</a></div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/ThingyUtils.html" title="class in host.plas.bou.utils">ThingyUtils</a></div>
 <div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/commands/WithCommandContext.html" title="interface in host.plas.bou.commands">WithCommandContext&lt;R&gt;</a></div>
-<div class="col-last odd-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
-<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/world/WorldSet.html" title="class in host.plas.bou.world">WorldSet</a></div>
-<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
-<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/WorldUtils.html" title="class in host.plas.bou.utils">WorldUtils</a></div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/owncmd/TitleCMD.html" title="class in host.plas.bou.owncmd">TitleCMD</a></div>
 <div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/UUIDFetcher.html" title="class in host.plas.bou.utils">UUIDFetcher</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/UuidUtils.html" title="class in host.plas.bou.utils">UuidUtils</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/obj/Versioning.html" title="class in host.plas.bou.utils.obj">Versioning</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/VersionTool.html" title="class in host.plas.bou.utils">VersionTool</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab1"><a href="host/plas/bou/commands/WithCommandContext.html" title="interface in host.plas.bou.commands">WithCommandContext&lt;R&gt;</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab1">&nbsp;</div>
+<div class="col-first odd-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/world/WorldSet.html" title="class in host.plas.bou.world">WorldSet</a></div>
+<div class="col-last odd-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
+<div class="col-first even-row-color all-classes-table all-classes-table-tab2"><a href="host/plas/bou/utils/WorldUtils.html" title="class in host.plas.bou.utils">WorldUtils</a></div>
+<div class="col-last even-row-color all-classes-table all-classes-table-tab2">&nbsp;</div>
 </div>
 </div>
 </div>

@@ -10,7 +10,7 @@
 <link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../../../script-dir/jquery-ui.min.css" title="Style">
 <script type="text/javascript" src="../../../../script.js"></script>
-<script type="text/javascript" src="../../../../script-dir/jquery-3.7.1.min.js"></script>
+<script type="text/javascript" src="../../../../script-dir/jquery-3.6.1.min.js"></script>
 <script type="text/javascript" src="../../../../script-dir/jquery-ui.min.js"></script>
 </head>
 <body class="class-declaration-page">
@@ -103,7 +103,8 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int)" class="member-name-link">InventorySheet</a><wbr>(int&nbsp;slots)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,host.plas.bou.gui.slots.Slot...)" class="member-name-link">InventorySheet</a><wbr>(int&nbsp;slots,
+ <a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>...&nbsp;icons)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -113,9 +114,9 @@ loadScripts(document, 'script');</script>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
-<div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
-<div class="summary-table three-column-summary">
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div id="method-summary-table.tabpanel" role="tabpanel">
+<div class="summary-table three-column-summary" aria-labelledby="method-summary-table-tab0">
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
@@ -127,6 +128,18 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addIcon(int,org.bukkit.inventory.ItemStack,host.plas.bou.gui.slots.SlotType)" class="member-name-link">addIcon</a><wbr>(int&nbsp;slot,
  org.bukkit.inventory.ItemStack&nbsp;stack,
  <a href="slots/SlotType.html" title="enum class in host.plas.bou.gui.slots">SlotType</a>&nbsp;type)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#asSlots(host.plas.bou.gui.slots.Slot...)" class="member-name-link">asSlots</a><wbr>(<a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>...&nbsp;slots)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="InventorySheet.html" title="class in host.plas.bou.gui">InventorySheet</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#empty(int)" class="member-name-link">empty</a><wbr>(int&nbsp;size)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ensureSlots()" class="member-name-link">ensureSlots</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ensureSlots(boolean)" class="member-name-link">ensureSlots</a><wbr>(boolean&nbsp;clear)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#forEachSlot(java.util.function.Consumer)" class="member-name-link">forEachSlot</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;<a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>&gt;&nbsp;consumer)</code></div>
@@ -144,13 +157,43 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSlots()" class="member-name-link">getSlots</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#insertSlot(host.plas.bou.gui.slots.Slot)" class="member-name-link">insertSlot</a><wbr>(<a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>&nbsp;slot)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="InventorySheet.html" title="class in host.plas.bou.gui">InventorySheet</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#of(host.plas.bou.helpful.data.HelpfulGui,int,org.bukkit.Material)" class="member-name-link">of</a><wbr>(<a href="../helpful/data/HelpfulGui.html" title="class in host.plas.bou.helpful.data">HelpfulGui</a>&nbsp;gui,
+ int&nbsp;startIndex,
+ org.bukkit.Material&nbsp;material)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="InventorySheet.html" title="class in host.plas.bou.gui">InventorySheet</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#of(host.plas.bou.utils.obj.ManagedInventory)" class="member-name-link">of</a><wbr>(<a href="../utils/obj/ManagedInventory.html" title="class in host.plas.bou.utils.obj">ManagedInventory</a>&nbsp;inventory)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="InventorySheet.html" title="class in host.plas.bou.gui">InventorySheet</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#of(host.plas.bou.utils.obj.ManagedInventory,host.plas.bou.gui.slots.SlotType)" class="member-name-link">of</a><wbr>(<a href="../utils/obj/ManagedInventory.html" title="class in host.plas.bou.utils.obj">ManagedInventory</a>&nbsp;inventory,
+ <a href="slots/SlotType.html" title="enum class in host.plas.bou.gui.slots">SlotType</a>&nbsp;type)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeIcon(int)" class="member-name-link">removeIcon</a><wbr>(int&nbsp;slot)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSize(int)" class="member-name-link">setSize</a><wbr>(int&nbsp;size)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAllEmpty()" class="member-name-link">setAllEmpty</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSlots(java.util.concurrent.ConcurrentSkipListSet)" class="member-name-link">setSlots</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentSkipListSet.html" title="class or interface in java.util.concurrent" class="external-link">ConcurrentSkipListSet</a>&lt;<a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>&gt;&nbsp;slots)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setIcon(int,mc.obliviate.inventory.Icon)" class="member-name-link">setIcon</a><wbr>(int&nbsp;slot,
+ mc.obliviate.inventory.Icon&nbsp;icon)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setIcon(int,org.bukkit.inventory.ItemStack,host.plas.bou.gui.slots.SlotType)" class="member-name-link">setIcon</a><wbr>(int&nbsp;slot,
+ org.bukkit.inventory.ItemStack&nbsp;stack,
+ <a href="slots/SlotType.html" title="enum class in host.plas.bou.gui.slots">SlotType</a>&nbsp;type)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSize(int)" class="member-name-link">setSize</a><wbr>(int&nbsp;size)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSlots(java.util.concurrent.ConcurrentSkipListSet)" class="member-name-link">setSlots</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentSkipListSet.html" title="class or interface in java.util.concurrent" class="external-link">ConcurrentSkipListSet</a>&lt;<a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>&gt;&nbsp;slots)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSlots(host.plas.bou.gui.slots.Slot...)" class="member-name-link">withSlots</a><wbr>(<a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>...&nbsp;slots)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
@@ -170,9 +213,10 @@ loadScripts(document, 'script');</script>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(int)">
+<section class="detail" id="&lt;init&gt;(int,host.plas.bou.gui.slots.Slot...)">
 <h3>InventorySheet</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">InventorySheet</span><wbr><span class="parameters">(int&nbsp;slots)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">InventorySheet</span><wbr><span class="parameters">(int&nbsp;slots,
+ <a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>...&nbsp;icons)</span></div>
 </section>
 </li>
 </ul>
@@ -183,6 +227,45 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="ensureSlots(boolean)">
+<h3>ensureSlots</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">ensureSlots</span><wbr><span class="parameters">(boolean&nbsp;clear)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="ensureSlots()">
+<h3>ensureSlots</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">ensureSlots</span>()</div>
+</section>
+</li>
+<li>
+<section class="detail" id="withSlots(host.plas.bou.gui.slots.Slot...)">
+<h3>withSlots</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">withSlots</span><wbr><span class="parameters">(<a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>...&nbsp;slots)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="asSlots(host.plas.bou.gui.slots.Slot...)">
+<h3>asSlots</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">asSlots</span><wbr><span class="parameters">(<a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>...&nbsp;slots)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="setIcon(int,org.bukkit.inventory.ItemStack,host.plas.bou.gui.slots.SlotType)">
+<h3>setIcon</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setIcon</span><wbr><span class="parameters">(int&nbsp;slot,
+ org.bukkit.inventory.ItemStack&nbsp;stack,
+ <a href="slots/SlotType.html" title="enum class in host.plas.bou.gui.slots">SlotType</a>&nbsp;type)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="setIcon(int,mc.obliviate.inventory.Icon)">
+<h3>setIcon</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setIcon</span><wbr><span class="parameters">(int&nbsp;slot,
+ mc.obliviate.inventory.Icon&nbsp;icon)</span></div>
+</section>
+</li>
 <li>
 <section class="detail" id="addIcon(int,org.bukkit.inventory.ItemStack,host.plas.bou.gui.slots.SlotType)">
 <h3>addIcon</h3>
@@ -196,6 +279,12 @@ loadScripts(document, 'script');</script>
 <h3>addIcon</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addIcon</span><wbr><span class="parameters">(int&nbsp;slot,
  mc.obliviate.inventory.Icon&nbsp;icon)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="insertSlot(host.plas.bou.gui.slots.Slot)">
+<h3>insertSlot</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">insertSlot</span><wbr><span class="parameters">(<a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>&nbsp;slot)</span></div>
 </section>
 </li>
 <li>
@@ -217,9 +306,42 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="setAllEmpty()">
+<h3>setAllEmpty</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setAllEmpty</span>()</div>
+</section>
+</li>
+<li>
 <section class="detail" id="forEachSlot(java.util.function.Consumer)">
 <h3>forEachSlot</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">forEachSlot</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;<a href="slots/Slot.html" title="class in host.plas.bou.gui.slots">Slot</a>&gt;&nbsp;consumer)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="empty(int)">
+<h3>empty</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="InventorySheet.html" title="class in host.plas.bou.gui">InventorySheet</a></span>&nbsp;<span class="element-name">empty</span><wbr><span class="parameters">(int&nbsp;size)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="of(host.plas.bou.utils.obj.ManagedInventory)">
+<h3>of</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="InventorySheet.html" title="class in host.plas.bou.gui">InventorySheet</a></span>&nbsp;<span class="element-name">of</span><wbr><span class="parameters">(<a href="../utils/obj/ManagedInventory.html" title="class in host.plas.bou.utils.obj">ManagedInventory</a>&nbsp;inventory)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="of(host.plas.bou.utils.obj.ManagedInventory,host.plas.bou.gui.slots.SlotType)">
+<h3>of</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="InventorySheet.html" title="class in host.plas.bou.gui">InventorySheet</a></span>&nbsp;<span class="element-name">of</span><wbr><span class="parameters">(<a href="../utils/obj/ManagedInventory.html" title="class in host.plas.bou.utils.obj">ManagedInventory</a>&nbsp;inventory,
+ <a href="slots/SlotType.html" title="enum class in host.plas.bou.gui.slots">SlotType</a>&nbsp;type)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="of(host.plas.bou.helpful.data.HelpfulGui,int,org.bukkit.Material)">
+<h3>of</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="InventorySheet.html" title="class in host.plas.bou.gui">InventorySheet</a></span>&nbsp;<span class="element-name">of</span><wbr><span class="parameters">(<a href="../helpful/data/HelpfulGui.html" title="class in host.plas.bou.helpful.data">HelpfulGui</a>&nbsp;gui,
+ int&nbsp;startIndex,
+ org.bukkit.Material&nbsp;material)</span></div>
 </section>
 </li>
 <li>

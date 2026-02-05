@@ -166,6 +166,12 @@ public class EntityUtils {
         });
     }
 
+    public static void collectEntitiesInWorldThenDoSet(String worldName, Consumer<Collection<Entity>> consumer) {
+        TaskManager.runTask(() -> {
+            consumer.accept(getEntities(true).values().stream().map(WeakReference::get).filter(Objects::nonNull).filter(entity -> entity.getWorld().getName().equalsIgnoreCase(worldName)).collect(Collectors.toList()));
+        });
+    }
+
     public static ConcurrentSkipListSet<String> getOnlinePlayerNames() {
         ConcurrentSkipListSet<String> names = new ConcurrentSkipListSet<>();
         Bukkit.getOnlinePlayers().forEach(player -> names.add(player.getName()));

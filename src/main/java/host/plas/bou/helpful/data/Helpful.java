@@ -3,6 +3,7 @@ package host.plas.bou.helpful.data;
 import host.plas.bou.text.TextDocument;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 @Getter @Setter
@@ -27,8 +28,8 @@ public class Helpful implements HelpfulIdentified {
         this(HelpfulInfo.of(identifier, prettyName, stylizedName), TextDocument.ofLines(lines));
     }
 
-    public void send(Player player) {
-        getDocument().readAllTo(player);
+    public void send(CommandSender sender) {
+        getDocument().readAllTo(sender);
     }
 
     public HelpfulGui asGui() {
