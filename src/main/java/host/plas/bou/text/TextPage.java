@@ -3,6 +3,7 @@ package host.plas.bou.text;
 import host.plas.bou.commands.Sender;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -68,18 +69,18 @@ public class TextPage {
         return this.lines == null || this.lines.isEmpty();
     }
 
-    public void readTo(Player player) {
-        readTo(player, false, true);
+    public void readTo(CommandSender sender) {
+        readTo(sender, false, true);
     }
 
-    public void readTo(Player player, boolean format) {
-        readTo(player, false, format);
+    public void readTo(CommandSender sender, boolean format) {
+        readTo(sender, false, format);
     }
 
-    public void readTo(Player player, boolean literalIndexing, boolean format) {
+    public void readTo(CommandSender sender, boolean literalIndexing, boolean format) {
         if (isEmpty()) return;
 
-        Sender sender = new Sender(player);
+        Sender s = new Sender(sender);
 
         List<String> lines = new ArrayList<>();
         if (literalIndexing) {
@@ -97,7 +98,7 @@ public class TextPage {
         }
 
         lines.forEach(line -> {
-            sender.sendMessage(line, format);
+            s.sendMessage(line, format);
         });
     }
 

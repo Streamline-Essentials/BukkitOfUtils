@@ -5,6 +5,9 @@ import host.plas.bou.events.ListenerConglomerate;
 import host.plas.bou.events.callbacks.DisableCallback;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.instances.BaseManager;
+import host.plas.bou.items.ItemFactory;
+import host.plas.bou.items.retreivables.RetreivableItem;
+import host.plas.bou.items.retreivables.RetrievableKey;
 import host.plas.bou.scheduling.TaskManager;
 import host.plas.bou.utils.DatabaseUtils;
 import host.plas.bou.utils.MessageUtils;
@@ -13,6 +16,7 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import gg.drak.thebase.async.SyncInstance;
@@ -24,6 +28,7 @@ import gg.drak.thebase.objects.Identified;
 import gg.drak.thebase.objects.handling.IEventable;
 import gg.drak.thebase.objects.handling.derived.IModifierEventable;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 @Getter @Setter
@@ -86,6 +91,22 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
         PluginDisableEvent event = new PluginDisableEvent(this).fire();
 
         unregisterSelfListener();
+    }
+
+    public Optional<RetreivableItem> getFactory(String key) {
+        return ItemFactory.getFactory(getRetrievableKey(key));
+    }
+
+    public Optional<ItemStack> getItem(String key) {
+        return ItemFactory.getItem(getRetrievableKey(key));
+    }
+
+    public void registerFactory(String key, RetreivableItem item) {
+        ItemFactory.registerFactory(getRetrievableKey(key), item);
+    }
+
+    public RetrievableKey getRetrievableKey(String key) {
+        return RetrievableKey.of(this, key);
     }
 
     public void registerSelfListener() {

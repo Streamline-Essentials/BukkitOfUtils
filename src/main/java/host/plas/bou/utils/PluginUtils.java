@@ -1,6 +1,8 @@
 package host.plas.bou.utils;
 
 import host.plas.bou.BetterPlugin;
+import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.helpful.HelpfulPlugin;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.NamespacedKey;
@@ -45,5 +47,22 @@ public class PluginUtils {
 
     public static int getLoadedBOUPluginCount() {
         return getLoadedBOUPlugins().size();
+    }
+
+    public static Optional<HelpfulPlugin> parseHelpfulPlugin(String name) {
+        if (name.equalsIgnoreCase("bou") || name.equalsIgnoreCase("bukkitofutils")) {
+            return Optional.of(BukkitOfUtils.getInstance());
+        }
+
+        return getHelpfulPlugins().stream()
+                .filter(plugin -> plugin.getIdentifier().equalsIgnoreCase(name))
+                .findFirst();
+    }
+
+    public static ConcurrentSkipListSet<HelpfulPlugin> getHelpfulPlugins() {
+        return getLoadedBOUPlugins().stream()
+                .filter(plugin -> plugin instanceof HelpfulPlugin)
+                .map(plugin -> (HelpfulPlugin) plugin)
+                .collect(ConcurrentSkipListSet::new, ConcurrentSkipListSet::add, ConcurrentSkipListSet::addAll);
     }
 }

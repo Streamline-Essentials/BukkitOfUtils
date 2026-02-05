@@ -10,7 +10,7 @@
 <link rel="stylesheet" type="text/css" href="stylesheet.css" title="Style">
 <link rel="stylesheet" type="text/css" href="script-dir/jquery-ui.min.css" title="Style">
 <script type="text/javascript" src="script.js"></script>
-<script type="text/javascript" src="script-dir/jquery-3.7.1.min.js"></script>
+<script type="text/javascript" src="script-dir/jquery-3.6.1.min.js"></script>
 <script type="text/javascript" src="script-dir/jquery-ui.min.js"></script>
 </head>
 <body class="tree-page">
@@ -79,9 +79,12 @@ loadScripts(document, 'script');</script>
 <li><a href="host/plas/bou/gui/screens/events/package-tree.html">host.plas.bou.gui.screens.events</a>, </li>
 <li><a href="host/plas/bou/gui/slots/package-tree.html">host.plas.bou.gui.slots</a>, </li>
 <li><a href="host/plas/bou/gui/type/package-tree.html">host.plas.bou.gui.type</a>, </li>
+<li><a href="host/plas/bou/helpful/package-tree.html">host.plas.bou.helpful</a>, </li>
+<li><a href="host/plas/bou/helpful/data/package-tree.html">host.plas.bou.helpful.data</a>, </li>
 <li><a href="host/plas/bou/instances/package-tree.html">host.plas.bou.instances</a>, </li>
 <li><a href="host/plas/bou/items/package-tree.html">host.plas.bou.items</a>, </li>
 <li><a href="host/plas/bou/items/droppable/package-tree.html">host.plas.bou.items.droppable</a>, </li>
+<li><a href="host/plas/bou/items/retreivables/package-tree.html">host.plas.bou.items.retreivables</a>, </li>
 <li><a href="host/plas/bou/math/package-tree.html">host.plas.bou.math</a>, </li>
 <li><a href="host/plas/bou/notifications/package-tree.html">host.plas.bou.notifications</a>, </li>
 <li><a href="host/plas/bou/owncmd/package-tree.html">host.plas.bou.owncmd</a>, </li>
@@ -89,6 +92,7 @@ loadScripts(document, 'script');</script>
 <li><a href="host/plas/bou/serialization/package-tree.html">host.plas.bou.serialization</a>, </li>
 <li><a href="host/plas/bou/serialization/items/package-tree.html">host.plas.bou.serialization.items</a>, </li>
 <li><a href="host/plas/bou/sql/package-tree.html">host.plas.bou.sql</a>, </li>
+<li><a href="host/plas/bou/text/package-tree.html">host.plas.bou.text</a>, </li>
 <li><a href="host/plas/bou/utils/package-tree.html">host.plas.bou.utils</a>, </li>
 <li><a href="host/plas/bou/utils/comparators/package-tree.html">host.plas.bou.utils.comparators</a>, </li>
 <li><a href="host/plas/bou/utils/obj/package-tree.html">host.plas.bou.utils.obj</a>, </li>
@@ -165,9 +169,11 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">host.plas.bou.commands.<a href="host/plas/bou/commands/SimplifiedCommand.html" class="type-name-link" title="class in host.plas.bou.commands">SimplifiedCommand</a>
 <ul>
+<li class="circle">host.plas.bou.owncmd.<a href="host/plas/bou/owncmd/BouHelpCMD.html" class="type-name-link" title="class in host.plas.bou.owncmd">BouHelpCMD</a></li>
 <li class="circle">host.plas.bou.owncmd.<a href="host/plas/bou/owncmd/DebugCMD.html" class="type-name-link" title="class in host.plas.bou.owncmd">DebugCMD</a></li>
 <li class="circle">host.plas.bou.owncmd.<a href="host/plas/bou/owncmd/EntityCountCMD.html" class="type-name-link" title="class in host.plas.bou.owncmd">EntityCountCMD</a></li>
 <li class="circle">host.plas.bou.owncmd.<a href="host/plas/bou/owncmd/FireStringCMD.html" class="type-name-link" title="class in host.plas.bou.owncmd">FireStringCMD</a></li>
+<li class="circle">host.plas.bou.owncmd.<a href="host/plas/bou/owncmd/GetItemCMD.html" class="type-name-link" title="class in host.plas.bou.owncmd">GetItemCMD</a></li>
 <li class="circle">host.plas.bou.owncmd.<a href="host/plas/bou/owncmd/MessageCMD.html" class="type-name-link" title="class in host.plas.bou.owncmd">MessageCMD</a></li>
 <li class="circle">host.plas.bou.owncmd.<a href="host/plas/bou/owncmd/TitleCMD.html" class="type-name-link" title="class in host.plas.bou.owncmd">TitleCMD</a></li>
 </ul>
@@ -223,6 +229,7 @@ loadScripts(document, 'script');</script>
 </li>
 </ul>
 </li>
+<li class="circle">host.plas.bou.gui.<a href="host/plas/bou/gui/GuiHelper.html" class="type-name-link" title="class in host.plas.bou.gui">GuiHelper</a></li>
 <li class="circle">host.plas.bou.gui.<a href="host/plas/bou/gui/GuiMaintenanceListener.html" class="type-name-link" title="class in host.plas.bou.gui">GuiMaintenanceListener</a> (implements org.bukkit.event.Listener)</li>
 <li class="circle">host.plas.bou.compat.<a href="host/plas/bou/compat/HeldHolder.html" class="type-name-link" title="class in host.plas.bou.compat">HeldHolder</a> (implements gg.drak.thebase.objects.Identifiable)
 <ul>
@@ -231,9 +238,18 @@ loadScripts(document, 'script');</script>
 <li class="circle">host.plas.bou.compat.papi.<a href="host/plas/bou/compat/papi/PAPIHeld.html" class="type-name-link" title="class in host.plas.bou.compat.papi">PAPIHeld</a></li>
 </ul>
 </li>
+<li class="circle">host.plas.bou.helpful.data.<a href="host/plas/bou/helpful/data/Helpful.html" class="type-name-link" title="class in host.plas.bou.helpful.data">Helpful</a> (implements host.plas.bou.helpful.data.<a href="host/plas/bou/helpful/data/HelpfulIdentified.html" title="interface in host.plas.bou.helpful.data">HelpfulIdentified</a>)</li>
+<li class="circle">host.plas.bou.helpful.data.<a href="host/plas/bou/helpful/data/HelpfulGui.html" class="type-name-link" title="class in host.plas.bou.helpful.data">HelpfulGui</a> (implements host.plas.bou.helpful.data.<a href="host/plas/bou/helpful/data/HelpfulIdentified.html" title="interface in host.plas.bou.helpful.data">HelpfulIdentified</a>)</li>
+<li class="circle">host.plas.bou.helpful.data.<a href="host/plas/bou/helpful/data/HelpfulGuiType.html" class="type-name-link" title="class in host.plas.bou.helpful.data">HelpfulGuiType</a> (implements host.plas.bou.gui.<a href="host/plas/bou/gui/GuiType.html" title="interface in host.plas.bou.gui">GuiType</a>)</li>
+<li class="circle">host.plas.bou.helpful.data.<a href="host/plas/bou/helpful/data/HelpfulInfo.html" class="type-name-link" title="class in host.plas.bou.helpful.data">HelpfulInfo</a> (implements gg.drak.thebase.objects.Identifiable)</li>
+<li class="circle">host.plas.bou.helpful.<a href="host/plas/bou/helpful/HelpfulUtils.html" class="type-name-link" title="class in host.plas.bou.helpful">HelpfulUtils</a></li>
 <li class="circle">mc.obliviate.inventory.Icon (implements mc.obliviate.inventory.GuiIcon)
 <ul>
-<li class="circle">host.plas.bou.gui.icons.<a href="host/plas/bou/gui/icons/BasicIcon.html" class="type-name-link" title="class in host.plas.bou.gui.icons">BasicIcon</a></li>
+<li class="circle">host.plas.bou.gui.icons.<a href="host/plas/bou/gui/icons/BasicIcon.html" class="type-name-link" title="class in host.plas.bou.gui.icons">BasicIcon</a>
+<ul>
+<li class="circle">host.plas.bou.gui.icons.<a href="host/plas/bou/gui/icons/AirIcon.html" class="type-name-link" title="class in host.plas.bou.gui.icons">AirIcon</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="circle">host.plas.bou.blocking.<a href="host/plas/bou/blocking/IdentifiedBlocking.html" class="type-name-link" title="class in host.plas.bou.blocking">IdentifiedBlocking</a></li>
@@ -242,6 +258,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">host.plas.bou.items.<a href="host/plas/bou/items/InventoryUtils.html" class="type-name-link" title="class in host.plas.bou.items">InventoryUtils</a></li>
 <li class="circle">host.plas.bou.items.<a href="host/plas/bou/items/ItemBin.html" class="type-name-link" title="class in host.plas.bou.items">ItemBin</a></li>
 <li class="circle">host.plas.bou.gui.items.<a href="host/plas/bou/gui/items/ItemData.html" class="type-name-link" title="class in host.plas.bou.gui.items">ItemData</a></li>
+<li class="circle">host.plas.bou.items.<a href="host/plas/bou/items/ItemFactory.html" class="type-name-link" title="class in host.plas.bou.items">ItemFactory</a></li>
 <li class="circle">host.plas.bou.serialization.items.<a href="host/plas/bou/serialization/items/ItemStackSerializer.html" class="type-name-link" title="class in host.plas.bou.serialization.items">ItemStackSerializer</a> (implements host.plas.bou.serialization.<a href="host/plas/bou/serialization/ISerializer.html" title="interface in host.plas.bou.serialization">ISerializer</a>&lt;V&gt;)</li>
 <li class="circle">host.plas.bou.items.<a href="host/plas/bou/items/ItemUtils.html" class="type-name-link" title="class in host.plas.bou.items">ItemUtils</a></li>
 <li class="circle">host.plas.bou.utils.<a href="host/plas/bou/utils/LocationUtils.html" class="type-name-link" title="class in host.plas.bou.utils">LocationUtils</a></li>
@@ -288,7 +305,7 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">host.plas.bou.<a href="host/plas/bou/BetterPlugin.html" class="type-name-link" title="class in host.plas.bou">BetterPlugin</a> (implements gg.drak.thebase.events.BaseEventListener, gg.drak.thebase.objects.Identified, gg.drak.thebase.objects.handling.derived.IModifierEventable, host.plas.bou.events.<a href="host/plas/bou/events/ListenerConglomerate.html" title="interface in host.plas.bou.events">ListenerConglomerate</a>, gg.drak.thebase.async.WithSync)
 <ul>
-<li class="circle">host.plas.bou.<a href="host/plas/bou/BukkitOfUtils.html" class="type-name-link" title="class in host.plas.bou">BukkitOfUtils</a></li>
+<li class="circle">host.plas.bou.<a href="host/plas/bou/BukkitOfUtils.html" class="type-name-link" title="class in host.plas.bou">BukkitOfUtils</a> (implements host.plas.bou.helpful.<a href="host/plas/bou/helpful/HelpfulPlugin.html" title="interface in host.plas.bou.helpful">HelpfulPlugin</a>)</li>
 </ul>
 </li>
 </ul>
@@ -296,11 +313,16 @@ loadScripts(document, 'script');</script>
 </ul>
 </li>
 <li class="circle">host.plas.bou.utils.<a href="host/plas/bou/utils/PluginUtils.html" class="type-name-link" title="class in host.plas.bou.utils">PluginUtils</a></li>
+<li class="circle">host.plas.bou.items.retreivables.<a href="host/plas/bou/items/retreivables/RetrievableKey.html" class="type-name-link" title="class in host.plas.bou.items.retreivables">RetrievableKey</a> (implements gg.drak.thebase.objects.Identified)</li>
 <li class="circle">host.plas.bou.gui.screens.blocks.<a href="host/plas/bou/gui/screens/blocks/ScreenBlock.html" class="type-name-link" title="class in host.plas.bou.gui.screens.blocks">ScreenBlock</a> (implements gg.drak.thebase.objects.Identifiable)</li>
 <li class="circle">host.plas.bou.gui.<a href="host/plas/bou/gui/ScreenManager.html" class="type-name-link" title="class in host.plas.bou.gui">ScreenManager</a></li>
 <li class="circle">host.plas.bou.commands.<a href="host/plas/bou/commands/Sender.html" class="type-name-link" title="class in host.plas.bou.commands">Sender</a></li>
 <li class="circle">host.plas.bou.utils.<a href="host/plas/bou/utils/SenderUtils.html" class="type-name-link" title="class in host.plas.bou.utils">SenderUtils</a></li>
-<li class="circle">host.plas.bou.gui.slots.<a href="host/plas/bou/gui/slots/Slot.html" class="type-name-link" title="class in host.plas.bou.gui.slots">Slot</a> (implements java.lang.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Comparable.html" title="class or interface in java.lang" class="external-link">Comparable</a>&lt;T&gt;)</li>
+<li class="circle">host.plas.bou.gui.slots.<a href="host/plas/bou/gui/slots/Slot.html" class="type-name-link" title="class in host.plas.bou.gui.slots">Slot</a> (implements java.lang.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Comparable.html" title="class or interface in java.lang" class="external-link">Comparable</a>&lt;T&gt;)
+<ul>
+<li class="circle">host.plas.bou.gui.icons.<a href="host/plas/bou/gui/icons/AirSlot.html" class="type-name-link" title="class in host.plas.bou.gui.icons">AirSlot</a></li>
+</ul>
+</li>
 <li class="circle">gg.drak.thebase.storage.resources.StorageResource&lt;T&gt; (implements gg.drak.thebase.objects.Classifiable&lt;T&gt;, java.lang.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Comparable.html" title="class or interface in java.lang" class="external-link">Comparable</a>&lt;T&gt;)
 <ul>
 <li class="circle">gg.drak.thebase.storage.resources.flat.FlatFileResource&lt;T&gt;
@@ -322,6 +344,8 @@ loadScripts(document, 'script');</script>
 </li>
 <li class="circle">host.plas.bou.utils.<a href="host/plas/bou/utils/StringUtils.html" class="type-name-link" title="class in host.plas.bou.utils">StringUtils</a></li>
 <li class="circle">host.plas.bou.scheduling.<a href="host/plas/bou/scheduling/TaskManager.html" class="type-name-link" title="class in host.plas.bou.scheduling">TaskManager</a></li>
+<li class="circle">host.plas.bou.text.<a href="host/plas/bou/text/TextDocument.html" class="type-name-link" title="class in host.plas.bou.text">TextDocument</a></li>
+<li class="circle">host.plas.bou.text.<a href="host/plas/bou/text/TextPage.html" class="type-name-link" title="class in host.plas.bou.text">TextPage</a></li>
 <li class="circle">host.plas.bou.utils.<a href="host/plas/bou/utils/ThingyUtils.html" class="type-name-link" title="class in host.plas.bou.utils">ThingyUtils</a></li>
 <li class="circle">host.plas.bou.utils.<a href="host/plas/bou/utils/UUIDFetcher.html" class="type-name-link" title="class in host.plas.bou.utils">UUIDFetcher</a></li>
 <li class="circle">host.plas.bou.utils.<a href="host/plas/bou/utils/UuidUtils.html" class="type-name-link" title="class in host.plas.bou.utils">UuidUtils</a></li>
@@ -355,9 +379,11 @@ loadScripts(document, 'script');</script>
 <li class="circle">host.plas.bou.utils.obj.<a href="host/plas/bou/utils/obj/Idable.html" class="type-name-link" title="interface in host.plas.bou.utils.obj">Idable</a></li>
 <li class="circle">gg.drak.thebase.objects.Identified
 <ul>
+<li class="circle">host.plas.bou.helpful.<a href="host/plas/bou/helpful/HelpfulPlugin.html" class="type-name-link" title="interface in host.plas.bou.helpful">HelpfulPlugin</a></li>
 <li class="circle">gg.drak.thebase.objects.Identifiable
 <ul>
 <li class="circle">host.plas.bou.commands.<a href="host/plas/bou/commands/BetterCommand.html" class="type-name-link" title="interface in host.plas.bou.commands">BetterCommand</a> (also extends org.bukkit.command.TabExecutor)</li>
+<li class="circle">host.plas.bou.helpful.data.<a href="host/plas/bou/helpful/data/HelpfulIdentified.html" class="type-name-link" title="interface in host.plas.bou.helpful.data">HelpfulIdentified</a></li>
 </ul>
 </li>
 </ul>
@@ -408,6 +434,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">java.util.function.<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Supplier.html" class="type-name-link external-link" title="class or interface in java.util.function">Supplier</a>&lt;T&gt;
 <ul>
 <li class="circle">host.plas.bou.compat.<a href="host/plas/bou/compat/HolderCreator.html" class="type-name-link" title="interface in host.plas.bou.compat">HolderCreator</a></li>
+<li class="circle">host.plas.bou.items.retreivables.<a href="host/plas/bou/items/retreivables/RetreivableItem.html" class="type-name-link" title="interface in host.plas.bou.items.retreivables">RetreivableItem</a></li>
 </ul>
 </li>
 <li class="circle">org.bukkit.command.TabCompleter

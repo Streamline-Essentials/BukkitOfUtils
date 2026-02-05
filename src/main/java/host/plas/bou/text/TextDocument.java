@@ -2,6 +2,7 @@ package host.plas.bou.text;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;
@@ -82,22 +83,22 @@ public class TextDocument {
         getPage(index).ifPresent(page -> page.readTo(player, literalIndexing, format));
     }
 
-    public void readAllTo(Player player) {
+    public void readAllTo(CommandSender sender) {
         if (isEmpty()) return;
 
-        this.pages.values().forEach(page -> page.readTo(player));
+        this.pages.values().forEach(page -> page.readTo(sender));
     }
 
-    public void readAllTo(Player player, boolean format) {
+    public void readAllTo(CommandSender sender, boolean format) {
         if (isEmpty()) return;
 
-        this.pages.values().forEach(page -> page.readTo(player, format));
+        this.pages.values().forEach(page -> page.readTo(sender, format));
     }
 
-    public void readAllTo(Player player, boolean literalIndexing, boolean format) {
+    public void readAllTo(CommandSender sender, boolean literalIndexing, boolean format) {
         if (isEmpty()) return;
 
-        this.pages.values().forEach(page -> page.readTo(player, literalIndexing, format));
+        this.pages.values().forEach(page -> page.readTo(sender, literalIndexing, format));
     }
 
     public static TextDocument of(TextPage... pages) {
