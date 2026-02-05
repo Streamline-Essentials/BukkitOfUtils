@@ -1,0 +1,36 @@
+name: 'BukkitOfUtils'
+version: '1.17.1'
+main: 'host.plas.bou.BukkitOfUtils'
+folia-supported: true
+authors: [ Drak ]
+
+commands:
+  entity-count:
+    description: Get the count of entities in the server.
+    aliases:
+      - entityc
+      - counte
+      - countentities
+    permission: bou.command.entity-count
+  boumessage:
+    description: Send a message to a user.
+    aliases:
+      - boumsg
+    permission: bou.command.boumessage
+  boutitle:
+    description: Send a title to a user.
+    aliases:
+      - bout
+    permission: bou.command.boutitle
+  boudebug:
+    description: Debug command.
+    aliases:
+      - boud
+    permission: bou.command.boudebug
+  runfirestring:
+    description: Run a Fire String.
+    aliases:
+      - rfs
+      - firestring
+      - fstring
+    permission: bou.command.runfirestring

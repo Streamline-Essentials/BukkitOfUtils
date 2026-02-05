@@ -4,5 +4,5 @@ public enum SlotType {
     STATIC,
     BUTTON,
     OTHER,
-    ;
+    EMPTY;
 }
