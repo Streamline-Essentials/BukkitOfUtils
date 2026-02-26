@@ -1,0 +1,42 @@
+# This is the base configuration file for the plugin.
+# Reach out for help here: https://dsc.gg/streamline
+
+# Configuration regarding the Console Sender within the plugin.
+# The Console Sender has to do with sending commands from the console of the server.
+console:
+  # The name of the console sender. (Like the name of the player.)
+  name: Console
+  # The UUID of the console sender. (Like the UUID of the player.)
+  # For identifying the console sender.
+  uuid: '%'
+
+# Configuration regarding the plugin's logging system.
+logging:
+  warn:
+    enabled: true
+    prefix: '&a[&3WARN&a] &e'
+  debug:
+    enabled: true
+    prefix: '&a[&3DEBUG&a] &d'
+  info:
+    enabled: true
+    prefix: '&a[&3INFO&a] &r'
+  severe:
+    enabled: true
+    prefix: '&a[&3SEVERE&a] &c'
+
+# Configuration regarding the plugin's task system.
+timers:
+  # Time in millis to run the async ticking task that drives all timers.
+  # 50 millis is the default and recommended value.
+  # 50 millis = 20 async ticks per second.
+  ticking-frequency: 50
+  # The entity collection timer.
+  # The entity collection timer controls how often the plugin will find all entities in all worlds.
+  # This is only used for Folia servers.
+  entity-collection:
+    # Time in async ticks to run the entity collection task.
+    # If timers.ticking-frequency is 50, then 20 ticks = 1 second.
+    # 10 ticks is the default and recommended value.
+    # 10 ticks = 1/2 second.
+    frequency: 10
