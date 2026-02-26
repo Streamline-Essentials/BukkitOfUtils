@@ -11,16 +11,10 @@ public class HelpfulInfo implements Identifiable {
         return new HelpfulInfo(identifier, prettyName, stylizedName);
     }
 
-    public String getIdentifier() {
-        return this.identifier;
-    }
-
-    public String getPrettyName() {
-        return this.prettyName;
-    }
-
-    public String getStylizedName() {
-        return this.stylizedName;
+    public HelpfulInfo(String identifier, String prettyName, String stylizedName) {
+        this.identifier = identifier;
+        this.prettyName = prettyName;
+        this.stylizedName = stylizedName;
     }
 
     public void setIdentifier(final String identifier) {
@@ -35,9 +29,15 @@ public class HelpfulInfo implements Identifiable {
         this.stylizedName = stylizedName;
     }
 
-    public HelpfulInfo(final String identifier, final String prettyName, final String stylizedName) {
-        this.identifier = identifier;
-        this.prettyName = prettyName;
-        this.stylizedName = stylizedName;
+    public String getIdentifier() {
+        return this.identifier;
+    }
+
+    public String getPrettyName() {
+        return this.prettyName;
+    }
+
+    public String getStylizedName() {
+        return this.stylizedName;
     }
 }

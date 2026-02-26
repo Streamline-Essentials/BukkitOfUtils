@@ -26,7 +26,7 @@ public class Helpful implements HelpfulIdentified {
     }
 
     public void send(CommandSender sender) {
-        getDocument().readAllTo(sender);
+        this.getDocument().readAllTo(sender);
     }
 
     public HelpfulGui asGui() {
@@ -34,15 +34,7 @@ public class Helpful implements HelpfulIdentified {
     }
 
     public void sendGui(Player player) {
-        asGui().open(player);
-    }
-
-    public HelpfulInfo getInfo() {
-        return this.info;
-    }
-
-    public TextDocument getDocument() {
-        return this.document;
+        this.asGui().open(player);
     }
 
     public void setInfo(final HelpfulInfo info) {
@@ -51,5 +43,13 @@ public class Helpful implements HelpfulIdentified {
 
     public void setDocument(final TextDocument document) {
         this.document = document;
+    }
+
+    public HelpfulInfo getInfo() {
+        return this.info;
+    }
+
+    public TextDocument getDocument() {
+        return this.document;
     }
 }
