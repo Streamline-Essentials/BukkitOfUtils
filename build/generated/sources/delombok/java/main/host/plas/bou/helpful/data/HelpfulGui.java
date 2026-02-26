@@ -11,11 +11,11 @@ public class HelpfulGui implements HelpfulIdentified {
     private HelpfulGuiType type;
 
     public HelpfulInfo getInfo() {
-        return helpful.getInfo();
+        return this.helpful.getInfo();
     }
 
     public void setInfo(HelpfulInfo info) {
-        helpful.setInfo(info);
+        this.helpful.setInfo(info);
     }
 
     public HelpfulGui(Helpful helpful, HelpfulGuiType type) {
@@ -28,7 +28,7 @@ public class HelpfulGui implements HelpfulIdentified {
     }
 
     public ScreenInstance makeScreenInstance(Player player) {
-        return new ScreenInstance(player, type, makeInventorySheet());
+        return new ScreenInstance(player, this.type, this.makeInventorySheet());
     }
 
     public InventorySheet makeInventorySheet() {
@@ -36,7 +36,7 @@ public class HelpfulGui implements HelpfulIdentified {
     }
 
     public void open(Player player) {
-        makeScreenInstance(player).open();
+        this.makeScreenInstance(player).open();
     }
 
     public static HelpfulGui of(Helpful helpful, HelpfulGuiType type) {
@@ -47,19 +47,19 @@ public class HelpfulGui implements HelpfulIdentified {
         return new HelpfulGui(helpful);
     }
 
-    public Helpful getHelpful() {
-        return this.helpful;
-    }
-
-    public HelpfulGuiType getType() {
-        return this.type;
-    }
-
     public void setHelpful(final Helpful helpful) {
         this.helpful = helpful;
     }
 
     public void setType(final HelpfulGuiType type) {
         this.type = type;
+    }
+
+    public Helpful getHelpful() {
+        return this.helpful;
+    }
+
+    public HelpfulGuiType getType() {
+        return this.type;
     }
 }

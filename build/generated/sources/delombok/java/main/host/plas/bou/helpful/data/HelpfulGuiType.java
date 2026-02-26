@@ -5,14 +5,12 @@ import host.plas.bou.gui.GuiType;
 public class HelpfulGuiType implements GuiType {
     private HelpfulInfo helpfulInfo;
 
-    @Override
     public String name() {
-        return "BOU_HELPFUL_" + getHelpfulInfo().getIdentifier().toUpperCase();
+        return "BOU_HELPFUL_" + this.getHelpfulInfo().getIdentifier().toUpperCase();
     }
 
-    @Override
     public String getTitle() {
-        return getHelpfulInfo().getStylizedName();
+        return this.getHelpfulInfo().getStylizedName();
     }
 
     public static HelpfulGuiType of(HelpfulInfo helpfulInfo) {
@@ -23,15 +21,15 @@ public class HelpfulGuiType implements GuiType {
         return new HelpfulGuiType(helpful.getInfo());
     }
 
-    public HelpfulInfo getHelpfulInfo() {
-        return this.helpfulInfo;
+    public HelpfulGuiType(HelpfulInfo helpfulInfo) {
+        this.helpfulInfo = helpfulInfo;
     }
 
     public void setHelpfulInfo(final HelpfulInfo helpfulInfo) {
         this.helpfulInfo = helpfulInfo;
     }
 
-    public HelpfulGuiType(final HelpfulInfo helpfulInfo) {
-        this.helpfulInfo = helpfulInfo;
+    public HelpfulInfo getHelpfulInfo() {
+        return this.helpfulInfo;
     }
 }
