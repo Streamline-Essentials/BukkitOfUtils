@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.AbstractCollection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -50,19 +51,10 @@ public class PluginUtils {
     }
 
     public static Optional<HelpfulPlugin> parseHelpfulPlugin(String name) {
-        if (name.equalsIgnoreCase("bou") || name.equalsIgnoreCase("bukkitofutils")) {
-            return Optional.of(BukkitOfUtils.getInstance());
-        }
-
-        return getHelpfulPlugins().stream()
-                .filter(plugin -> plugin.getIdentifier().equalsIgnoreCase(name))
-                .findFirst();
+        return !name.equalsIgnoreCase("bou") && !name.equalsIgnoreCase("bukkitofutils") ? getHelpfulPlugins().stream().filter((plugin) -> plugin.getIdentifier().equalsIgnoreCase(name)).findFirst() : Optional.of(BukkitOfUtils.getInstance());
     }
 
     public static ConcurrentSkipListSet<HelpfulPlugin> getHelpfulPlugins() {
-        return getLoadedBOUPlugins().stream()
-                .filter(plugin -> plugin instanceof HelpfulPlugin)
-                .map(plugin -> (HelpfulPlugin) plugin)
-                .collect(ConcurrentSkipListSet::new, ConcurrentSkipListSet::add, ConcurrentSkipListSet::addAll);
+        return getLoadedBOUPlugins().stream().filter((plugin) -> plugin instanceof HelpfulPlugin).map((plugin) -> (HelpfulPlugin)plugin).collect(ConcurrentSkipListSet::new, ConcurrentSkipListSet::add, AbstractCollection::addAll);
     }
 }

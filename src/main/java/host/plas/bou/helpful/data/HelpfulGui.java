@@ -8,17 +8,18 @@ import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-@Getter @Setter
+@Setter
+@Getter
 public class HelpfulGui implements HelpfulIdentified {
     private Helpful helpful;
     private HelpfulGuiType type;
 
     public HelpfulInfo getInfo() {
-        return helpful.getInfo();
+        return this.helpful.getInfo();
     }
 
     public void setInfo(HelpfulInfo info) {
-        helpful.setInfo(info);
+        this.helpful.setInfo(info);
     }
 
     public HelpfulGui(Helpful helpful, HelpfulGuiType type) {
@@ -31,7 +32,7 @@ public class HelpfulGui implements HelpfulIdentified {
     }
 
     public ScreenInstance makeScreenInstance(Player player) {
-        return new ScreenInstance(player, type, makeInventorySheet());
+        return new ScreenInstance(player, this.type, this.makeInventorySheet());
     }
 
     public InventorySheet makeInventorySheet() {
@@ -39,7 +40,7 @@ public class HelpfulGui implements HelpfulIdentified {
     }
 
     public void open(Player player) {
-        makeScreenInstance(player).open();
+        this.makeScreenInstance(player).open();
     }
 
     public static HelpfulGui of(Helpful helpful, HelpfulGuiType type) {
@@ -49,4 +50,5 @@ public class HelpfulGui implements HelpfulIdentified {
     public static HelpfulGui of(Helpful helpful) {
         return new HelpfulGui(helpful);
     }
+
 }

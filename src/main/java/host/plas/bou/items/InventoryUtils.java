@@ -217,20 +217,22 @@ public class InventoryUtils {
     }
 
     public static void addItemToPlayer(Player player, ItemStack stack, boolean dropIfFull) {
-        if (player == null) return;
-        if (stack == null) return;
+        if (player != null) {
+            if (stack != null) {
+                PlayerInventory inventory = player.getInventory();
+                if (inventory.firstEmpty() == -1) {
+                    if (dropIfFull) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), stack);
+                    }
+                } else {
+                    int mainHandSlot = inventory.getHeldItemSlot();
+                    if (inventory.getItemInMainHand() != null && inventory.getItemInMainHand().getType() != Material.AIR) {
+                        inventory.addItem(new ItemStack[]{stack});
+                    } else {
+                        inventory.setItem(mainHandSlot, stack);
+                    }
+                }
 
-        PlayerInventory inventory = player.getInventory();
-        if (inventory.firstEmpty() == -1) {
-            if (dropIfFull) {
-                player.getWorld().dropItemNaturally(player.getLocation(), stack);
-            }
-        } else {
-            int mainHandSlot = inventory.getHeldItemSlot();
-            if (inventory.getItemInMainHand() == null || inventory.getItemInMainHand().getType() == Material.AIR) {
-                inventory.setItem(mainHandSlot, stack);
-            } else {
-                inventory.addItem(stack);
             }
         }
     }
