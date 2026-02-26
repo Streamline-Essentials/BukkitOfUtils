@@ -37,9 +37,11 @@ public class BukkitOfUtils extends BetterPlugin implements HelpfulPlugin {
 
         // Plugin startup logic
 //        instance = this; // Set earlier.
+        new BouHelpCMD();
         new DebugCMD();
         new EntityCountCMD();
         new FireStringCMD();
+        new GetItemCMD();
         new MessageCMD();
         new TitleCMD();
 
