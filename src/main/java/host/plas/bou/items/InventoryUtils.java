@@ -4,10 +4,7 @@ import host.plas.bou.gui.InventorySheet;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -213,5 +210,30 @@ public class InventoryUtils {
         });
 
         stack.setItemMeta(meta);
+    }
+
+    public static void addItemToPlayer(Player player, ItemStack stack) {
+        addItemToPlayer(player, stack, true);
+    }
+
+    public static void addItemToPlayer(Player player, ItemStack stack, boolean dropIfFull) {
+        if (player != null) {
+            if (stack != null) {
+                PlayerInventory inventory = player.getInventory();
+                if (inventory.firstEmpty() == -1) {
+                    if (dropIfFull) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), stack);
+                    }
+                } else {
+                    int mainHandSlot = inventory.getHeldItemSlot();
+                    if (inventory.getItemInMainHand() != null && inventory.getItemInMainHand().getType() != Material.AIR) {
+                        inventory.addItem(new ItemStack[]{stack});
+                    } else {
+                        inventory.setItem(mainHandSlot, stack);
+                    }
+                }
+
+            }
+        }
     }
 }
