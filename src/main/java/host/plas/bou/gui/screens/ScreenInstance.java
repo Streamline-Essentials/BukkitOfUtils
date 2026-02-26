@@ -144,24 +144,30 @@ public class ScreenInstance extends Gui implements Identified {
     }
 
     public void redraw() {
-        redraw(true);
+        redraw(false);
     }
 
-    public void redraw(boolean reshow) {
+    public void redraw(boolean close) {
+        redraw(true, close);
+    }
+
+    public void redraw(boolean reshow, boolean close) {
         build(inventorySheet);
 
-        if (reshow) {
-            reshow();
-        }
+        if (reshow) reshow(close);
     }
 
     public void reshow() {
+        reshow(false);
+    }
+
+    public void reshow(boolean close) {
         if (! TaskManager.isThreadSync()) {
             TaskManager.runTask(player, this::reshow);
             return;
         }
 
-        close();
+        if (close) close();
         open();
     }
 

@@ -6,6 +6,9 @@ import host.plas.bou.commands.CommandResult;
 import host.plas.bou.compat.CompatManager;
 import host.plas.bou.firestring.FireStringManager;
 import host.plas.bou.gui.ScreenManager;
+import host.plas.bou.helpful.HelpfulPlugin;
+import host.plas.bou.helpful.data.Helpful;
+import host.plas.bou.helpful.data.HelpfulInfo;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.owncmd.*;
 import host.plas.bou.utils.ClassHelper;
@@ -13,7 +16,7 @@ import host.plas.bou.utils.obj.Versioning;
 import lombok.Getter;
 import lombok.Setter;
 
-public class BukkitOfUtils extends BetterPlugin {
+public class BukkitOfUtils extends BetterPlugin implements HelpfulPlugin {
     @Getter @Setter
     private static BukkitOfUtils instance;
 
@@ -68,5 +71,13 @@ public class BukkitOfUtils extends BetterPlugin {
         BStats.onDisable();
 
         BaseManager.stop();
+    }
+
+    public HelpfulInfo getHelpfulInfo() {
+        return HelpfulInfo.of("bukkitofutils", "BukkitOfUtils", "&6&lBukkitOfUtils");
+    }
+
+    public Helpful getHelpful() {
+        return new Helpful(this.getHelpfulInfo(), new String[]{"&eA utility plugin for Bukkit-based servers.", "&eProvides various utilities, commands, and features to enhance server management and gameplay experience.", "&r", "&eCommands Included:", "&b- /debug: &7Toggle debug mode.", "&b- /entitycount: &7Check entity counts on the server.", "&b- /firestring: &7Execute Fire Strings for dynamic actions.", "&b- /message: &7Send custom messages to players.", "&b- /title: &7Display titles to players.&r", "&r", "&eFor more information, visit the wiki:", "&bhttps://wiki.drak.gg/bukkitofutils/"});
     }
 }
