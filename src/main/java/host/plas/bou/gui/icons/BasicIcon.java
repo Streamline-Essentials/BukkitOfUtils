@@ -1,17 +1,13 @@
 package host.plas.bou.gui.icons;
 
-import lombok.Getter;
-import lombok.Setter;
 import mc.obliviate.inventory.Icon;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-@Getter @Setter
 public class BasicIcon extends Icon {
     public BasicIcon(ItemStack stack) {
         super(stack);
-
-        applyEdits();
+        this.applyEdits();
     }
 
     public BasicIcon(Material material) {
@@ -27,12 +23,14 @@ public class BasicIcon extends Icon {
 
     public static Material getMaterial(String materialName) {
         try {
-            for (Material mat : Material.values()) {
+            for(Material mat : Material.values()) {
                 if (mat.name().equalsIgnoreCase(materialName)) {
                     return mat;
                 }
             }
-        } catch (Exception e) { /* Ignored */ }
+        } catch (Exception var5) {
+        }
+
         return Material.BARRIER;
     }
 }

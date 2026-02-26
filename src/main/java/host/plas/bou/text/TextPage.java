@@ -1,67 +1,64 @@
 package host.plas.bou.text;
 
 import host.plas.bou.commands.Sender;
-import lombok.Getter;
-import lombok.Setter;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-@Getter @Setter
+import lombok.Getter;
+import lombok.Setter;
+import org.bukkit.command.CommandSender;
+
+@Setter
+@Getter
 public class TextPage {
     private ConcurrentSkipListMap<Integer, String> lines;
 
     public TextPage(String... lines) {
-        asLines(lines);
+        this.asLines(lines);
     }
 
     public void asLines(String... lines) {
-        ensureLines(true);
+        this.ensureLines(true);
 
-        for (int i = 0; i < lines.length; i++) {
+        for(int i = 0; i < lines.length; ++i) {
             this.lines.put(i, lines[i]);
         }
     }
 
     public void withLines(String... lines) {
-        ensureLines();
+        this.ensureLines();
+        int startIndex = this.getLastLineIndex() + 1;
 
-        int startIndex = getLastLineIndex() + 1;
-        for (int i = 0; i < lines.length; i++) {
+        for(int i = 0; i < lines.length; ++i) {
             this.lines.put(startIndex + i, lines[i]);
         }
     }
 
     public int getLastLineIndex() {
-        if (this.lines == null || this.lines.isEmpty()) return -1;
-        return this.lines.lastKey();
+        return this.lines != null && !this.lines.isEmpty() ? this.lines.lastKey() : -1;
     }
 
     public void ensureLines() {
-        ensureLines(false);
+        this.ensureLines(false);
     }
 
     public void ensureLines(boolean clear) {
-        if (this.lines == null) this.lines = new ConcurrentSkipListMap<>();
-        else {
-            if (clear) this.lines.clear();
+        if (this.lines == null) {
+            this.lines = new ConcurrentSkipListMap();
+        } else if (clear) {
+            this.lines.clear();
         }
     }
 
     public Optional<String> getLine(int index) {
-        if (isEmpty()) return Optional.empty();
-
-        return Optional.ofNullable(this.lines.get(index));
+        return this.isEmpty() ? Optional.empty() : Optional.ofNullable(this.lines.get(index));
     }
 
     public void insertLine(int index, String line) {
-        ensureLines();
-
+        this.ensureLines();
         this.lines.put(index, line);
     }
 
@@ -70,60 +67,48 @@ public class TextPage {
     }
 
     public void readTo(CommandSender sender) {
-        readTo(sender, false, true);
+        this.readTo(sender, false, true);
     }
 
     public void readTo(CommandSender sender, boolean format) {
-        readTo(sender, false, format);
+        this.readTo(sender, false, format);
     }
 
     public void readTo(CommandSender sender, boolean literalIndexing, boolean format) {
-        if (isEmpty()) return;
+        if (!this.isEmpty()) {
+            Sender s = new Sender(sender);
+            List<String> lines = new ArrayList();
+            if (literalIndexing) {
+                int lastIndex = (Integer)this.lines.lastKey();
 
-        Sender s = new Sender(sender);
-
-        List<String> lines = new ArrayList<>();
-        if (literalIndexing) {
-//            int firstIndex = this.lines.firstKey();
-            int lastIndex = this.lines.lastKey();
-
-            for (int i = 0; i <= lastIndex; i++) {
-                String line = this.lines.get(i);
-                lines.add(Objects.requireNonNullElse(line, ""));
+                for(int i = 0; i <= lastIndex; ++i) {
+                    String line = (String)this.lines.get(i);
+                    lines.add((String)Objects.requireNonNullElse(line, ""));
+                }
+            } else {
+                this.lines.forEach((index, linex) -> lines.add(linex));
             }
-        } else {
-            this.lines.forEach((index, line) -> {
-                lines.add(line);
-            });
-        }
 
-        lines.forEach(line -> {
-            s.sendMessage(line, format);
-        });
+            lines.forEach((linex) -> s.sendMessage(linex, format));
+        }
     }
 
     public String[] asLore(boolean literalIndexing) {
-        if (isEmpty()) return new String[0];
-
-        if (literalIndexing) {
-            String[] lore = new String[this.lines.lastKey()];
-            this.lines.forEach((index, line) -> {
-                lore[index] = line;
-            });
-
+        if (this.isEmpty()) {
+            return new String[0];
+        } else if (literalIndexing) {
+            String[] lore = new String[(Integer)this.lines.lastKey()];
+            this.lines.forEach((index, line) -> lore[index] = line);
             return lore;
         } else {
-            List<String> loreList = new ArrayList<>();
-            this.lines.forEach((index, line) -> {
-                loreList.add(line);
-            });
-
-            return loreList.toArray(new String[0]);
+            List<String> loreList = new ArrayList();
+            this.lines.forEach((index, line) -> loreList.add(line));
+            return (String[])loreList.toArray(new String[0]);
         }
     }
 
     public String[] asLore() {
-        return asLore(false);
+        return this.asLore(false);
     }
 
     public static TextPage of(String... lines) {
@@ -132,8 +117,9 @@ public class TextPage {
 
     public static TextPage of(ConcurrentSkipListMap<Integer, String> raw) {
         TextPage page = of();
+        Objects.requireNonNull(page);
         raw.forEach(page::insertLine);
-
         return page;
     }
+
 }

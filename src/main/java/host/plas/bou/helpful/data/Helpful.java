@@ -6,7 +6,8 @@ import lombok.Setter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-@Getter @Setter
+@Setter
+@Getter
 public class Helpful implements HelpfulIdentified {
     private HelpfulInfo info;
     private TextDocument document;
@@ -29,7 +30,7 @@ public class Helpful implements HelpfulIdentified {
     }
 
     public void send(CommandSender sender) {
-        getDocument().readAllTo(sender);
+        this.getDocument().readAllTo(sender);
     }
 
     public HelpfulGui asGui() {
@@ -37,6 +38,7 @@ public class Helpful implements HelpfulIdentified {
     }
 
     public void sendGui(Player player) {
-        asGui().open(player);
+        this.asGui().open(player);
     }
+
 }

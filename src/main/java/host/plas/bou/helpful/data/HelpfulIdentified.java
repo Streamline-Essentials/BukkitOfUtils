@@ -5,15 +5,13 @@ import gg.drak.thebase.objects.Identifiable;
 public interface HelpfulIdentified extends Identifiable {
     HelpfulInfo getInfo();
 
-    void setInfo(HelpfulInfo info);
+    void setInfo(HelpfulInfo var1);
 
-    @Override
     default String getIdentifier() {
-        return getInfo().getIdentifier();
+        return this.getInfo().getIdentifier();
     }
 
-    @Override
     default void setIdentifier(String s) {
-        getInfo().setIdentifier(s);
+        this.getInfo().setIdentifier(s);
     }
 }

@@ -75,31 +75,11 @@ public class BukkitOfUtils extends BetterPlugin implements HelpfulPlugin {
         BaseManager.stop();
     }
 
-    @Override
     public HelpfulInfo getHelpfulInfo() {
-        return HelpfulInfo.of(
-                "bukkitofutils",
-                "BukkitOfUtils",
-                "&6&lBukkitOfUtils"
-        );
+        return HelpfulInfo.of("bukkitofutils", "BukkitOfUtils", "&6&lBukkitOfUtils");
     }
 
-    @Override
     public Helpful getHelpful() {
-        return new Helpful(
-                getHelpfulInfo(),
-                "&eA utility plugin for Bukkit-based servers.",
-                        "&eProvides various utilities, commands, and features to enhance server management and gameplay experience.",
-                        "&r",
-                        "&eCommands Included:",
-                        "&b- /debug: &7Toggle debug mode.",
-                        "&b- /entitycount: &7Check entity counts on the server.",
-                        "&b- /firestring: &7Execute Fire Strings for dynamic actions.",
-                        "&b- /message: &7Send custom messages to players.",
-                        "&b- /title: &7Display titles to players.&r",
-                        "&r",
-                        "&eFor more information, visit the wiki:",
-                        "&bhttps://wiki.drak.gg/bukkitofutils/"
-        );
+        return new Helpful(this.getHelpfulInfo(), new String[]{"&eA utility plugin for Bukkit-based servers.", "&eProvides various utilities, commands, and features to enhance server management and gameplay experience.", "&r", "&eCommands Included:", "&b- /debug: &7Toggle debug mode.", "&b- /entitycount: &7Check entity counts on the server.", "&b- /firestring: &7Execute Fire Strings for dynamic actions.", "&b- /message: &7Send custom messages to players.", "&b- /title: &7Display titles to players.&r", "&r", "&eFor more information, visit the wiki:", "&bhttps://wiki.drak.gg/bukkitofutils/"});
     }
 }

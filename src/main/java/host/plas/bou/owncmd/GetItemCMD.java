@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package host.plas.bou.owncmd;
 
 import host.plas.bou.BukkitOfUtils;
@@ -5,51 +10,44 @@ import host.plas.bou.commands.CommandContext;
 import host.plas.bou.commands.SimplifiedCommand;
 import host.plas.bou.items.InventoryUtils;
 import host.plas.bou.items.ItemFactory;
-import host.plas.bou.items.retreivables.RetrievableKey;
-import host.plas.bou.utils.EntityUtils;
-import host.plas.bou.utils.WorldUtils;
+import host.plas.bou.items.retrievables.RetrievableKey;
+import java.util.concurrent.ConcurrentSkipListSet;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.concurrent.ConcurrentSkipListSet;
 
 public class GetItemCMD extends SimplifiedCommand {
     public GetItemCMD() {
         super("item-factory", BukkitOfUtils.getInstance());
     }
 
-    @Override
     public boolean command(CommandContext ctx) {
-        if (! ctx.isArgUsable(1)) {
+        if (!ctx.isArgUsable(1)) {
             ctx.sendMessage("&cUsage: /item-factory <plugin> <key>");
             return false;
+        } else {
+            Player player = ctx.getPlayerOrNull();
+            if (player == null) {
+                ctx.sendMessage("&cThis command can only be executed by a player.");
+                return false;
+            } else {
+                String plugin = ctx.getStringArg(0);
+                String key = ctx.getStringArg(1);
+                RetrievableKey k = RetrievableKey.of(plugin, key);
+                ItemStack stack = (ItemStack)ItemFactory.getItem(k).orElse(null);
+                if (stack == null) {
+                    ctx.sendMessage("&cNo item found for key &b" + k.getIdentifier());
+                    return false;
+                } else {
+                    InventoryUtils.addItemToPlayer(player, stack);
+                    ctx.sendMessage("&eGave you item for key &b" + k.getIdentifier());
+                    return true;
+                }
+            }
         }
-
-        Player player = ctx.getPlayerOrNull();
-        if (player == null) {
-            ctx.sendMessage("&cThis command can only be executed by a player.");
-            return false;
-        }
-
-        String plugin = ctx.getStringArg(0);
-        String key = ctx.getStringArg(1);
-
-        RetrievableKey k = RetrievableKey.of(plugin, key);
-        ItemStack stack = ItemFactory.getItem(k).orElse(null);
-        if (stack == null) {
-            ctx.sendMessage("&cNo item found for key &b" + k.getIdentifier());
-            return false;
-        }
-
-        InventoryUtils.addItemToPlayer(player, stack);
-        ctx.sendMessage("&eGave you item for key &b" + k.getIdentifier());
-        return true;
     }
 
-    @Override
     public ConcurrentSkipListSet<String> tabComplete(CommandContext ctx) {
         ConcurrentSkipListSet<String> completions = new ConcurrentSkipListSet<>();
-
         if (ctx.getArgCount() <= 1) {
             completions.addAll(ItemFactory.getPluginsWithItemsNames());
         }
