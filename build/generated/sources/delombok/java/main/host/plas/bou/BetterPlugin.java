@@ -6,8 +6,8 @@ import host.plas.bou.events.callbacks.DisableCallback;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.items.ItemFactory;
-import host.plas.bou.items.retreivables.RetreivableItem;
-import host.plas.bou.items.retreivables.RetrievableKey;
+import host.plas.bou.items.retrievables.RetrievableItem;
+import host.plas.bou.items.retrievables.RetrievableKey;
 import host.plas.bou.scheduling.TaskManager;
 import host.plas.bou.utils.DatabaseUtils;
 import host.plas.bou.utils.MessageUtils;
@@ -87,7 +87,7 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
         unregisterSelfListener();
     }
 
-    public Optional<RetreivableItem> getFactory(String key) {
+    public Optional<RetrievableItem> getFactory(String key) {
         return ItemFactory.getFactory(getRetrievableKey(key));
     }
 
@@ -95,7 +95,7 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
         return ItemFactory.getItem(getRetrievableKey(key));
     }
 
-    public void registerFactory(String key, RetreivableItem item) {
+    public void registerFactory(String key, RetrievableItem item) {
         ItemFactory.registerFactory(getRetrievableKey(key), item);
     }
 

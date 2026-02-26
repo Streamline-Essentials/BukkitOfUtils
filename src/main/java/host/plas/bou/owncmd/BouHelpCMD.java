@@ -33,17 +33,16 @@ public class BouHelpCMD extends SimplifiedCommand {
     }
 
     public static void parseHelpful(HelpfulPlugin plugin, CommandContext ctx) {
-        Player player = (Player)ctx.getPlayer().orElse((Object)null);
+        Player player = ctx.getPlayer().orElse(null);
         if (player == null) {
             plugin.sendHelpful(ctx.getCommandSender());
         } else {
             plugin.sendHelpfulGui(player);
         }
-
     }
 
     public ConcurrentSkipListSet<String> tabComplete(CommandContext ctx) {
-        ConcurrentSkipListSet<String> completions = new ConcurrentSkipListSet();
+        ConcurrentSkipListSet<String> completions = new ConcurrentSkipListSet<>();
         if (ctx.getArgCount() <= 1) {
             for(HelpfulPlugin plugin : PluginUtils.getHelpfulPlugins()) {
                 completions.add(plugin.getIdentifier());

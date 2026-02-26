@@ -13,14 +13,14 @@ public interface HelpfulPlugin extends Identified {
     Helpful getHelpful();
 
     default HelpfulGui getHelpfulGui() {
-        return getHelpful().asGui();
+        return this.getHelpful().asGui();
     }
 
     default void sendHelpful(CommandSender sender) {
-        getHelpful().send(sender);
+        this.getHelpful().send(sender);
     }
 
     default void sendHelpfulGui(Player player) {
-        getHelpful().sendGui(player);
+        this.getHelpful().sendGui(player);
     }
 }

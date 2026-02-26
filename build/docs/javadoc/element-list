@@ -30,7 +30,7 @@ host.plas.bou.helpful.data
 host.plas.bou.instances
 host.plas.bou.items
 host.plas.bou.items.droppable
-host.plas.bou.items.retreivables
+host.plas.bou.items.retrievables
 host.plas.bou.math
 host.plas.bou.notifications
 host.plas.bou.owncmd

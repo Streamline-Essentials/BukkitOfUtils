@@ -1,17 +1,12 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package host.plas.bou.items.retrievables;
 
 import gg.drak.thebase.objects.Identified;
 import host.plas.bou.BetterPlugin;
+import host.plas.bou.BukkitOfUtils;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
-@Getter
+@Getter @Setter
 public class RetrievableKey implements Identified {
     private String plugin;
     private String key;
@@ -21,8 +16,9 @@ public class RetrievableKey implements Identified {
         this.key = key;
     }
 
+    @Override
     public String getIdentifier() {
-        return this.plugin + ":" + this.key;
+        return plugin + ":" + key;
     }
 
     public static RetrievableKey of(String plugin, String key) {
