@@ -54,7 +54,6 @@ repositories {
     maven {
         url = uri("https://repo.codemc.org/repository/streamline-essentials/")
     }
-    maven { url = 'https://jitpack.io' }
 }
 
 dependencies {
