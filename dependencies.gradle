@@ -1,7 +1,7 @@
 ext {
     IMPL = [
-            'com.github.Server-Utilities:TheBase:master-SNAPSHOT',
-            'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
+            'gg.drak:TheBase:1.1.0',
+            'gg.drak:UniversalScheduler:1.5-SNAPSHOT',
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
             'com.google.code.gson:gson:2.11.0',
             'com.google.re2j:re2j:1.7',
@@ -10,8 +10,8 @@ ext {
             'com.konghq:unirest-java:3.14.5',
     ]
     SHADOW = [
-            'com.github.Server-Utilities:TheBase:master-SNAPSHOT',
-            'com.github.streamline-essentials:UniversalScheduler:main-SNAPSHOT',
+            'gg.drak:TheBase:1.1.0',
+            'gg.drak:UniversalScheduler:1.5-SNAPSHOT',
             'com.github.ben-manes.caffeine:caffeine:3.1.8',
             'com.google.code.gson:gson:2.11.0',
             'com.google.re2j:re2j:1.7',
