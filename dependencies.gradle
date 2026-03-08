@@ -22,10 +22,12 @@ ext {
     ANNO = [
 //            'org.spigotmc:spigot:1.21.5-R0.1-SNAPSHOT',
             'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT',
+            'net.kyori:adventure-api:4.13.1',
     ]
     COMP_ONLY = [
 //            'org.spigotmc:spigot:1.21.5-R0.1-SNAPSHOT',
             'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT',
+            'net.kyori:adventure-api:4.13.1',
     ]
     FILES = [
     ]
