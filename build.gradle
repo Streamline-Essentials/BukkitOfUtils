@@ -40,7 +40,6 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
-    maven { url = 'https://jitpack.io' }
     maven {
         name = "placeholderapi"
         url = "https://repo.extendedclip.com/content/repositories/placeholderapi/"
@@ -55,6 +54,7 @@ repositories {
     maven {
         url = uri("https://repo.codemc.org/repository/streamline-essentials/")
     }
+    maven { url = 'https://jitpack.io' }
 }
 
 dependencies {
@@ -132,7 +132,7 @@ artifacts {
 }
 
 wrapper {
-    gradleVersion = '9.3.1'
+    gradleVersion = '8.9'
     distributionType = Wrapper.DistributionType.ALL
 }
 
