@@ -12,9 +12,22 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.UUID;
 
+/**
+ * Utility class for fetching Minecraft player UUIDs and names from the PlayerDB API.
+ */
 public class UUIDFetcher {
+    /** Private constructor to prevent instantiation of this utility class. */
+    private UUIDFetcher() {}
+
+    /** The PlayerDB API URL template for fetching Minecraft player data. */
     private static final String API_URL = "https://playerdb.co/api/player/minecraft/%s";
 
+    /**
+     * Fetches the UUID of a Minecraft player by their username using the PlayerDB API.
+     *
+     * @param name the player's username
+     * @return the player's UUID, or null if the player is not found or an error occurs
+     */
     @Nullable
     public static UUID getUUID(@NotNull String name) {
         name = name.toLowerCase(); // Had some issues with upper-case letters in the username, so I added this to make sure that doesn't happen.
@@ -61,6 +74,12 @@ public class UUIDFetcher {
         return null;
     }
 
+    /**
+     * Fetches the username of a Minecraft player by their UUID string using the PlayerDB API.
+     *
+     * @param uuid the player's UUID as a string
+     * @return the player's username, or null if the player is not found or an error occurs
+     */
     @Nullable
     public static String getName(@NotNull String uuid) {
         uuid = uuid.toLowerCase(); // Had some issues with upper-case letters in the username, so I added this to make sure that doesn't happen.
@@ -105,6 +124,12 @@ public class UUIDFetcher {
         return null;
     }
 
+    /**
+     * Fetches the username of a Minecraft player by their UUID using the PlayerDB API.
+     *
+     * @param uuid the player's UUID
+     * @return the player's username, or null if the player is not found or an error occurs
+     */
     public static String getName(UUID uuid) {
         return getName(uuid.toString());
     }

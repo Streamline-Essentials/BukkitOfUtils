@@ -11,7 +11,14 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+/**
+ * Bukkit event listener that prevents players from moving button and static items
+ * within GUI inventories by cancelling click events on those items.
+ */
 public class GuiMaintenanceListener implements Listener {
+    /**
+     * Constructs a new GuiMaintenanceListener and registers it with the Bukkit plugin manager.
+     */
     public GuiMaintenanceListener() {
         Bukkit.getPluginManager().registerEvents(this, BukkitOfUtils.getInstance());
     }

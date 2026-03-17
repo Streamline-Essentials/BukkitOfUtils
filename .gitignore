@@ -29,3 +29,11 @@ replay_pid*
 /.idea/
 /build/
 /lib/
+
+# AI
+/.claude/
+/.vscode/
+/.cursor/
+/.gemini/
+CLAUDE.md
+PLAN.md
