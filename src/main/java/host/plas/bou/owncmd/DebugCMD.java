@@ -30,11 +30,28 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+/**
+ * A multi-purpose debug command for BukkitOfUtils that provides various debugging actions
+ * such as item NBT inspection, plugin listing, item storage/retrieval, UUID lookup,
+ * teleportation utilities, world listing, DrakAPI interaction, and task management.
+ */
 public class DebugCMD extends SimplifiedCommand {
+    /**
+     * Constructs the /boudebug command and registers it with the BukkitOfUtils plugin.
+     */
     public DebugCMD() {
         super("boudebug", BukkitOfUtils.getInstance());
     }
 
+    /**
+     * Executes the boudebug command with the specified action and arguments.
+     * Supported actions include: item-nbt, item-nbt-strict, list-bou-plugins, dump,
+     * store-item, get-item, make-item, make-item-strict, uuid, up, down, top, worlds,
+     * drakapi, and tasks.
+     *
+     * @param ctx the command context containing the sender and arguments
+     * @return true if the command executed successfully, false otherwise
+     */
     @Override
     public boolean command(CommandContext ctx) {
         if (! ctx.isArgUsable(0)) {
@@ -504,6 +521,13 @@ public class DebugCMD extends SimplifiedCommand {
         return true;
     }
 
+    /**
+     * Provides tab-completion suggestions for the boudebug command based on the current arguments.
+     * Supports context-aware completions for all sub-actions and their nested arguments.
+     *
+     * @param ctx the command context containing the current arguments
+     * @return a sorted set of tab-completion suggestions
+     */
     @Override
     public ConcurrentSkipListSet<String> tabComplete(CommandContext ctx) {
         ConcurrentSkipListSet<String> completions = new ConcurrentSkipListSet<>();

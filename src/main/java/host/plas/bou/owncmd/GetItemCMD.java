@@ -15,11 +15,25 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Command that retrieves an item from the ItemFactory by plugin name and key,
+ * then gives it to the executing player. Uses the RetrievableKey system to look up registered items.
+ */
 public class GetItemCMD extends SimplifiedCommand {
+    /**
+     * Constructs the /item-factory command and registers it with the BukkitOfUtils plugin.
+     */
     public GetItemCMD() {
         super("item-factory", BukkitOfUtils.getInstance());
     }
 
+    /**
+     * Executes the item-factory command. Looks up an item by the given plugin name and key,
+     * then adds it to the executing player's inventory.
+     *
+     * @param ctx the command context containing the sender and arguments
+     * @return true if the item was found and given to the player, false otherwise
+     */
     public boolean command(CommandContext ctx) {
         if (!ctx.isArgUsable(1)) {
             ctx.sendMessage("&cUsage: /item-factory <plugin> <key>");
@@ -46,6 +60,13 @@ public class GetItemCMD extends SimplifiedCommand {
         }
     }
 
+    /**
+     * Provides tab-completion suggestions for the item-factory command.
+     * Suggests plugin names for the first argument and item keys for the second argument.
+     *
+     * @param ctx the command context containing the current arguments
+     * @return a sorted set of tab-completion suggestions
+     */
     public ConcurrentSkipListSet<String> tabComplete(CommandContext ctx) {
         ConcurrentSkipListSet<String> completions = new ConcurrentSkipListSet<>();
         if (ctx.getArgCount() <= 1) {

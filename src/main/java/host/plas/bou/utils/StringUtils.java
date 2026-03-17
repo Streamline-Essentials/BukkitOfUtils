@@ -3,7 +3,20 @@ package host.plas.bou.utils;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.utils.obj.CapitalizationType;
 
+/**
+ * Utility class for string manipulation including capitalization,
+ * truncation, and character removal.
+ */
 public class StringUtils {
+    /** Private constructor to prevent instantiation of this utility class. */
+    private StringUtils() {}
+    /**
+     * Capitalizes a string according to the specified capitalization type.
+     *
+     * @param input the string to capitalize
+     * @param type  the capitalization type to apply
+     * @return the capitalized string, or the original input if null/empty or type is unknown
+     */
     public static String capitalize(String input, CapitalizationType type) {
         if (input == null || input.isEmpty()) {
             return input;
@@ -54,6 +67,13 @@ public class StringUtils {
         }
     }
 
+    /**
+     * Truncates a string to the specified maximum length.
+     *
+     * @param input  the string to truncate
+     * @param length the maximum length
+     * @return the truncated string, or the original if it is shorter than or equal to the specified length
+     */
     public static String truncate(String input, int length) {
         if (input == null || input.length() <= length) {
             return input;
@@ -62,6 +82,13 @@ public class StringUtils {
         return input.substring(0, length);
     }
 
+    /**
+     * Truncates an object's string representation to the specified maximum length.
+     *
+     * @param input  the object whose string representation to truncate
+     * @param length the maximum length
+     * @return the truncated string, or null if the input is null
+     */
     public static String truncate(Object input, int length) {
         if (input == null) return null;
 
@@ -72,6 +99,14 @@ public class StringUtils {
         return truncate(input.toString(), length);
     }
 
+    /**
+     * Truncates the decimal portion of a numeric string to the specified length.
+     * If the string does not contain a decimal point, it is truncated normally.
+     *
+     * @param input  the string to truncate
+     * @param length the maximum number of decimal places
+     * @return the string with truncated decimals
+     */
     public static String truncateDecimals(String input, int length) {
         if (input == null || input.length() <= length) {
             return input;
@@ -87,6 +122,13 @@ public class StringUtils {
         return truncate(input, length);
     }
 
+    /**
+     * Truncates the decimal portion of an object's string representation to the specified length.
+     *
+     * @param input  the object whose string representation to process
+     * @param length the maximum number of decimal places
+     * @return the string with truncated decimals, or null if the input is null
+     */
     public static String truncateDecimals(Object input, int length) {
         if (input == null) return null;
 
@@ -97,6 +139,12 @@ public class StringUtils {
         return truncateDecimals(input.toString(), length);
     }
 
+    /**
+     * Removes all whitespace characters from a string.
+     *
+     * @param input the string to process
+     * @return the string with all whitespace removed, or null if the input is null
+     */
     public static String removeSpaces(String input) {
         if (input == null) {
             return null;
@@ -105,6 +153,12 @@ public class StringUtils {
         return input.replaceAll("\\s+", "");
     }
 
+    /**
+     * Removes all non-alphanumeric characters from a string.
+     *
+     * @param input the string to process
+     * @return the string with only alphanumeric characters remaining, or null if the input is null
+     */
     public static String removeSpecialCharacters(String input) {
         if (input == null) {
             return null;
