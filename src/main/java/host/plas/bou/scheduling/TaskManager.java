@@ -25,27 +25,65 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+/**
+ * Central manager for scheduling and tracking runnables, async tasks, and Bukkit scheduled tasks.
+ * Provides utility methods for running tasks on entities, regions, chunks, and the global scheduler.
+ */
 public class TaskManager {
+    /** Private constructor to prevent instantiation of this utility class. */
+    private TaskManager() {}
+
+    /**
+     * A sorted map of all currently registered runnables, keyed by their index.
+     *
+     * @param currentRunnables the map of runnables to set
+     * @return the map of currently registered runnables
+     */
     @Getter @Setter
     private static ConcurrentSkipListMap<Integer, BaseRunnable> currentRunnables = new ConcurrentSkipListMap<>();
 
+    /**
+     * Registers a runnable in the current runnables map.
+     *
+     * @param runnable the runnable to register
+     */
     public static void load(BaseRunnable runnable) {
         getCurrentRunnables().put(runnable.getIndex(), runnable);
     }
 
+    /**
+     * Unregisters a runnable by its index from the current runnables map.
+     *
+     * @param index the index of the runnable to remove
+     */
     public static void unload(int index) {
         getCurrentRunnables().remove(index);
     }
 
+    /**
+     * Unregisters the given runnable from the current runnables map.
+     *
+     * @param runnable the runnable to remove
+     */
     public static void unload(BaseRunnable runnable) {
         unload(runnable.getIndex());
     }
 
+    /**
+     * Registers and starts the given runnable.
+     *
+     * @param runnable the runnable to register and start
+     */
     public static void start(BaseRunnable runnable) {
         load(runnable);
         runnable.start();
     }
 
+    /**
+     * Cancels a runnable by its index. Logs a warning if the runnable is not found.
+     *
+     * @param index the index of the runnable to cancel
+     */
     public static void cancel(int index) {
         BaseRunnable runnable = getRunnable(index);
         if (runnable == null) {
@@ -56,23 +94,49 @@ public class TaskManager {
         cancel(runnable);
     }
 
+    /**
+     * Stops and unregisters the given runnable.
+     *
+     * @param runnable the runnable to cancel
+     */
     public static void cancel(BaseRunnable runnable) {
         runnable.stop();
         unload(runnable.getIndex());
     }
 
+    /**
+     * Returns the next available index for a new runnable.
+     *
+     * @return the next index based on the current map size
+     */
     public static int getNextIndex() {
         return currentRunnables.size();
     }
 
+    /**
+     * Checks whether a runnable with the given index has been cancelled.
+     *
+     * @param index the index to check
+     * @return true if no runnable with the given index exists
+     */
     public static boolean isCancelled(int index) {
         return ! currentRunnables.containsKey(index);
     }
 
+    /**
+     * Retrieves the runnable registered at the given index.
+     *
+     * @param index the index of the runnable
+     * @return the BaseRunnable at the given index, or null if not found
+     */
     public static BaseRunnable getRunnable(int index) {
         return currentRunnables.get(index);
     }
 
+    /**
+     * Initializes the TaskManager by starting the async utilities, enabling ticking,
+     * and setting up the menu updater.
+     */
     public static void init() {
         try {
             AsyncUtils.init();
@@ -87,25 +151,51 @@ public class TaskManager {
         BukkitOfUtils.getInstance().logInfo("&cTaskManager &fis now initialized!");
     }
 
+    /**
+     * An atomic flag indicating whether the ticking mechanism is enabled.
+     *
+     * @param tickingEnabled the atomic boolean to set
+     * @return the atomic boolean indicating ticking state
+     */
     @Getter @Setter
     private static AtomicBoolean tickingEnabled = new AtomicBoolean(false);
 
+    /**
+     * Updates the ticking enabled state to the specified value.
+     *
+     * @param bool true to enable ticking, false to disable
+     */
     public static void updateTickingEnabled(boolean bool) {
         tickingEnabled.set(bool);
     }
 
+    /**
+     * Enables the ticking mechanism for all registered runnables.
+     */
     public static void enableTicking() {
         updateTickingEnabled(true);
     }
 
+    /**
+     * Disables the ticking mechanism for all registered runnables.
+     */
     public static void disableTicking() {
         updateTickingEnabled(false);
     }
 
+    /**
+     * Checks whether ticking is currently enabled.
+     *
+     * @return true if ticking is enabled
+     */
     public static boolean isTickingEnabled() {
         return tickingEnabled.get();
     }
 
+    /**
+     * Stops the TaskManager by disabling ticking, cancelling all runnables,
+     * and removing all queued async tasks.
+     */
     public static void stop() {
         disableTicking();
 
@@ -117,138 +207,361 @@ public class TaskManager {
         BukkitOfUtils.getInstance().logInfo("&cTaskManager &fis now stopped!");
     }
 
+    /**
+     * Checks whether the TaskManager is able to run tasks (plugin enabled and ticking active).
+     *
+     * @return true if tasks can be executed
+     */
     public static boolean isAbleToRun() {
         return BukkitOfUtils.getInstance().isEnabled() && isTickingEnabled();
     }
 
+    /**
+     * Gets the universal task scheduler from the BetterPlugin instance.
+     *
+     * @return the task scheduler
+     */
     public static TaskScheduler getScheduler() {
         return BetterPlugin.getScheduler();
     }
 
+    /**
+     * Schedules a runnable to execute immediately.
+     *
+     * @param runnable the runnable to schedule
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(Runnable runnable) {
         return new CompletableTask(new InjectedRunnable(runnable));
     }
 
+    /**
+     * Schedules a runnable to execute after a delay.
+     *
+     * @param runnable the runnable to schedule
+     * @param delay    the delay in ticks before execution
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(Runnable runnable, long delay) {
         return new CompletableTask(new InjectedRunnable(runnable), delay);
     }
 
+    /**
+     * Schedules a runnable to execute repeatedly after a delay.
+     *
+     * @param runnable the runnable to schedule
+     * @param delay    the delay in ticks before the first execution
+     * @param period   the period in ticks between subsequent executions
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(Runnable runnable, long delay, long period) {
         return new CompletableTask(new InjectedRunnable(runnable), delay, period);
     }
 
+    /**
+     * Schedules a runnable bound to an entity to execute immediately.
+     *
+     * @param entity   the entity context for the task
+     * @param runnable the runnable to schedule
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(Entity entity, Runnable runnable) {
         return new CompletableTask(entity, new InjectedRunnable(runnable));
     }
 
+    /**
+     * Schedules a runnable bound to an entity to execute after a delay.
+     *
+     * @param entity   the entity context for the task
+     * @param runnable the runnable to schedule
+     * @param delay    the delay in ticks before execution
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(Entity entity, Runnable runnable, long delay) {
         return new CompletableTask(entity, new InjectedRunnable(runnable), delay);
     }
 
+    /**
+     * Schedules a runnable bound to an entity to execute repeatedly.
+     *
+     * @param entity   the entity context for the task
+     * @param runnable the runnable to schedule
+     * @param delay    the delay in ticks before the first execution
+     * @param period   the period in ticks between subsequent executions
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(Entity entity, Runnable runnable, long delay, long period) {
         return new CompletableTask(entity, new InjectedRunnable(runnable), delay, period);
     }
 
+    /**
+     * Schedules a runnable bound to a region to execute immediately.
+     *
+     * @param world    the world containing the region
+     * @param x        the chunk X coordinate
+     * @param z        the chunk Z coordinate
+     * @param runnable the runnable to schedule
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(World world, int x, int z, Runnable runnable) {
         return new CompletableTask(world, x, z, new InjectedRunnable(runnable));
     }
 
+    /**
+     * Schedules a runnable bound to a chunk to execute immediately.
+     *
+     * @param chunk    the chunk context for the task
+     * @param runnable the runnable to schedule
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(Chunk chunk, Runnable runnable) {
         return new CompletableTask(chunk, new InjectedRunnable(runnable));
     }
 
+    /**
+     * Schedules a runnable bound to a region to execute after a delay.
+     *
+     * @param world    the world containing the region
+     * @param x        the chunk X coordinate
+     * @param z        the chunk Z coordinate
+     * @param runnable the runnable to schedule
+     * @param delay    the delay in ticks before execution
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(World world, int x, int z, Runnable runnable, long delay) {
         return new CompletableTask(world, x, z, new InjectedRunnable(runnable), delay);
     }
 
+    /**
+     * Schedules a runnable bound to a chunk to execute after a delay.
+     *
+     * @param chunk    the chunk context for the task
+     * @param runnable the runnable to schedule
+     * @param delay    the delay in ticks before execution
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(Chunk chunk, Runnable runnable, long delay) {
         return new CompletableTask(chunk, new InjectedRunnable(runnable), delay);
     }
 
+    /**
+     * Schedules a runnable bound to a region to execute repeatedly.
+     *
+     * @param world    the world containing the region
+     * @param x        the chunk X coordinate
+     * @param z        the chunk Z coordinate
+     * @param runnable the runnable to schedule
+     * @param delay    the delay in ticks before the first execution
+     * @param period   the period in ticks between subsequent executions
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(World world, int x, int z, Runnable runnable, long delay, long period) {
         return new CompletableTask(world, x, z, new InjectedRunnable(runnable), delay, period);
     }
 
+    /**
+     * Schedules a runnable bound to a chunk to execute repeatedly.
+     *
+     * @param chunk    the chunk context for the task
+     * @param runnable the runnable to schedule
+     * @param delay    the delay in ticks before the first execution
+     * @param period   the period in ticks between subsequent executions
+     * @return a CompletableTask wrapping the scheduled execution
+     */
     public static CompletableTask schedule(Chunk chunk, Runnable runnable, long delay, long period) {
         return new CompletableTask(chunk, new InjectedRunnable(runnable), delay, period);
     }
 
+    /**
+     * Schedules a teleportation of an entity to the given location.
+     *
+     * @param entityToTeleport the entity to teleport
+     * @param location         the target location
+     * @return a CompletableTask wrapping the teleportation
+     */
     public static CompletableTask schedule(Entity entityToTeleport, Location location) {
         return new CompletableTask(entityToTeleport, location);
     }
 
+    /**
+     * Runs a task immediately on the scheduler, if the manager is able to run.
+     *
+     * @param runnable the runnable to execute
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTask(Runnable runnable) {
         if (! isAbleToRun()) return null;
 
         return getScheduler().runTask(runnable);
     }
 
+    /**
+     * Runs a task after a delay on the scheduler, if the manager is able to run.
+     *
+     * @param runnable the runnable to execute
+     * @param delay    the delay in ticks before execution
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTaskLater(Runnable runnable, long delay) {
         if (! isAbleToRun()) return null;
 
         return getScheduler().runTaskLater(runnable, delay);
     }
 
+    /**
+     * Runs a repeating task on the scheduler, if the manager is able to run.
+     *
+     * @param runnable the runnable to execute
+     * @param delay    the delay in ticks before the first execution
+     * @param period   the period in ticks between subsequent executions
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTaskTimer(Runnable runnable, long delay, long period) {
         if (! isAbleToRun()) return null;
 
         return getScheduler().runTaskTimer(runnable, delay, period);
     }
 
+    /**
+     * Runs a task bound to an entity immediately, if the manager is able to run.
+     *
+     * @param entity   the entity context
+     * @param runnable the runnable to execute
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTask(Entity entity, Runnable runnable) {
         if (! isAbleToRun()) return null;
 
         return getScheduler().runTask(entity, runnable);
     }
 
+    /**
+     * Runs a task bound to an entity after a delay, if the manager is able to run.
+     *
+     * @param entity   the entity context
+     * @param runnable the runnable to execute
+     * @param delay    the delay in ticks before execution
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTaskLater(Entity entity, Runnable runnable, long delay) {
         if (! isAbleToRun()) return null;
 
         return getScheduler().runTaskLater(entity, runnable, delay);
     }
 
+    /**
+     * Runs a repeating task bound to an entity, if the manager is able to run.
+     *
+     * @param entity   the entity context
+     * @param runnable the runnable to execute
+     * @param delay    the delay in ticks before the first execution
+     * @param period   the period in ticks between subsequent executions
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTaskTimer(Entity entity, Runnable runnable, long delay, long period) {
         if (! isAbleToRun()) return null;
 
         return getScheduler().runTaskTimer(entity, runnable, delay, period);
     }
 
+    /**
+     * Runs a task bound to a region immediately, if the manager is able to run.
+     *
+     * @param world    the world containing the region
+     * @param x        the chunk X coordinate
+     * @param z        the chunk Z coordinate
+     * @param runnable the runnable to execute
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTask(World world, int x, int z, Runnable runnable) {
         if (! isAbleToRun()) return null;
 
         return getScheduler().runTask(world, x, z, runnable);
     }
 
+    /**
+     * Runs a task bound to a chunk immediately, if the manager is able to run.
+     *
+     * @param chunk    the chunk context
+     * @param runnable the runnable to execute
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTask(Chunk chunk, Runnable runnable) {
         if (! isAbleToRun()) return null;
 
         return runTask(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable);
     }
 
+    /**
+     * Runs a task bound to a region after a delay, if the manager is able to run.
+     *
+     * @param world    the world containing the region
+     * @param x        the chunk X coordinate
+     * @param z        the chunk Z coordinate
+     * @param runnable the runnable to execute
+     * @param delay    the delay in ticks before execution
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTaskLater(World world, int x, int z, Runnable runnable, long delay) {
         if (! isAbleToRun()) return null;
 
         return getScheduler().runTaskLater(world, x, z, runnable, delay);
     }
 
+    /**
+     * Runs a task bound to a chunk after a delay, if the manager is able to run.
+     *
+     * @param chunk    the chunk context
+     * @param runnable the runnable to execute
+     * @param delay    the delay in ticks before execution
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTaskLater(Chunk chunk, Runnable runnable, long delay) {
         if (! isAbleToRun()) return null;
 
         return runTaskLater(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable, delay);
     }
 
+    /**
+     * Runs a repeating task bound to a region, if the manager is able to run.
+     *
+     * @param world    the world containing the region
+     * @param x        the chunk X coordinate
+     * @param z        the chunk Z coordinate
+     * @param runnable the runnable to execute
+     * @param delay    the delay in ticks before the first execution
+     * @param period   the period in ticks between subsequent executions
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTaskTimer(World world, int x, int z, Runnable runnable, long delay, long period) {
         if (! isAbleToRun()) return null;
 
         return getScheduler().runTaskTimer(world, x, z, runnable, delay, period);
     }
 
+    /**
+     * Runs a repeating task bound to a chunk, if the manager is able to run.
+     *
+     * @param chunk    the chunk context
+     * @param runnable the runnable to execute
+     * @param delay    the delay in ticks before the first execution
+     * @param period   the period in ticks between subsequent executions
+     * @return the scheduled task, or null if the manager cannot run
+     */
     public static MyScheduledTask runTaskTimer(Chunk chunk, Runnable runnable, long delay, long period) {
         if (! isAbleToRun()) return null;
 
         return runTaskTimer(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable, delay, period);
     }
 
+    /**
+     * Teleports an entity to the given location using the scheduler, with fallback methods.
+     * Falls back to synchronous teleport and then async teleport if the scheduler fails.
+     *
+     * @param entityToTeleport the entity to teleport
+     * @param location         the target location
+     * @return the scheduled task, or a no-op task if fallback was used, or null if unable to run
+     */
     public static MyScheduledTask teleport(Entity entityToTeleport, Location location) {
         if (! isAbleToRun()) return null;
 
@@ -269,6 +582,11 @@ public class TaskManager {
         }
     }
 
+    /**
+     * Executes a callable, catching and logging any exceptions.
+     *
+     * @param callable the callable to execute
+     */
     public static void doThis(Callable<?> callable) {
         try {
             callable.call();
@@ -278,10 +596,25 @@ public class TaskManager {
         }
     }
 
+    /**
+     * Applies a consumer to the given object. A convenience method for inline usage.
+     *
+     * @param c        the object to consume
+     * @param consumer the consumer to apply
+     * @param <C>      the type of the object
+     */
     public static <C> void use(C c, Consumer<C> consumer) {
         consumer.accept(c);
     }
 
+    /**
+     * Checks whether the current thread is synchronized with the appropriate context.
+     * On Folia servers, checks entity/region thread ownership; on standard servers,
+     * checks whether this is the primary thread.
+     *
+     * @param obj an optional context object (Entity or Location) for thread checking, or null
+     * @return true if the current thread is the correct sync thread for the given context
+     */
     public static boolean isThreadSync(Object obj) {
         Entity e = null;
         Location l = null;
@@ -326,10 +659,21 @@ public class TaskManager {
         );
     }
 
+    /**
+     * Checks whether the current thread is the primary/tick thread with no specific context.
+     *
+     * @return true if the current thread is synchronized
+     */
     public static boolean isThreadSync() {
         return isThreadSync(null);
     }
 
+    /**
+     * Builds a formatted string with detailed information about the given runnable.
+     *
+     * @param runnable the runnable to describe
+     * @return a formatted multi-line string with task details
+     */
     public static String buildTaskInfo(BaseRunnable runnable) {
         StringBuilder sb = new StringBuilder();
 
@@ -343,6 +687,11 @@ public class TaskManager {
         return sb.toString();
     }
 
+    /**
+     * Builds a formatted string listing all currently registered tasks and their details.
+     *
+     * @return a formatted multi-line string of all current tasks
+     */
     public static String listTasks() {
         StringBuilder sb = new StringBuilder("&cCurrent Tasks &e(&a").append(currentRunnables.size()).append("&e)&7:\n");
 
@@ -357,12 +706,23 @@ public class TaskManager {
         return sb.toString();
     }
 
+    /**
+     * Gets a set of all current task indices as strings.
+     *
+     * @return a sorted set of task index strings
+     */
     public static ConcurrentSkipListSet<String> getTaskIdsAsStrings() {
         ConcurrentSkipListSet<String> taskIds = new ConcurrentSkipListSet<>();
         currentRunnables.forEach((index, runnable) -> taskIds.add(String.valueOf(index)));
         return taskIds;
     }
 
+    /**
+     * Creates an ItemStack representing the task at the given index for use in a GUI menu.
+     *
+     * @param index the index of the task
+     * @return an ItemStack with the task's details in its lore
+     */
     public static ItemStack getTaskItem(int index) {
         Material material = Material.COAL;
 
@@ -386,12 +746,23 @@ public class TaskManager {
         return ItemUtils.make(material, name, lore);
     }
 
+    /**
+     * Creates a map of ItemStacks representing all currently registered tasks.
+     *
+     * @return a sorted map of task index to task ItemStack
+     */
     public static ConcurrentSkipListMap<Integer, ItemStack> getTaskItems() {
         ConcurrentSkipListMap<Integer, ItemStack> taskItems = new ConcurrentSkipListMap<>();
         currentRunnables.forEach((index, runnable) -> taskItems.put(index, getTaskItem(index)));
         return taskItems;
     }
 
+    /**
+     * Creates an ItemStack representing an async task at the given index for use in a GUI menu.
+     *
+     * @param index the index of the async task
+     * @return an ItemStack with the async task's details in its lore
+     */
     public static ItemStack getAsyncItem(long index) {
         Material material = Material.DIAMOND;
 
@@ -417,15 +788,30 @@ public class TaskManager {
         return ItemUtils.make(material, name, lore);
     }
 
+    /**
+     * Creates a map of ItemStacks representing all queued async tasks.
+     *
+     * @return a sorted map of async task index to task ItemStack
+     */
     public static ConcurrentSkipListMap<Integer, ItemStack> getAsyncItems() {
         ConcurrentSkipListMap<Integer, ItemStack> taskItems = new ConcurrentSkipListMap<>();
         AsyncUtils.getQueuedTasks().forEach((task) -> taskItems.put((int) task.getId(), getAsyncItem(task.getId())));
         return taskItems;
     }
 
+    /**
+     * The runnable responsible for periodically updating the task menu GUI.
+     *
+     * @param taskMenuUpdater the task menu updater runnable to set
+     * @return the task menu updater runnable
+     */
     @Getter @Setter
     private static BaseRunnable taskMenuUpdater;
 
+    /**
+     * Sets up or restarts the task menu updater runnable.
+     * Cancels any existing updater before creating a new one.
+     */
     public static void setupMenuUpdater() {
         try {
             if (taskMenuUpdater != null) {

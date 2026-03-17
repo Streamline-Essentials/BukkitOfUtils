@@ -11,12 +11,27 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * A paginated menu that displays all active synchronous and asynchronous tasks
+ * as items in a GUI inventory.
+ */
 public class TaskMenu extends PaginatedMenu {
+    /**
+     * Constructs a new TaskMenu for the given player, displaying all active tasks.
+     *
+     * @param player the player to show the task menu to
+     */
     public TaskMenu(@NotNull Player player) {
         super(player, BouGuiTypes.TASK_MENU, buildTaskList(),
                 4 * 9, 0, 0, 0, 2);
     }
 
+    /**
+     * Builds a managed inventory containing item representations of all active
+     * synchronous and asynchronous tasks.
+     *
+     * @return a {@link ManagedInventory} populated with task item stacks
+     */
     public static ManagedInventory buildTaskList() {
         ConcurrentSkipListMap<Integer, ItemStack> taskItems = TaskManager.getTaskItems();
         ConcurrentSkipListMap<Integer, ItemStack> asyncItems = TaskManager.getAsyncItems();
@@ -38,6 +53,12 @@ public class TaskMenu extends PaginatedMenu {
         return inventory;
     }
 
+    /**
+     * Opens a task menu for the given player. If not called from the main server thread,
+     * the operation is rescheduled to run synchronously.
+     *
+     * @param player the player to open the task menu for, or {@code null} to do nothing
+     */
     public static void open(Player player) {
         if (player == null) return;
 

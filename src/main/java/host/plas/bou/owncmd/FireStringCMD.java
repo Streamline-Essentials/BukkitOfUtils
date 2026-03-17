@@ -12,11 +12,26 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+/**
+ * Command that executes Fire Strings, which are configurable action strings
+ * that can trigger console commands, player commands, chat messages, titles, and broadcasts.
+ * Provides a help sub-command with a link to the wiki documentation.
+ */
 public class FireStringCMD extends SimplifiedCommand {
+    /**
+     * Constructs the /runfirestring command and registers it with the BukkitOfUtils plugin.
+     */
     public FireStringCMD() {
         super("runfirestring", BukkitOfUtils.getInstance());
     }
 
+    /**
+     * Executes the runfirestring command. Displays help information when "help" is passed
+     * as the first argument, otherwise fires the specified Fire String with the provided arguments.
+     *
+     * @param ctx the command context containing the sender and arguments
+     * @return true if the command executed successfully, false otherwise
+     */
     @Override
     public boolean command(CommandContext ctx) {
         if (! ctx.isArgUsable(0)) {
@@ -55,6 +70,14 @@ public class FireStringCMD extends SimplifiedCommand {
         return true;
     }
 
+    /**
+     * Provides tab-completion suggestions for the runfirestring command.
+     * Suggests Fire String identifiers and help for the first argument,
+     * and player names for applicable Fire String types.
+     *
+     * @param ctx the command context containing the current arguments
+     * @return a sorted set of tab-completion suggestions
+     */
     @Override
     public ConcurrentSkipListSet<String> tabComplete(CommandContext ctx) {
         ConcurrentSkipListSet<String> completions = new ConcurrentSkipListSet<>();

@@ -5,14 +5,24 @@ import lombok.Setter;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Represents a database argument index tracker, providing methods to
+ * increment, reset, and manage the current argument position.
+ */
 @Getter @Setter
 public class DbArg {
     /**
-     * The start index of the argument
+     * The start index of the argument.
+     *
+     * @param start the start index to set
+     * @return the start index
      */
     private int start;
     /**
-     * The current argument index
+     * The current argument index.
+     *
+     * @param i the argument index to set
+     * @return the current argument index
      */
     private AtomicInteger i;
 
