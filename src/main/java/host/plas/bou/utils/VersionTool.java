@@ -28,14 +28,28 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+/**
+ * Utility class providing version-dependent reflection methods, ItemStack serialization/deserialization,
+ * command synchronization, and NMS/CraftBukkit class access.
+ */
 public class VersionTool {
+    /** Private constructor to prevent instantiation of this utility class. */
+    private VersionTool() {}
 
     // GSON
 
+    /** A shared Gson instance used for JSON serialization and deserialization. */
     public static final Gson GSON = new GsonBuilder().create();
 
     // ITEMSTACK SERIALIZATION AND DESERIALIZATION
 
+    /**
+     * Serializes a Bukkit ItemStack to a JSON string.
+     * Uses NMS reflection when a server version is available, otherwise falls back to Bukkit serialization.
+     *
+     * @param stack the ItemStack to serialize
+     * @return a JSON string representation of the ItemStack
+     */
     public static String getJsonStringFromBukkitItemStack(ItemStack stack) {
         if (getServerVersion().isEmpty()) {
             try {
@@ -75,6 +89,13 @@ public class VersionTool {
         }
     }
 
+    /**
+     * Deserializes a Bukkit ItemStack from a JSON/NBT string.
+     * Uses NMS reflection when a server version is available, otherwise falls back to Bukkit deserialization.
+     *
+     * @param nbtJson the JSON or NBT string to deserialize
+     * @return the deserialized ItemStack, or null if deserialization fails
+     */
     public static ItemStack getBukkitItemStackFromJsonString(String nbtJson) {
         if (getServerVersion().isEmpty()) {
             try {
@@ -131,6 +152,14 @@ public class VersionTool {
 
     // ITEM META FALLBACK
 
+    /**
+     * Deserializes ItemMeta from a raw map using a fallback approach when standard deserialization fails.
+     * Handles display names, lore, and skull owner data.
+     *
+     * @param stack   the ItemStack to create meta for
+     * @param metaMap the raw meta data map
+     * @return the deserialized ItemMeta, or null if the stack type has no meta
+     */
     public static ItemMeta deserializeItemMetaFallback(ItemStack stack, Map<String, Object> metaMap) {
         ItemMeta meta = Bukkit.getItemFactory().getItemMeta(stack.getType());
 
@@ -188,6 +217,12 @@ public class VersionTool {
         return meta;
     }
 
+    /**
+     * Combines an array of BaseComponents into a single TextComponent.
+     *
+     * @param components the components to combine
+     * @return a TextComponent containing all the given components as extras
+     */
     public static TextComponent squashComponents(BaseComponent[] components) {
         TextComponent textComponent = new TextComponent();
         for (BaseComponent component : components) {
@@ -196,6 +231,12 @@ public class VersionTool {
         return textComponent;
     }
 
+    /**
+     * Deserializes a JSON string into an array of BaseComponents, handling text, color, and extra fields.
+     *
+     * @param json the JSON string to deserialize
+     * @return an array of BaseComponents representing the deserialized text
+     */
     public static BaseComponent[] deserializeJsonToText(String json) {
         Map<String, Object> metaMap2 = (Map<String, Object>) GSON.fromJson(json, Map.class);
         String text = (String) metaMap2.get("text");
@@ -228,6 +269,10 @@ public class VersionTool {
 
     // FAST REFLECTION METHODS
 
+    /**
+     * Initializes the VersionTool by introspecting the server version and pre-loading
+     * all reflection classes, methods, and fields.
+     */
     public static void init() {
         Versioning.introspect(); // Initialize server version
 
@@ -238,6 +283,9 @@ public class VersionTool {
         initFields();
     }
 
+    /**
+     * Pre-loads all NMS and CraftBukkit classes used by reflection.
+     */
     public static void initClasses() {
         try {
             getBukkitServerClass();
@@ -286,6 +334,9 @@ public class VersionTool {
         }
     }
 
+    /**
+     * Pre-loads all reflection methods used by this utility.
+     */
     public static void initMethods() {
         try {
             getBukkitServerSyncCommandsMethod();
@@ -324,6 +375,9 @@ public class VersionTool {
         }
     }
 
+    /**
+     * Pre-loads all reflection fields used by this utility.
+     */
     public static void initFields() {
         try {
             getGameProfileNameField();
@@ -352,24 +406,51 @@ public class VersionTool {
         }
     }
 
+    /**
+     * Returns the NMS (net.minecraft.server) package path.
+     *
+     * @return the NMS package path without a trailing dot
+     */
     public static String getNMSPackage() {
         return getNMSPackage(false);
     }
 
+    /**
+     * Returns the NMS (net.minecraft.server) package path with an optional trailing dot.
+     *
+     * @param withTrailingDot whether to append a trailing dot
+     * @return the NMS package path
+     */
     public static String getNMSPackage(boolean withTrailingDot) {
         return "net.minecraft.server" + getServerVersionDotted() + (withTrailingDot ? "." : "");
     }
 
+    /**
+     * Returns the CraftBukkit package path.
+     *
+     * @return the CraftBukkit package path without a trailing dot
+     */
     public static String getCraftPackage() {
         return getCraftPackage(false);
     }
 
+    /**
+     * Returns the CraftBukkit package path with an optional trailing dot.
+     *
+     * @param withTrailingDot whether to append a trailing dot
+     * @return the CraftBukkit package path
+     */
     public static String getCraftPackage(boolean withTrailingDot) {
         return "org.bukkit.craftbukkit" + getServerVersionDotted() + (withTrailingDot ? "." : "");
     }
 
     private static Class<?> CLASS_BUKKIT_SERVER = null;
 
+    /**
+     * Returns the Bukkit server implementation class.
+     *
+     * @return the server class
+     */
     public static Class<?> getBukkitServerClass() {
         if (CLASS_BUKKIT_SERVER == null) {
             CLASS_BUKKIT_SERVER = Bukkit.getServer().getClass();
@@ -379,6 +460,12 @@ public class VersionTool {
 
     private static Class<?> CLASS_PLAYER_LIST = null;
 
+    /**
+     * Returns the NMS PlayerList class.
+     *
+     * @return the PlayerList class
+     * @throws Throwable if the class cannot be found
+     */
     public static Class<?> getPlayerListClass() throws Throwable {
         if (CLASS_PLAYER_LIST == null) {
             boolean is17OrOver = Versioning.getServerVersion().isAfter(17 - 1); // 1.17+
@@ -389,6 +476,12 @@ public class VersionTool {
 
     private static Class<?> CLASS_CRAFT_PLAYER = null;
 
+    /**
+     * Returns the CraftPlayer class.
+     *
+     * @return the CraftPlayer class
+     * @throws Throwable if the class cannot be found
+     */
     public static Class<?> getCraftPlayerClass() throws Throwable {
         if (CLASS_CRAFT_PLAYER == null) {
             CLASS_CRAFT_PLAYER = Class.forName(getCraftPackage() + ".entity.CraftPlayer");
@@ -398,6 +491,12 @@ public class VersionTool {
 
     private static Class<?> CLASS_CRAFT_ITEM_STACK = null;
 
+    /**
+     * Returns the CraftItemStack class.
+     *
+     * @return the CraftItemStack class
+     * @throws Throwable if the class cannot be found
+     */
     public static Class<?> getCraftItemStackClass() throws Throwable {
         if (CLASS_CRAFT_ITEM_STACK == null) {
             CLASS_CRAFT_ITEM_STACK = Class.forName(getCraftPackage() + ".inventory.CraftItemStack");
@@ -405,6 +504,13 @@ public class VersionTool {
         return CLASS_CRAFT_ITEM_STACK;
     }
 
+    /**
+     * Converts a Bukkit ItemStack to an NMS ItemStack using reflection.
+     *
+     * @param itemStack the Bukkit ItemStack to convert
+     * @return the NMS ItemStack object
+     * @throws Throwable if the conversion fails
+     */
     public static Object getNMSItemStack(ItemStack itemStack) throws Throwable {
         Class<?> craftItemStackClass = getCraftItemStackClass();
         Method asNMSCopy = craftItemStackClass.getMethod("asNMSCopy", ItemStack.class);
@@ -413,6 +519,12 @@ public class VersionTool {
 
     private static Class<?> CLASS_NBT_TAG_COMPOUND = null;
 
+    /**
+     * Returns the NMS NBTTagCompound class.
+     *
+     * @return the NBTTagCompound class
+     * @throws Throwable if the class cannot be found
+     */
     public static Class<?> getNBTTagCompoundClass() throws Throwable {
         if (CLASS_NBT_TAG_COMPOUND == null) {
             CLASS_NBT_TAG_COMPOUND = Class.forName("net.minecraft.nbt.NBTTagCompound");
@@ -422,6 +534,12 @@ public class VersionTool {
 
     private static Class<?> CLASS_MOJANGSON_PARSER = null;
 
+    /**
+     * Returns the NMS MojangsonParser class.
+     *
+     * @return the MojangsonParser class
+     * @throws Throwable if the class cannot be found
+     */
     public static Class<?> getMojangsonParserClass() throws Throwable {
         if (CLASS_MOJANGSON_PARSER == null) {
             CLASS_MOJANGSON_PARSER = Class.forName("net.minecraft.nbt.MojangsonParser");
@@ -431,6 +549,12 @@ public class VersionTool {
 
     private static Class<?> CLASS_NMS_ITEM_STACK = null;
 
+    /**
+     * Returns the NMS ItemStack class.
+     *
+     * @return the NMS ItemStack class
+     * @throws Throwable if the class cannot be found
+     */
     public static Class<?> getNMSItemStackClass() throws Throwable {
         if (CLASS_NMS_ITEM_STACK == null) {
             CLASS_NMS_ITEM_STACK = Class.forName("net.minecraft.world.item.ItemStack");
@@ -440,6 +564,12 @@ public class VersionTool {
 
     private static Class<?> CLASS_FOLIA_ENTITY = null;
 
+    /**
+     * Returns the Bukkit Entity class (used for Folia teleport compatibility).
+     *
+     * @return the Entity class
+     * @throws Throwable if the class cannot be found
+     */
     public static Class<?> getFoliaEntityClass() throws Throwable {
         if (CLASS_FOLIA_ENTITY == null) {
             CLASS_FOLIA_ENTITY = Class.forName("org.bukkit.entity.Entity");
@@ -449,6 +579,12 @@ public class VersionTool {
 
     private static Class<?> CLASS_FOLIA_LOCATION = null;
 
+    /**
+     * Returns the Bukkit Location class (used for Folia teleport compatibility).
+     *
+     * @return the Location class
+     * @throws Throwable if the class cannot be found
+     */
     public static Class<?> getFoliaLocationClass() throws Throwable {
         if (CLASS_FOLIA_LOCATION == null) {
             CLASS_FOLIA_LOCATION = Class.forName("org.bukkit.Location");
@@ -458,6 +594,12 @@ public class VersionTool {
 
     private static Method METHOD_BUKKIT_SERVER_SYNC_COMMANDS = null;
 
+    /**
+     * Returns the CraftServer syncCommands method.
+     *
+     * @return the syncCommands Method
+     * @throws Throwable if the method cannot be found
+     */
     public static Method getBukkitServerSyncCommandsMethod() throws Throwable {
         if (METHOD_BUKKIT_SERVER_SYNC_COMMANDS == null) {
             METHOD_BUKKIT_SERVER_SYNC_COMMANDS = getBukkitServerClass().getDeclaredMethod("syncCommands");
@@ -468,6 +610,12 @@ public class VersionTool {
 
     private static Method METHOD_CRAFT_PLAYER_GET_GAME_PROFILE = null;
 
+    /**
+     * Returns the CraftPlayer getProfile method for retrieving the GameProfile.
+     *
+     * @return the getProfile Method
+     * @throws Throwable if the method cannot be found
+     */
     public static Method getCraftPlayerGetGameProfileMethod() throws Throwable {
         if (METHOD_CRAFT_PLAYER_GET_GAME_PROFILE == null) {
             METHOD_CRAFT_PLAYER_GET_GAME_PROFILE = getCraftPlayerClass().getMethod("getProfile");
@@ -477,6 +625,12 @@ public class VersionTool {
 
     private static Method METHOD_CRAFT_PLAYER_GET_HANDLE = null;
 
+    /**
+     * Returns the CraftPlayer getHandle method for retrieving the NMS EntityPlayer.
+     *
+     * @return the getHandle Method
+     * @throws Throwable if the method cannot be found
+     */
     public static Method getCraftPlayerGetHandleMethod() throws Throwable {
         if (METHOD_CRAFT_PLAYER_GET_HANDLE == null) {
             METHOD_CRAFT_PLAYER_GET_HANDLE = getCraftPlayerClass().getMethod("getHandle");
@@ -486,6 +640,12 @@ public class VersionTool {
 
     private static Method MOJANGSON_PARSER_PARSE_METHOD = null;
 
+    /**
+     * Returns the MojangsonParser parse method for parsing NBT JSON strings.
+     *
+     * @return the parse Method
+     * @throws Throwable if the method cannot be found
+     */
     public static Method getMojangsonParserParseMethod() throws Throwable {
         if (MOJANGSON_PARSER_PARSE_METHOD == null) {
             MOJANGSON_PARSER_PARSE_METHOD = getMojangsonParserClass().getMethod("parse", String.class);
@@ -495,6 +655,12 @@ public class VersionTool {
 
     private static Method NMS_ITEM_STACK_A_METHOD = null;
 
+    /**
+     * Returns the NMS ItemStack factory method for creating ItemStacks from NBT data.
+     *
+     * @return the factory Method
+     * @throws Throwable if the method cannot be found
+     */
     public static Method getNMSItemStackAMethod() throws Throwable {
         if (NMS_ITEM_STACK_A_METHOD == null) {
             NMS_ITEM_STACK_A_METHOD = getNMSItemStackClass().getMethod("a", getNBTTagCompoundClass());
@@ -504,6 +670,12 @@ public class VersionTool {
 
     private static Method CRAFT_ITEM_STACK_AS_BUKKIT_COPY_METHOD = null;
 
+    /**
+     * Returns the CraftItemStack asBukkitCopy method for converting NMS ItemStacks to Bukkit ItemStacks.
+     *
+     * @return the asBukkitCopy Method
+     * @throws Throwable if the method cannot be found
+     */
     public static Method getCraftItemStackAsBukkitCopyMethod() throws Throwable {
         if (CRAFT_ITEM_STACK_AS_BUKKIT_COPY_METHOD == null) {
             CRAFT_ITEM_STACK_AS_BUKKIT_COPY_METHOD = getCraftItemStackClass().getMethod("asBukkitCopy", getNMSItemStackClass());
@@ -513,6 +685,12 @@ public class VersionTool {
 
     private static Method FOLIA_ENTITY_TELEPORT_ASYNC_METHOD = null;
 
+    /**
+     * Returns the Entity teleportAsync method used for Folia-compatible teleportation.
+     *
+     * @return the teleportAsync Method
+     * @throws Throwable if the method cannot be found
+     */
     public static Method getFoliaEntityTeleportAsyncMethod() throws Throwable {
         if (FOLIA_ENTITY_TELEPORT_ASYNC_METHOD == null) {
             FOLIA_ENTITY_TELEPORT_ASYNC_METHOD = getFoliaEntityClass().getMethod("teleportAsync", getFoliaLocationClass());
@@ -522,6 +700,12 @@ public class VersionTool {
 
     private static Field FIELD_GAME_PROFILE_NAME = null;
 
+    /**
+     * Returns the GameProfile name field for modifying player profile names via reflection.
+     *
+     * @return the name Field
+     * @throws Throwable if the field cannot be found
+     */
     public static Field getGameProfileNameField() throws Throwable {
         if (FIELD_GAME_PROFILE_NAME == null) {
             FIELD_GAME_PROFILE_NAME = GameProfile.class.getDeclaredField("name");
@@ -532,6 +716,12 @@ public class VersionTool {
 
     private static Field FIELD_PLAYER_LIST = null;
 
+    /**
+     * Returns the CraftServer playerList field.
+     *
+     * @return the playerList Field
+     * @throws Throwable if the field cannot be found
+     */
     public static Field getPlayerListField() throws Throwable {
         if (FIELD_PLAYER_LIST == null) {
             FIELD_PLAYER_LIST = Bukkit.getServer().getClass().getDeclaredField("playerList");
@@ -542,6 +732,12 @@ public class VersionTool {
 
     private static Field FIELD_PLAYERS_BY_NAME = null;
 
+    /**
+     * Returns the PlayerList playersByName field for accessing the player-by-name lookup map.
+     *
+     * @return the playersByName Field
+     * @throws Throwable if the field cannot be found
+     */
     public static Field getPlayersByNameField() throws Throwable {
         if (FIELD_PLAYERS_BY_NAME == null) {
             final Object playerList = getPlayerListField().get(Bukkit.getServer());
@@ -554,6 +750,12 @@ public class VersionTool {
 
     private static Map MAP_PLAYERS = null;
 
+    /**
+     * Returns the internal players-by-name map from the server's PlayerList.
+     *
+     * @return the players map
+     * @throws Throwable if the map cannot be accessed
+     */
     public static Map getPlayersMap() throws Throwable {
         if (MAP_PLAYERS == null) {
             final Object playerList = getPlayerListField().get(Bukkit.getServer());
@@ -565,6 +767,12 @@ public class VersionTool {
 
     private static Field FIELD_COMMAND_MAP_KNOWN_COMMANDS = null;
 
+    /**
+     * Returns the knownCommands field from the server's command map.
+     *
+     * @return the knownCommands Field
+     * @throws Throwable if the field cannot be found
+     */
     public static Field getCommandMapKnownCommandsField() throws Throwable {
         if (FIELD_COMMAND_MAP_KNOWN_COMMANDS == null) {
             FIELD_COMMAND_MAP_KNOWN_COMMANDS = CommandHandler.getCommandMap().getClass().getDeclaredField("knownCommands");
@@ -575,6 +783,9 @@ public class VersionTool {
 
     // WORKER METHODS
 
+    /**
+     * Invokes the server's syncCommands method to synchronize registered commands with clients.
+     */
     public static void syncCommands() {
         try {
             getBukkitServerSyncCommandsMethod().invoke(Bukkit.getServer());
@@ -585,6 +796,11 @@ public class VersionTool {
         }
     }
 
+    /**
+     * Unregisters a command and its aliases from the server's known commands map.
+     *
+     * @param command the command to unregister
+     */
     public static void unregisterKnownCommand(Command command) {
         try {
             @SuppressWarnings("unchecked") final Map<String, Command> knownCommands = (Map<String, Command>) getCommandMapKnownCommandsField().get(CommandHandler.getCommandMap());
@@ -598,18 +814,45 @@ public class VersionTool {
         }
     }
 
+    /**
+     * Parses an NBT JSON string into an NMS NBTTagCompound object.
+     *
+     * @param nbtJson the NBT JSON string to parse
+     * @return the parsed NBTTagCompound object
+     * @throws Throwable if parsing fails
+     */
     public static Object parseNBT(String nbtJson) throws Throwable {
         return getMojangsonParserParseMethod().invoke(null, nbtJson);
     }
 
+    /**
+     * Creates an NMS ItemStack from an NBTTagCompound object.
+     *
+     * @param nbtTagCompound the NBT data to create the ItemStack from
+     * @return the NMS ItemStack object
+     * @throws Throwable if creation fails
+     */
     public static Object getNMSItemStackFromNBT(Object nbtTagCompound) throws Throwable {
         return getNMSItemStackAMethod().invoke(null, nbtTagCompound);
     }
 
+    /**
+     * Converts an NMS ItemStack to a Bukkit ItemStack.
+     *
+     * @param nmsItemStack the NMS ItemStack to convert
+     * @return the Bukkit ItemStack
+     * @throws Throwable if conversion fails
+     */
     public static ItemStack getBukkitItemStack(Object nmsItemStack) throws Throwable {
         return (ItemStack) getCraftItemStackAsBukkitCopyMethod().invoke(null, nmsItemStack);
     }
 
+    /**
+     * Teleports an entity asynchronously using Folia's teleportAsync method.
+     *
+     * @param entity   the entity to teleport
+     * @param location the destination location
+     */
     public static void teleportAsync(Entity entity, Location location) {
         try {
             getFoliaEntityTeleportAsyncMethod().invoke(entity, location);
@@ -620,12 +863,23 @@ public class VersionTool {
 
     // SERVER VERSION
 
+    /**
+     * Returns the server version string with a leading dot.
+     *
+     * @return the dotted server version string
+     */
     public static String getServerVersionDotted() {
         return getServerVersionDotted(true);
     }
 
     private static String SERVER_VERSION = null;
 
+    /**
+     * Returns the server version string with a dot on the specified side.
+     *
+     * @param before if true, the dot is placed before the version; if false, after
+     * @return the dotted server version string, or empty if no version is available
+     */
     public static String getServerVersionDotted(boolean before) {
         if (SERVER_VERSION == null) {
             String r;
@@ -645,6 +899,11 @@ public class VersionTool {
         return SERVER_VERSION;
     }
 
+    /**
+     * Extracts the server version string from the CraftBukkit package name.
+     *
+     * @return the server version string (e.g., "v1_20_R1"), or empty if not available
+     */
     public static String getServerVersion() {
         String packageName = Bukkit.getServer().getClass().getPackage().getName();
 
@@ -665,6 +924,12 @@ public class VersionTool {
         return r;
     }
 
+    /**
+     * Returns an empty string as a fallback for modern servers that do not include
+     * a version string in the CraftBukkit package name.
+     *
+     * @return an empty string
+     */
     public static String getNewServerVersion() {
         return "";
     }

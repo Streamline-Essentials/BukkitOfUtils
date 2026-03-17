@@ -16,14 +16,31 @@ import host.plas.bou.utils.obj.Versioning;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Main plugin class for BukkitOfUtils, a utility plugin for Bukkit-based servers.
+ * Provides various utilities, commands, and features to enhance server management
+ * and gameplay experience. This is the entry point for the BukkitOfUtils framework.
+ */
 public class BukkitOfUtils extends BetterPlugin implements HelpfulPlugin {
+    /**
+     * The singleton instance of this plugin.
+     * @param instance the plugin instance to set
+     * @return the singleton plugin instance
+     */
     @Getter @Setter
     private static BukkitOfUtils instance;
 
+    /**
+     * Constructs a new BukkitOfUtils instance by delegating to the parent constructor.
+     */
     public BukkitOfUtils() {
         super();
     }
 
+    /**
+     * {@inheritDoc}
+     * Sets the singleton instance and initializes the BaseManager during the load phase.
+     */
     @Override
     public void onLoad() {
         setInstance(this);
@@ -31,6 +48,11 @@ public class BukkitOfUtils extends BetterPlugin implements HelpfulPlugin {
         BaseManager.init(this);
     }
 
+    /**
+     * {@inheritDoc}
+     * Registers all built-in commands, initializes helper systems (ClassHelper, ScreenManager,
+     * FireStringManager, CompatManager), and enables bStats metrics.
+     */
     @Override
     public void onBaseEnabled() {
         BaseManager.initOnEnabled();
@@ -68,6 +90,10 @@ public class BukkitOfUtils extends BetterPlugin implements HelpfulPlugin {
         BStats.onEnable();
     }
 
+    /**
+     * {@inheritDoc}
+     * Disables bStats metrics and stops the BaseManager.
+     */
     @Override
     public void onBaseDisable() {
         BStats.onDisable();
@@ -75,10 +101,20 @@ public class BukkitOfUtils extends BetterPlugin implements HelpfulPlugin {
         BaseManager.stop();
     }
 
+    /**
+     * Returns the helpful information metadata for this plugin.
+     *
+     * @return a HelpfulInfo instance containing the plugin's identifier, name, and display name
+     */
     public HelpfulInfo getHelpfulInfo() {
         return HelpfulInfo.of("bukkitofutils", "BukkitOfUtils", "&6&lBukkitOfUtils");
     }
 
+    /**
+     * Returns the help content for this plugin, including description lines and command information.
+     *
+     * @return a Helpful instance containing the plugin's help text
+     */
     public Helpful getHelpful() {
         return new Helpful(this.getHelpfulInfo(), new String[]{"&eA utility plugin for Bukkit-based servers.", "&eProvides various utilities, commands, and features to enhance server management and gameplay experience.", "&r", "&eCommands Included:", "&b- /debug: &7Toggle debug mode.", "&b- /entitycount: &7Check entity counts on the server.", "&b- /firestring: &7Execute Fire Strings for dynamic actions.", "&b- /message: &7Send custom messages to players.", "&b- /title: &7Display titles to players.&r", "&r", "&eFor more information, visit the wiki:", "&bhttps://wiki.drak.gg/bukkitofutils/"});
     }
