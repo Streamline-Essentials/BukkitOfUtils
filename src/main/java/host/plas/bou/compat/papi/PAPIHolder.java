@@ -249,7 +249,9 @@ public class PAPIHolder extends ApiHolder<PlaceholderAPIPlugin> {
 
         flushAll();
 
-        ownExpansion.unregister();
+        if (ownExpansion != null && ownExpansion.isRegistered()) {
+            ownExpansion.unregister();
+        }
 
         loadedExpansions.clear();
 
