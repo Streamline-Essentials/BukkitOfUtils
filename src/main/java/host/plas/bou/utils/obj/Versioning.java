@@ -213,20 +213,42 @@ public class Versioning implements Comparable<Versioning> {
      * @return the parsed Versioning, or an empty version if parsing fails
      */
     public static Versioning fromString(String version) {
+        String original = version;
         try {
-            if (version.contains("-")) {
-                version = version.split("-")[0];
-            }
+            version = normalizeVersionString(version);
 
             String[] parts = version.split("\\.");
-            long first = parts.length > 0 ? Long.parseLong(grabOnlyNumbers(parts[0])) : 0;
-            long second = parts.length > 1 ? Long.parseLong(grabOnlyNumbers(parts[1])) : 0;
-            long third = parts.length > 2 ? Long.parseLong(grabOnlyNumbers(parts[2])) : 0;
+            long first = parts.length > 0 ? parseVersionPart(parts[0]) : 0;
+            long second = parts.length > 1 ? parseVersionPart(parts[1]) : 0;
+            long third = parts.length > 2 ? parseVersionPart(parts[2]) : 0;
             return new Versioning(first, second, third);
         } catch (Exception e) {
-            BukkitOfUtils.getInstance().logWarningWithInfo("Failed to parse version string: " + version, e);
+            BukkitOfUtils.getInstance().logWarningWithInfo("Failed to parse version string: " + original, e);
             return getEmpty();
         }
+    }
+
+    /**
+     * Normalizes a Bukkit/Paper version string before numeric parsing.
+     * Strips snapshot suffixes and Paper build metadata (e.g. {@code 26.2.build.3}).
+     */
+    static String normalizeVersionString(String version) {
+        version = version.split("-", 2)[0];
+
+        int paperBuildMetadataIndex = version.indexOf(".build.");
+        if (paperBuildMetadataIndex != -1) {
+            version = version.substring(0, paperBuildMetadataIndex);
+        }
+
+        return version;
+    }
+
+    private static long parseVersionPart(String part) {
+        String numbers = grabOnlyNumbers(part);
+        if (numbers.isEmpty()) {
+            return 0;
+        }
+        return Long.parseLong(numbers);
     }
 
     /**
