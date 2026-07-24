@@ -44,6 +44,10 @@ public class BaseConfig extends SimpleConfiguration {
         // Version checker.
         isVersionCheckerEnabled();
         getModrinthProjectSlug();
+
+        // OneMenu.
+        isOneMenuEnabled();
+        getOneMenuCommandAlias();
     }
 
     /**
@@ -64,6 +68,27 @@ public class BaseConfig extends SimpleConfiguration {
     public String getModrinthProjectSlug() {
         reloadResource();
         return getOrSetDefault("version-checker.modrinth-project", "bukkitofutils");
+    }
+
+    /**
+     * Whether the OneMenu command/GUI feature is enabled.
+     *
+     * @return {@code true} if OneMenu is enabled
+     */
+    public boolean isOneMenuEnabled() {
+        reloadResource();
+        return getOrSetDefault("one-menu.enabled", false);
+    }
+
+    /**
+     * Optional alias for {@code /onemenu}. Empty string disables the alias.
+     * Default is {@code menu}.
+     *
+     * @return command alias, or blank for none
+     */
+    public String getOneMenuCommandAlias() {
+        reloadResource();
+        return getOrSetDefault("one-menu.command-alias", "menu");
     }
 
     /**
