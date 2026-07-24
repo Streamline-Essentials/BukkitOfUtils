@@ -1,0 +1,44 @@
+---
+description: Always git add and commit after finishing a change set
+alwaysApply: true
+---
+
+# Commit After Every Change
+
+After completing any code or config change in this repo, **always** stage and create a git commit before ending the turn. Do not wait for the user to ask.
+
+## When to commit
+
+- After implementing a feature, fix, refactor, or cleanup
+- After adding/updating rules, build files, or docs as part of the work
+- Treat each logical unit of work as its own commit when practical
+
+## How to commit
+
+Follow the repo git safety protocol:
+
+1. Run in parallel: `git status`, `git diff`, `git log -5 --oneline`
+2. Stage relevant files (`git add`); do not stage secrets (`.env`, credentials, etc.)
+3. Commit with a concise message via HEREDOC:
+
+```bash
+git commit -m "$(cat <<'EOF'
+Short summary of why this change was made.
+
+EOF
+)"
+```
+
+On Windows PowerShell, if HEREDOC is unavailable, use:
+
+```powershell
+git commit -m "Short summary of why this change was made."
+```
+
+4. Run `git status` to confirm success
+5. Do **not** push unless the user explicitly asks
+
+## Message style
+
+- Prefer why over what; match recent commit message style from `git log`
+- Use conventional tone already in the repo (e.g. `fix`, `add`, `update`, `clean`)

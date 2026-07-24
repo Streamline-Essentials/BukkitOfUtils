@@ -1,6 +1,7 @@
 package host.plas.bou.gui.menus;
 
 import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.gui.InventorySheet;
 import host.plas.bou.gui.type.BouGuiTypes;
 import host.plas.bou.scheduling.TaskManager;
 import host.plas.bou.utils.obj.ManagedInventory;
@@ -35,22 +36,69 @@ public class TaskMenu extends PaginatedMenu {
     public static ManagedInventory buildTaskList() {
         ConcurrentSkipListMap<Integer, ItemStack> taskItems = TaskManager.getTaskItems();
         ConcurrentSkipListMap<Integer, ItemStack> asyncItems = TaskManager.getAsyncItems();
-        ManagedInventory inventory = new ManagedInventory(taskItems.size());
+        int total = Math.max(1, taskItems.size() + asyncItems.size());
+        ManagedInventory inventory = new ManagedInventory(total);
 
         try {
             AtomicInteger slot = new AtomicInteger(0);
-            taskItems.forEach((key, value) -> {
-                inventory.setItem(slot.getAndIncrement(), value);
-            });
-
-            asyncItems.forEach((key, value) -> {
-                inventory.setItem(slot.getAndIncrement(), value);
-            });
+            taskItems.forEach((key, value) -> inventory.setItem(slot.getAndIncrement(), value));
+            asyncItems.forEach((key, value) -> inventory.setItem(slot.getAndIncrement(), value));
         } catch (Exception e) {
             BukkitOfUtils.getInstance().logWarning("Error while building task list: " + e.getMessage(), e);
         }
 
         return inventory;
+    }
+
+    /**
+     * Refreshes the backing task list from {@link TaskManager} and clamps the current page.
+     */
+    public void refreshTasks() {
+        setFullSlots(buildTaskList());
+        int maxPages = Math.max(1, getMaxPages(getFullSlots(), getSlotsPerPage()));
+        if (getCurrentPage() > maxPages) {
+            setCurrentPage(maxPages);
+        }
+        if (getCurrentPage() < 1) {
+            setCurrentPage(1);
+        }
+    }
+
+    /**
+     * Rebuilds the task list and refreshes icons in-place when possible.
+     * Falls back to reopening the page if the inventory is not open.
+     */
+    @Override
+    public void redraw() {
+        if (!TaskManager.isThreadSync()) {
+            TaskManager.runTask(getPlayer(), this::redraw);
+            return;
+        }
+
+        try {
+            refreshTasks();
+            InventorySheet sheet = buildSheet(
+                    getPlayer(),
+                    getFullSlots(),
+                    getCurrentPage(),
+                    getSlotsPerPage(),
+                    getPadLeft(),
+                    getPadRight(),
+                    getPadTop(),
+                    getPadBottom(),
+                    getWhenNotFilled(),
+                    getWhenFilled()
+            );
+            setInventorySheet(sheet);
+
+            if (getInventory() != null && getPlayer().getOpenInventory().getTopInventory().equals(getInventory())) {
+                build(sheet);
+            } else {
+                openPage(getCurrentPage());
+            }
+        } catch (Throwable e) {
+            BukkitOfUtils.getInstance().logWarning("Error while redrawing task menu: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -62,7 +110,7 @@ public class TaskMenu extends PaginatedMenu {
     public static void open(Player player) {
         if (player == null) return;
 
-        if (! TaskManager.isThreadSync()) {
+        if (!TaskManager.isThreadSync()) {
             TaskManager.runTask(player, () -> open(player));
             return;
         }

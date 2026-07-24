@@ -10,6 +10,7 @@ import host.plas.bou.gui.screens.events.BlockRedrawEvent;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import gg.drak.thebase.objects.Identifiable;
@@ -18,7 +19,8 @@ import gg.drak.thebase.objects.Identifiable;
  * Abstract representation of a world block that can open a GUI screen when interacted with.
  * Manages open, close, and redraw lifecycle events for associated screen instances.
  */
-@Getter @Setter
+@Getter
+@Setter
 public abstract class ScreenBlock implements Identifiable {
     /**
      * The GUI type for screens opened by this block.
@@ -38,7 +40,16 @@ public abstract class ScreenBlock implements Identifiable {
 
     @Override
     public String getIdentifier() {
-        return type.name().toLowerCase();
+        String typeName = type == null ? "unknown" : type.name().toLowerCase();
+        if (location == null) {
+            return typeName;
+        }
+        World world = location.getWorld();
+        String worldName = world == null ? "null" : world.getName();
+        return typeName + "@" + worldName + ","
+                + location.getBlockX() + ","
+                + location.getBlockY() + ","
+                + location.getBlockZ();
     }
 
     /**
@@ -68,8 +79,7 @@ public abstract class ScreenBlock implements Identifiable {
      */
     public void onRightClick(Player player) {
         BlockOpenEvent event = new BlockOpenEvent(player, this).fire();
-
-        if (! event.isCancelled()) onOpen(event);
+        if (!event.isCancelled()) onOpen(event);
     }
 
     /**
@@ -79,15 +89,15 @@ public abstract class ScreenBlock implements Identifiable {
      */
     public void onClose(Player player) {
         BlockCloseEvent event = new BlockCloseEvent(player, this).fire();
-        if (! event.isCancelled()) onClose(event);
+        if (!event.isCancelled()) onClose(event);
     }
 
     /**
      * Initiates a redraw of all screens associated with this block by firing a {@link BlockRedrawEvent}.
+     * Handling is performed by the event listener to avoid double-processing.
      */
     public void onRedraw() {
-        BlockRedrawEvent event = new BlockRedrawEvent(this).fire();
-        if (! event.isCancelled()) onRedraw(event);
+        redraw();
     }
 
     /**
@@ -99,7 +109,7 @@ public abstract class ScreenBlock implements Identifiable {
     public void onOpen(BlockOpenEvent event) {
         Player player = event.getPlayer();
 
-        if (ScreenManager.hasScreen(player) && ! event.isOverride()) {
+        if (ScreenManager.hasScreen(player) && !event.isOverride()) {
             ScreenManager.getScreen(player).ifPresent(ScreenInstance::open);
             return;
         }
@@ -113,9 +123,7 @@ public abstract class ScreenBlock implements Identifiable {
      * @param event the block close event
      */
     public void onClose(BlockCloseEvent event) {
-        Player player = event.getPlayer();
-
-        ScreenManager.removeScreen(player);
+        ScreenManager.removeScreen(event.getPlayer());
     }
 
     /**
@@ -150,7 +158,6 @@ public abstract class ScreenBlock implements Identifiable {
 
         ScreenInstance instance = new ScreenInstance(player, getType(), inventorySheet);
         instance.setBlock(block);
-
         instance.setTitle(buildTitle(player, block));
 
         return instance;
@@ -163,11 +170,11 @@ public abstract class ScreenBlock implements Identifiable {
      */
     public void onRedraw(BlockRedrawEvent event) {
         ScreenBlock block = event.getScreenBlock();
-        if (! block.getIdentifier().equals(getIdentifier())) return; // ensure this block
+        if (block == null || !block.getIdentifier().equals(getIdentifier())) return;
 
         ScreenManager.getPlayersOf(block).forEach(screenInstance -> {
-            screenInstance.redraw(); // re-builds and re-shows the inventory without closing it
-            screenInstance.setBlock(this); // for redundancy
+            screenInstance.redraw();
+            screenInstance.setBlock(this);
         });
     }
 
@@ -175,6 +182,6 @@ public abstract class ScreenBlock implements Identifiable {
      * Triggers a redraw of this screen block by firing a {@link BlockRedrawEvent}.
      */
     public void redraw() {
-        BlockRedrawEvent event = new BlockRedrawEvent(this).fire();
+        new BlockRedrawEvent(this).fire();
     }
 }
