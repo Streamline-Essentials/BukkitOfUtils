@@ -40,6 +40,30 @@ public class BaseConfig extends SimpleConfiguration {
         // Timers.
         getTickingFrequency();
         getEntityCollectionFrequency();
+
+        // Version checker.
+        isVersionCheckerEnabled();
+        getModrinthProjectSlug();
+    }
+
+    /**
+     * Whether the built-in Modrinth version checker should run on enable.
+     *
+     * @return {@code true} if version checking is enabled
+     */
+    public boolean isVersionCheckerEnabled() {
+        reloadResource();
+        return getOrSetDefault("version-checker.enabled", true);
+    }
+
+    /**
+     * Modrinth project ID or slug used by the built-in version checker.
+     *
+     * @return Modrinth project id/slug (default {@code bukkitofutils})
+     */
+    public String getModrinthProjectSlug() {
+        reloadResource();
+        return getOrSetDefault("version-checker.modrinth-project", "bukkitofutils");
     }
 
     /**
