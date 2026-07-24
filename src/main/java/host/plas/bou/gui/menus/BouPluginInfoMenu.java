@@ -22,12 +22,14 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Info GUI for a {@link BetterPlugin}, opened via {@code /boup menu <plugin>}.
@@ -35,16 +37,24 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class BouPluginInfoMenu extends ScreenInstance {
     private final BetterPlugin target;
     private volatile VersionCheckResult versionResult;
+    private final AtomicBoolean versionRefreshStarted = new AtomicBoolean(false);
 
     public BouPluginInfoMenu(@NotNull Player player, @NotNull BetterPlugin target) {
         super(player, BouGuiTypes.BOU_PLUGIN_INFO, buildSheet(player, target, null), true);
         this.target = target;
         updateTitle(MessageUtils.codedString("&8BOU &7| &b" + target.getName()));
-        refreshVersionAsync();
     }
 
     public static void open(@NotNull Player player, @NotNull BetterPlugin target) {
         new BouPluginInfoMenu(player, target).open();
+    }
+
+    @Override
+    public void onOpen(InventoryOpenEvent event) {
+        super.onOpen(event);
+        if (versionRefreshStarted.compareAndSet(false, true)) {
+            refreshVersionAsync();
+        }
     }
 
     private void refreshVersionAsync() {
@@ -67,7 +77,14 @@ public class BouPluginInfoMenu extends ScreenInstance {
 
     private void rebuild() {
         setInventorySheet(buildSheet(getPlayer(), target, versionResult));
-        build(getInventorySheet());
+        // Oblivate Gui has no inventory until open(); avoid NPE from addItem beforehand.
+        try {
+            if (getInventory() != null) {
+                build(getInventorySheet());
+            }
+        } catch (Throwable ignored) {
+            // Inventory not ready yet; onOpen will render the current sheet.
+        }
     }
 
     private static InventorySheet buildSheet(Player player, BetterPlugin target, VersionCheckResult versionResult) {
@@ -82,7 +99,7 @@ public class BouPluginInfoMenu extends ScreenInstance {
                 "&7Status: " + (target.isEnabled() ? "&aEnabled" : "&cDisabled"));
         sheet.setIcon(10, versionItem, SlotType.BUTTON);
 
-        ItemStack authorItem = ItemUtils.make(Material.PLAYER_HEAD,
+        ItemStack authorItem = ItemUtils.make(Material.NAME_TAG,
                 "&eAuthor(s)",
                 "&7" + authorLine);
         sheet.setIcon(11, authorItem, SlotType.BUTTON);
@@ -92,14 +109,15 @@ public class BouPluginInfoMenu extends ScreenInstance {
                 buildDatabaseLore(target).toArray(new String[0]));
         sheet.setIcon(12, dbItem, SlotType.BUTTON);
 
-        ItemStack uptimeItem = ItemUtils.make(Material.CLOCK,
+        ItemStack uptimeItem = ItemUtils.make(resolveMaterial("CLOCK", "WATCH", Material.COMPASS),
                 "&eUptime",
                 "&7" + target.getFormattedUptime());
         sheet.setIcon(13, uptimeItem, SlotType.BUTTON);
 
+        final VersionCheckResult clickResult = versionResult;
         Icon updateIcon = new BasicIcon(buildUpdateStack(target, versionResult)).onClick(e -> {
             Player clicker = (Player) e.getWhoClicked();
-            sendDownloadLink(clicker, target, versionResult);
+            sendDownloadLink(clicker, target, clickResult);
         });
         sheet.setIcon(14, updateIcon);
 
@@ -123,7 +141,7 @@ public class BouPluginInfoMenu extends ScreenInstance {
             });
             sheet.setIcon(16, provided);
         } else {
-            sheet.setIcon(16, ItemUtils.make(Material.GRAY_DYE,
+            sheet.setIcon(16, ItemUtils.make(resolveMaterial("GRAY_DYE", "INK_SACK", Material.STONE),
                     "&7Plugin Provided Menu",
                     "&cThis plugin did not provide a menu."), SlotType.STATIC);
         }
@@ -157,12 +175,14 @@ public class BouPluginInfoMenu extends ScreenInstance {
         }
         if (result.isBehind()) {
             lore.add("&cOutdated — click for download link");
-            return ItemUtils.make(Material.REDSTONE_TORCH, "&cUp to date? &7No", lore);
+            return ItemUtils.make(resolveMaterial("REDSTONE_TORCH", "REDSTONE_TORCH_ON", Material.REDSTONE),
+                    "&cUp to date? &7No", lore);
         }
         if (result.isUpToDate()) {
             lore.add("&aYou are up to date");
             lore.add("&7Click for Modrinth / download link");
-            return ItemUtils.make(Material.LIME_DYE, "&aUp to date? &7Yes", lore);
+            return ItemUtils.make(resolveMaterial("LIME_DYE", "INK_SACK", Material.EMERALD),
+                    "&aUp to date? &7Yes", lore);
         }
         if (result.isAhead()) {
             lore.add("&eInstalled version is ahead of Modrinth");
@@ -171,6 +191,22 @@ public class BouPluginInfoMenu extends ScreenInstance {
         }
         lore.add("&7Click for link");
         return ItemUtils.make(Material.COMPASS, "&eUp to date?", lore);
+    }
+
+    private static Material resolveMaterial(String primary, String fallback, Material lastResort) {
+        Material mat = Material.matchMaterial(primary);
+        if (mat != null) return mat;
+        mat = Material.matchMaterial(fallback);
+        if (mat != null) return mat;
+        try {
+            return Material.valueOf(primary);
+        } catch (IllegalArgumentException ignored) {
+            try {
+                return Material.valueOf(fallback);
+            } catch (IllegalArgumentException ignored2) {
+                return lastResort;
+            }
+        }
     }
 
     private static List<String> buildDatabaseLore(BetterPlugin target) {
