@@ -6,6 +6,7 @@ import host.plas.bou.compat.papi.PAPICompat;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.gui.screens.events.BlockRedrawEvent;
 import host.plas.bou.utils.DatabaseUtils;
+import host.plas.bou.utils.PluginUtils;
 import gg.drak.thebase.events.processing.BaseProcessor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.plugin.Plugin;
@@ -30,12 +31,15 @@ public class MainListener extends BOUListener {
      */
     @BaseProcessor
     public void onPluginDisable(PluginDisableEvent event) {
-        if (! PAPICompat.isEnabled()) return;
-
         try {
             BetterPlugin plugin = event.getPlugin();
             DatabaseUtils.flush(plugin);
-            PAPICompat.flush(plugin);
+            if (PAPICompat.isEnabled()) {
+                PAPICompat.flush(plugin);
+            }
+            if (!(plugin instanceof BukkitOfUtils)) {
+                PluginUtils.unregisterPlugin(plugin);
+            }
         } catch (Throwable t) {
             BukkitOfUtils.getInstance().logWarning("Failed to fully disable a Better Plugin!", t);
         }
