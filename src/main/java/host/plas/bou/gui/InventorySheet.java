@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package host.plas.bou.gui;
 
 import host.plas.bou.gui.icons.AirSlot;
@@ -11,14 +6,14 @@ import host.plas.bou.gui.slots.SlotType;
 import host.plas.bou.helpful.data.HelpfulGui;
 import host.plas.bou.items.ItemUtils;
 import host.plas.bou.utils.obj.ManagedInventory;
-import java.util.Arrays;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import mc.obliviate.inventory.Icon;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * Represents a sheet of inventory slots used to build and manage GUI layouts.
@@ -30,13 +25,19 @@ public class InventorySheet {
 
     /**
      * Constructs a new InventorySheet with the given number of slots and initializes all slots as empty.
+     * Any provided icons are applied on top of the empty sheet.
      *
      * @param slots the total number of slots in the sheet
-     * @param icons optional initial icons (currently unused in constructor body)
+     * @param icons optional initial icons
      */
     public InventorySheet(int slots, Slot... icons) {
         this.size = slots;
         this.setAllEmpty();
+        if (icons != null) {
+            for (Slot icon : icons) {
+                setSlot(icon);
+            }
+        }
     }
 
     /**
@@ -46,11 +47,10 @@ public class InventorySheet {
      */
     public void ensureSlots(boolean clear) {
         if (this.slots == null) {
-            this.slots = new ConcurrentSkipListSet();
+            this.slots = new ConcurrentSkipListSet<>();
         } else if (clear) {
             this.slots.clear();
         }
-
     }
 
     /**
@@ -62,12 +62,16 @@ public class InventorySheet {
 
     /**
      * Adds the given slots to the existing slot set without clearing.
+     * Slots that share an index with an existing entry replace that entry.
      *
      * @param slots the slots to add
      */
     public void withSlots(Slot... slots) {
         this.ensureSlots();
-        this.slots.addAll(Arrays.asList(slots));
+        if (slots == null) return;
+        for (Slot slot : slots) {
+            setSlot(slot);
+        }
     }
 
     /**
@@ -77,6 +81,7 @@ public class InventorySheet {
      */
     public void asSlots(Slot... slots) {
         this.ensureSlots(true);
+        if (slots == null) return;
         this.slots.addAll(Arrays.asList(slots));
     }
 
@@ -88,8 +93,7 @@ public class InventorySheet {
      * @param type  the slot type classification
      */
     public void setIcon(int slot, ItemStack stack, SlotType type) {
-        this.removeIcon(slot);
-        this.slots.add(new Slot(slot, stack, type));
+        this.setSlot(new Slot(slot, stack, type));
     }
 
     /**
@@ -99,29 +103,30 @@ public class InventorySheet {
      * @param icon the icon to place
      */
     public void setIcon(int slot, Icon icon) {
-        this.removeIcon(slot);
-        this.slots.add(new Slot(slot, icon, SlotType.OTHER));
+        this.setSlot(new Slot(slot, icon, SlotType.OTHER));
     }
 
     /**
-     * Adds an icon at the specified slot index without removing existing icons at that position.
+     * Places an icon at the specified slot index, replacing any existing icon at that position.
+     * Named {@code addIcon} for API compatibility; behaves as an upsert because slot identity is index-based.
      *
      * @param slot  the slot index
      * @param stack the item stack to add
      * @param type  the slot type classification
      */
     public void addIcon(int slot, ItemStack stack, SlotType type) {
-        this.slots.add(new Slot(slot, stack, type));
+        this.setIcon(slot, stack, type);
     }
 
     /**
-     * Adds an icon at the specified slot index without removing existing icons at that position.
+     * Places an icon at the specified slot index, replacing any existing icon at that position.
+     * Named {@code addIcon} for API compatibility; behaves as an upsert because slot identity is index-based.
      *
      * @param slot the slot index
      * @param icon the icon to add
      */
     public void addIcon(int slot, Icon icon) {
-        this.slots.add(new Slot(slot, icon, SlotType.OTHER));
+        this.setIcon(slot, icon);
     }
 
     /**
@@ -130,22 +135,19 @@ public class InventorySheet {
      * @param slot the slot to set, or {@code null} to do nothing
      */
     public void setSlot(Slot slot) {
-        if (slot != null) {
-            int index = slot.getIndex();
-            this.removeIcon(index);
-            this.addSlot(slot);
-        }
+        if (slot == null) return;
+        this.ensureSlots();
+        this.removeIcon(slot.getIndex());
+        this.slots.add(slot);
     }
 
     /**
-     * Adds a slot to the sheet without removing existing slots at the same index.
+     * Adds a slot to the sheet, replacing any existing slot at the same index.
      *
      * @param slot the slot to add, or {@code null} to do nothing
      */
     public void addSlot(Slot slot) {
-        if (slot != null) {
-            this.slots.add(slot);
-        }
+        this.setSlot(slot);
     }
 
     /**
@@ -154,7 +156,8 @@ public class InventorySheet {
      * @param slot the slot index to clear
      */
     public void removeIcon(int slot) {
-        this.slots.removeIf((s) -> s.getIndex() == slot);
+        this.ensureSlots();
+        this.slots.removeIf(s -> s.getIndex() == slot);
     }
 
     /**
@@ -164,14 +167,13 @@ public class InventorySheet {
      * @return the {@link Slot} at the given index, or {@code null} if not found
      */
     public Slot getSlot(int slot) {
-        AtomicReference<Slot> slotReference = new AtomicReference();
-        this.slots.forEach((s) -> {
+        this.ensureSlots();
+        for (Slot s : this.slots) {
             if (s.getIndex() == slot) {
-                slotReference.set(s);
+                return s;
             }
-
-        });
-        return (Slot)slotReference.get();
+        }
+        return null;
     }
 
     /**
@@ -180,7 +182,7 @@ public class InventorySheet {
      * @return the number of rows (each row contains 9 slots)
      */
     public int getRows() {
-        return (int)Math.ceil((double)this.size / (double)9.0F);
+        return (int) Math.ceil(this.size / 9.0D);
     }
 
     /**
@@ -188,11 +190,9 @@ public class InventorySheet {
      */
     public void setAllEmpty() {
         this.ensureSlots(true);
-
-        for(int i = 0; i < this.size; ++i) {
-            this.setSlot(AirSlot.get(i));
+        for (int i = 0; i < this.size; i++) {
+            this.slots.add(AirSlot.get(i));
         }
-
     }
 
     /**
@@ -201,6 +201,7 @@ public class InventorySheet {
      * @param consumer the consumer to apply to each slot
      */
     public void forEachSlot(Consumer<Slot> consumer) {
+        this.ensureSlots();
         this.slots.forEach(consumer);
     }
 
@@ -211,9 +212,7 @@ public class InventorySheet {
      * @return a new empty {@link InventorySheet}
      */
     public static InventorySheet empty(int size) {
-        InventorySheet sheet = new InventorySheet(size, new Slot[0]);
-        sheet.setAllEmpty();
-        return sheet;
+        return new InventorySheet(size);
     }
 
     /**
@@ -235,14 +234,12 @@ public class InventorySheet {
      */
     public static InventorySheet of(ManagedInventory inventory, SlotType type) {
         InventorySheet sheet = empty(inventory.size());
-
-        for(int i = 0; i < inventory.size(); ++i) {
+        for (int i = 0; i < inventory.size(); i++) {
             ItemStack item = inventory.getItem(i);
             if (item != null) {
                 sheet.setIcon(i, item, type);
             }
         }
-
         return sheet;
     }
 
@@ -260,8 +257,7 @@ public class InventorySheet {
         AtomicInteger pageCount = new AtomicInteger(0);
         gui.getHelpful().getDocument().getPages().forEach((integer, textPage) -> {
             ItemStack stack = ItemUtils.make(material, "&e&lHint &b#&a" + pageCount.incrementAndGet(), textPage.asLore());
-            Slot slot = new Slot(index.getAndIncrement(), stack, SlotType.STATIC);
-            sheet.setSlot(slot);
+            sheet.setSlot(new Slot(index.getAndIncrement(), stack, SlotType.STATIC));
         });
         return sheet;
     }
@@ -281,6 +277,7 @@ public class InventorySheet {
      * @return the concurrent set of slots
      */
     public ConcurrentSkipListSet<Slot> getSlots() {
+        this.ensureSlots();
         return this.slots;
     }
 

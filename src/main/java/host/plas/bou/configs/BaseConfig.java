@@ -40,6 +40,55 @@ public class BaseConfig extends SimpleConfiguration {
         // Timers.
         getTickingFrequency();
         getEntityCollectionFrequency();
+
+        // Version checker.
+        isVersionCheckerEnabled();
+        getModrinthProjectSlug();
+
+        // OneMenu.
+        isOneMenuEnabled();
+        getOneMenuCommandAlias();
+    }
+
+    /**
+     * Whether the built-in Modrinth version checker should run on enable.
+     *
+     * @return {@code true} if version checking is enabled
+     */
+    public boolean isVersionCheckerEnabled() {
+        reloadResource();
+        return getOrSetDefault("version-checker.enabled", true);
+    }
+
+    /**
+     * Modrinth project ID or slug used by the built-in version checker.
+     *
+     * @return Modrinth project id/slug (default {@code 6owv5fWs})
+     */
+    public String getModrinthProjectSlug() {
+        reloadResource();
+        return getOrSetDefault("version-checker.modrinth-project", "6owv5fWs");
+    }
+
+    /**
+     * Whether the OneMenu command/GUI feature is enabled.
+     *
+     * @return {@code true} if OneMenu is enabled
+     */
+    public boolean isOneMenuEnabled() {
+        reloadResource();
+        return getOrSetDefault("one-menu.enabled", false);
+    }
+
+    /**
+     * Optional alias for {@code /onemenu}. Empty string disables the alias.
+     * Default is {@code menu}.
+     *
+     * @return command alias, or blank for none
+     */
+    public String getOneMenuCommandAlias() {
+        reloadResource();
+        return getOrSetDefault("one-menu.command-alias", "menu");
     }
 
     /**

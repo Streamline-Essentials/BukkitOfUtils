@@ -23,6 +23,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -43,11 +44,17 @@ public class TaskManager {
     private static ConcurrentSkipListMap<Integer, BaseRunnable> currentRunnables = new ConcurrentSkipListMap<>();
 
     /**
+     * Monotonic counter for runnable indices. Never reuse indices so cancellations cannot collide.
+     */
+    private static final AtomicInteger NEXT_INDEX = new AtomicInteger(0);
+
+    /**
      * Registers a runnable in the current runnables map.
      *
      * @param runnable the runnable to register
      */
     public static void load(BaseRunnable runnable) {
+        if (runnable == null) return;
         getCurrentRunnables().put(runnable.getIndex(), runnable);
     }
 
@@ -100,17 +107,23 @@ public class TaskManager {
      * @param runnable the runnable to cancel
      */
     public static void cancel(BaseRunnable runnable) {
-        runnable.stop();
+        if (runnable == null) return;
+        try {
+            runnable.stop();
+        } catch (Throwable t) {
+            BukkitOfUtils.getInstance().logWarning("Failed to stop runnable: " + runnable, t);
+        }
         unload(runnable.getIndex());
     }
 
     /**
      * Returns the next available index for a new runnable.
+     * Uses a monotonic counter so cancelled middle indices cannot collide with new ones.
      *
-     * @return the next index based on the current map size
+     * @return the next unique index
      */
     public static int getNextIndex() {
-        return currentRunnables.size();
+        return NEXT_INDEX.getAndIncrement();
     }
 
     /**
@@ -199,10 +212,27 @@ public class TaskManager {
     public static void stop() {
         disableTicking();
 
-        if (getTaskMenuUpdater() != null) getTaskMenuUpdater().cancel();
+        if (getTaskMenuUpdater() != null) {
+            getTaskMenuUpdater().cancel();
+            setTaskMenuUpdater(null);
+        }
 
-        currentRunnables.forEach((index, runnable) -> runnable.cancel());
-        AsyncUtils.getQueuedTasks().forEach(AsyncTask::remove);
+        // Copy values first — cancel() mutates currentRunnables.
+        List<BaseRunnable> snapshot = new ArrayList<>(currentRunnables.values());
+        for (BaseRunnable runnable : snapshot) {
+            try {
+                runnable.cancel();
+            } catch (Throwable t) {
+                BukkitOfUtils.getInstance().logWarning("Failed to cancel runnable during stop: " + runnable, t);
+            }
+        }
+        currentRunnables.clear();
+
+        try {
+            AsyncUtils.getQueuedTasks().forEach(AsyncTask::remove);
+        } catch (Throwable t) {
+            BukkitOfUtils.getInstance().logWarning("Failed to clear async tasks during stop.", t);
+        }
 
         BukkitOfUtils.getInstance().logInfo("&cTaskManager &fis now stopped!");
     }
@@ -737,11 +767,12 @@ public class TaskManager {
         name = "&c" + className + " &f(&dIndex&7: &b" + index + "&f)";
 
         List<String> lore = new ArrayList<>();
+        lore.add("&dType&7: &aSync");
         lore.add("&dPeriod&7: &a" + runnable.getPeriod());
         lore.add("&dTicks Lived&7: &a" + runnable.getTicksLived());
         lore.add("&dCurrent Tick Count&7: &a" + runnable.getCurrentTickCount());
-        lore.add("&dPaused&7? &a" + (runnable.isPaused() ? "&aYes" : "&cNo"));
-        lore.add("&dCancelled&7? &a" + (runnable.isCancelled() ? "&aYes" : "&cNo"));
+        lore.add("&dPaused&7? " + (runnable.isPaused() ? "&aYes" : "&cNo"));
+        lore.add("&dCancelled&7? " + (runnable.isCancelled() ? "&aYes" : "&cNo"));
 
         return ItemUtils.make(material, name, lore);
     }
@@ -778,24 +809,32 @@ public class TaskManager {
         name = "&c" + className + " &f(&dIndex&7: &b" + index + "&f)";
 
         List<String> lore = new ArrayList<>();
+        lore.add("&dType&7: &bAsync");
         lore.add("&dPeriod&7: &a" + asyncTask.getPeriod());
         lore.add("&dTicks Lived&7: &a" + asyncTask.getTicksLived());
         lore.add("&dCurrent Delay&7: &a" + asyncTask.getCurrentDelay());
         lore.add("&dNeeded Ticks&7: &a" + asyncTask.getNeededTicks());
-        lore.add("&dCompleted&7? &a" + (asyncTask.isCompleted() ? "&aYes" : "&cNo"));
-        lore.add("&dRepeatable&7? &a" + (asyncTask.isRepeatable() ? "&aYes" : "&cNo"));
+        lore.add("&dCompleted&7? " + (asyncTask.isCompleted() ? "&aYes" : "&cNo"));
+        lore.add("&dRepeatable&7? " + (asyncTask.isRepeatable() ? "&aYes" : "&cNo"));
 
         return ItemUtils.make(material, name, lore);
     }
 
     /**
      * Creates a map of ItemStacks representing all queued async tasks.
+     * Keys are sequential display indices (not raw async IDs) to avoid long→int collisions.
      *
-     * @return a sorted map of async task index to task ItemStack
+     * @return a sorted map of display index to task ItemStack
      */
     public static ConcurrentSkipListMap<Integer, ItemStack> getAsyncItems() {
         ConcurrentSkipListMap<Integer, ItemStack> taskItems = new ConcurrentSkipListMap<>();
-        AsyncUtils.getQueuedTasks().forEach((task) -> taskItems.put((int) task.getId(), getAsyncItem(task.getId())));
+        AtomicInteger displayIndex = new AtomicInteger(0);
+        try {
+            AsyncUtils.getQueuedTasks().forEach(task ->
+                    taskItems.put(displayIndex.getAndIncrement(), getAsyncItem(task.getId())));
+        } catch (Throwable t) {
+            BukkitOfUtils.getInstance().logWarning("Failed to collect async task items.", t);
+        }
         return taskItems;
     }
 

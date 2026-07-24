@@ -1,38 +1,45 @@
 ext {
-    IMPL = [
+    // Framework deps compiled + shaded into the plugin JAR (not on Maven Central / needed early).
+    FRAMEWORK = [
             'gg.drak:TheBase:1.1.0',
             'gg.drak:UniversalScheduler:1.5-SNAPSHOT',
-            'com.github.ben-manes.caffeine:caffeine:3.1.8',
-            'com.google.code.gson:gson:2.11.0',
-            'com.google.re2j:re2j:1.7',
-            'net.objecthunter:exp4j:0.4.8',
-            'mysql:mysql-connector-java:8.0.33',
-            'com.konghq:unirest-java:3.14.5',
     ]
-    SHADOW = [
-            'gg.drak:TheBase:1.1.0',
-            'gg.drak:UniversalScheduler:1.5-SNAPSHOT',
-            'com.github.ben-manes.caffeine:caffeine:3.1.8',
+
+    // Declared in plugin.yml and downloaded by Spigot (modern) or RuntimeLibraryLoader (legacy).
+    // Spigot only resolves Maven Central and does not pull transitives — list them explicitly.
+    SPIGOT_LIBRARIES = [
+            'com.zaxxer:HikariCP:5.1.0',
+            'org.slf4j:slf4j-api:2.0.13',
+            'org.xerial:sqlite-jdbc:3.46.1.0',
+            'com.mysql:mysql-connector-j:8.0.33',
             'com.google.code.gson:gson:2.11.0',
-            'com.google.re2j:re2j:1.7',
-            'net.objecthunter:exp4j:0.4.8',
-            'mysql:mysql-connector-java:8.0.33',
+            'com.github.ben-manes.caffeine:caffeine:3.1.8',
             'com.konghq:unirest-java:3.14.5',
+            'org.apache.httpcomponents:httpclient:4.5.13',
+            'org.apache.httpcomponents:httpcore:4.4.16',
+            'org.apache.httpcomponents:httpmime:4.5.13',
+            'org.apache.httpcomponents:httpasyncclient:4.1.5',
+            'org.apache.httpcomponents:httpcore-nio:4.4.16',
+            'commons-codec:commons-codec:1.15',
+            'commons-logging:commons-logging:1.2',
     ]
+
+    // Back-compat aliases used by older notes/scripts.
+    IMPL = FRAMEWORK
+    SHADOW = FRAMEWORK
+
     ANNO = [
-//            'org.spigotmc:spigot:1.21.5-R0.1-SNAPSHOT',
             'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT',
             'net.kyori:adventure-api:4.13.1',
     ]
     COMP_ONLY = [
-//            'org.spigotmc:spigot:1.21.5-R0.1-SNAPSHOT',
             'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT',
             'net.kyori:adventure-api:4.13.1',
     ]
     FILES = [
     ]
     OTHER_PLUGINS = [
-            'me.clip:placeholderapi:2.11.5',
-            'net.luckperms:api:5.4',
+            'me.clip:placeholderapi:2.12.2',
+            'net.luckperms:api:5.5',
     ]
 }

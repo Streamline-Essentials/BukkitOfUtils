@@ -7,7 +7,7 @@ import lombok.Getter;
  */
 @Getter
 public enum DatabaseType {
-    /** MySQL database type using the MySQL Connector/J driver. */
+    /** MySQL database type using MySQL Connector/J ({@code com.mysql:mysql-connector-j}). */
     MYSQL("jdbc:mysql://", "com.mysql.cj.jdbc.Driver"),
     /** SQLite database type using the SQLite JDBC driver. */
     SQLITE("jdbc:sqlite:", "org.sqlite.JDBC"),
@@ -35,5 +35,24 @@ public enum DatabaseType {
     DatabaseType(String urlPrefix, String driver) {
         this.urlPrefix = urlPrefix;
         this.driver = driver;
+    }
+
+    /**
+     * Recommended Hikari maximum pool size for this database type.
+     * SQLite is file-locked and should generally use a single connection.
+     *
+     * @return recommended max pool size
+     */
+    public int recommendedMaxPoolSize() {
+        return this == SQLITE ? 1 : 10;
+    }
+
+    /**
+     * Recommended Hikari minimum idle connections for this database type.
+     *
+     * @return recommended minimum idle count
+     */
+    public int recommendedMinimumIdle() {
+        return this == SQLITE ? 1 : 2;
     }
 }
