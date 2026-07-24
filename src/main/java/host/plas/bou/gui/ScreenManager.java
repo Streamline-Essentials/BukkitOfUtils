@@ -9,19 +9,14 @@ import org.bukkit.inventory.Inventory;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 /**
  * Central manager for GUI screens and screen blocks. Tracks active screen instances
  * per player and manages loaded screen blocks.
  */
-public class ScreenManager {
-    /**
-     * Private constructor to prevent instantiation of this utility class.
-     */
+public final class ScreenManager {
     private ScreenManager() {
-        // Utility class
     }
 
     /**
@@ -30,7 +25,8 @@ public class ScreenManager {
      * @param guiMaintenanceListener the GUI maintenance listener to set
      * @return the GUI maintenance listener
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private static GuiMaintenanceListener guiMaintenanceListener;
 
     /**
@@ -46,7 +42,8 @@ public class ScreenManager {
      * @param screens the set of screen instances to set
      * @return the set of active screen instances
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private static ConcurrentSkipListSet<ScreenInstance> screens = new ConcurrentSkipListSet<>();
 
     /**
@@ -56,15 +53,14 @@ public class ScreenManager {
      * @return an {@link Optional} containing the screen instance, or empty if none exists
      */
     public static Optional<ScreenInstance> getScreen(Player player) {
-        AtomicReference<Optional<ScreenInstance>> screen = new AtomicReference<>(Optional.empty());
-
-        screens.forEach(s -> {
-            if (s.getIdentifier().equals(player.getUniqueId().toString())) {
-                screen.set(Optional.of(s));
+        if (player == null) return Optional.empty();
+        String id = player.getUniqueId().toString();
+        for (ScreenInstance screen : screens) {
+            if (id.equals(screen.getIdentifier())) {
+                return Optional.of(screen);
             }
-        });
-
-        return screen.get();
+        }
+        return Optional.empty();
     }
 
     /**
@@ -74,17 +70,13 @@ public class ScreenManager {
      * @return an {@link Optional} containing the screen instance, or empty if none matches
      */
     public static Optional<ScreenInstance> getScreen(Inventory inventory) {
-        AtomicReference<Optional<ScreenInstance>> screen = new AtomicReference<>(Optional.empty());
-
-        screens.forEach(s -> {
-            if (screen.get().isPresent()) return;
-
-            if (s.getInventory().equals(inventory)) {
-                screen.set(Optional.of(s));
+        if (inventory == null) return Optional.empty();
+        for (ScreenInstance screen : screens) {
+            if (inventory.equals(screen.getInventory())) {
+                return Optional.of(screen);
             }
-        });
-
-        return screen.get();
+        }
+        return Optional.empty();
     }
 
     /**
@@ -94,10 +86,8 @@ public class ScreenManager {
      * @param screen the screen instance to set
      */
     public static void setScreen(Player player, ScreenInstance screen) {
-        if (hasScreen(player)) {
-            removeScreen(player);
-        }
-
+        if (player == null || screen == null) return;
+        removeScreen(player);
         screens.add(screen);
     }
 
@@ -107,7 +97,9 @@ public class ScreenManager {
      * @param player the player whose screen should be removed
      */
     public static void removeScreen(Player player) {
-        screens.removeIf(s -> s.getIdentifier().equals(player.getUniqueId().toString()));
+        if (player == null) return;
+        String id = player.getUniqueId().toString();
+        screens.removeIf(s -> id.equals(s.getIdentifier()));
     }
 
     /**
@@ -128,15 +120,15 @@ public class ScreenManager {
      */
     public static ConcurrentSkipListSet<ScreenInstance> getPlayersOf(ScreenBlock block) {
         ConcurrentSkipListSet<ScreenInstance> players = new ConcurrentSkipListSet<>();
+        if (block == null) return players;
 
-        getScreens().forEach(screenInstance -> {
+        for (ScreenInstance screenInstance : screens) {
             screenInstance.getScreenBlock().ifPresent(screenBlock -> {
-                if (screenBlock.equals(block)) {
+                if (screenBlock.equals(block) || screenBlock.getIdentifier().equals(block.getIdentifier())) {
                     players.add(screenInstance);
                 }
             });
-        });
-
+        }
         return players;
     }
 
@@ -146,7 +138,8 @@ public class ScreenManager {
      * @param loadedBlocks the set of screen blocks to set
      * @return the set of loaded screen blocks
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private static ConcurrentSkipListSet<ScreenBlock> loadedBlocks = new ConcurrentSkipListSet<>();
 
     /**
@@ -155,6 +148,7 @@ public class ScreenManager {
      * @param block the screen block to add
      */
     public static void addBlock(ScreenBlock block) {
+        if (block == null) return;
         loadedBlocks.add(block);
     }
 
@@ -164,6 +158,7 @@ public class ScreenManager {
      * @param predicate the condition for removal
      */
     public static void removeBlock(Predicate<ScreenBlock> predicate) {
+        if (predicate == null) return;
         loadedBlocks.removeIf(predicate);
     }
 
@@ -174,17 +169,21 @@ public class ScreenManager {
      * @return an {@link Optional} containing the matching screen block, or empty if not found
      */
     public static Optional<ScreenBlock> getScreenBlock(ScreenInstance instance) {
-        AtomicReference<Optional<ScreenBlock>> block = new AtomicReference<>(Optional.empty());
-
-        loadedBlocks.forEach(b -> {
-            if (block.get().isPresent()) return;
-
-            if (instance.getScreenBlock().isPresent() && instance.getScreenBlock().get().equals(b)) {
-                block.set(Optional.of(b));
+        if (instance == null) return Optional.empty();
+        Optional<ScreenBlock> attached = instance.getScreenBlock();
+        if (attached.isPresent()) {
+            ScreenBlock block = attached.get();
+            if (loadedBlocks.contains(block)) {
+                return Optional.of(block);
             }
-        });
-
-        return block.get();
+            for (ScreenBlock loaded : loadedBlocks) {
+                if (loaded.getIdentifier().equals(block.getIdentifier())) {
+                    return Optional.of(loaded);
+                }
+            }
+            return attached;
+        }
+        return Optional.empty();
     }
 
     /**
@@ -194,13 +193,7 @@ public class ScreenManager {
      * @return an {@link Optional} containing the screen block, or empty if the player has no active screen block
      */
     public static Optional<ScreenBlock> getScreenBlockOf(Player player) {
-        AtomicReference<Optional<ScreenBlock>> block = new AtomicReference<>(Optional.empty());
-
-        getScreen(player).ifPresent(screen -> {
-            block.set(getScreenBlock(screen));
-        });
-
-        return block.get();
+        return getScreen(player).flatMap(ScreenManager::getScreenBlock);
     }
 
     /**
@@ -210,6 +203,6 @@ public class ScreenManager {
      * @return {@code true} if the block is loaded, {@code false} otherwise
      */
     public static boolean hasBlock(ScreenBlock block) {
-        return loadedBlocks.contains(block);
+        return block != null && loadedBlocks.contains(block);
     }
 }

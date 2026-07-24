@@ -4,6 +4,7 @@ import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskSchedule
 import host.plas.bou.events.ListenerConglomerate;
 import host.plas.bou.events.callbacks.DisableCallback;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
+import host.plas.bou.gui.BetterPluginMenuBuilder;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.items.ItemFactory;
 import host.plas.bou.items.retrievables.RetrievableItem;
@@ -19,6 +20,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 import gg.drak.thebase.async.SyncInstance;
 import gg.drak.thebase.async.ThreadHolder;
 import gg.drak.thebase.async.WithSync;
@@ -68,6 +70,19 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     private static TaskScheduler scheduler;
 
     /**
+     * Epoch millis when this plugin was last enabled, or {@code -1} when disabled/never enabled.
+     */
+    @Getter
+    private volatile long enabledAtMillis = -1L;
+
+    /**
+     * Optional builder for a plugin-specific menu opened from {@code /boup menu}.
+     */
+    @Getter @Setter
+    @Nullable
+    private BetterPluginMenuBuilder pluginMenuBuilder;
+
+    /**
      * {@inheritDoc}
      * Returns the plugin's name as its identifier.
      *
@@ -76,6 +91,44 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
     @Override
     public String getIdentifier() {
         return getName();
+    }
+
+    /**
+     * Modrinth project ID or slug used by the Drak API version checker.
+     * Override in subclasses (optionally backed by a {@code public static final String MODRINTH_ID}).
+     *
+     * @return Modrinth project id/slug, or {@code null} if none
+     */
+    @Nullable
+    public String getModrinthId() {
+        return null;
+    }
+
+    /**
+     * Formatted uptime since the last enable, or {@code Disabled} when not enabled.
+     *
+     * @return human-readable uptime string
+     */
+    public String getFormattedUptime() {
+        if (!isEnabled() || enabledAtMillis <= 0L) {
+            return "Disabled";
+        }
+        long millis = Math.max(0L, System.currentTimeMillis() - enabledAtMillis);
+        long seconds = millis / 1000L;
+        long days = seconds / 86400L;
+        long hours = (seconds % 86400L) / 3600L;
+        long minutes = (seconds % 3600L) / 60L;
+        long secs = seconds % 60L;
+        if (days > 0) {
+            return days + "d " + hours + "h " + minutes + "m";
+        }
+        if (hours > 0) {
+            return hours + "h " + minutes + "m " + secs + "s";
+        }
+        if (minutes > 0) {
+            return minutes + "m " + secs + "s";
+        }
+        return secs + "s";
     }
 
     /**
@@ -136,6 +189,8 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
      */
     @Override
     public void onEnable() {
+        this.enabledAtMillis = System.currentTimeMillis();
+
         registerSelfListener();
 
         onBaseEnabling();
@@ -159,6 +214,7 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
         PluginDisableEvent event = new PluginDisableEvent(this).fire();
 
         unregisterSelfListener();
+        this.enabledAtMillis = -1L;
     }
 
     /**
@@ -341,12 +397,34 @@ public class BetterPlugin extends JavaPlugin implements IModifierEventable, Iden
         StringBuilder builder = new StringBuilder();
         builder.append("&7- &b").append(getIdentifier()).append(" &7(").append(isEnabled() ? "&aEnabled" : "&cDisabled").append("&7)").append("\n");
         builder.append("  &f> &eVersion&7: &b").append(getDescription().getVersion()).append("\n");
+        java.util.List<String> authors = getDescription().getAuthors();
+        if (authors == null || authors.isEmpty()) {
+            builder.append("  &f> &eAuthor&7: &cUnknown").append("\n");
+        } else {
+            builder.append("  &f> &eAuthor&7(&es&7)&7: &b").append(String.join("&7, &b", authors)).append("\n");
+        }
+        builder.append("  &f> &eUptime&7: &b").append(getFormattedUptime()).append("\n");
+        String modrinthId = getModrinthId();
+        if (modrinthId != null && !modrinthId.isBlank()) {
+            builder.append("  &f> &eModrinth&7: &b").append(modrinthId).append("\n");
+        }
         builder.append("  &f> &eDatabase&7(&es&7)&7:").append("\n");
         if (! DatabaseUtils.hasAny(getIdentifier())) builder.append("   &f- &cNo databases.");
         else {
             DatabaseUtils.get(getIdentifier()).forEach(db -> {
                 builder.append("    &f+ &bID&7: &a").append(db.getId());
-                builder.append("    &f+ &bType&7: &c").append(db.getConnectorSet().getType());
+                builder.append(" &7| &bType&7: &c").append(db.getConnectorSet().getType());
+                if (db.getConnectorSet().getType() != null && db.getConnectorSet().getType().name().equals("MYSQL")) {
+                    builder.append(" &7| &bHost&7: &f").append(db.getConnectorSet().getHost())
+                            .append("&7:&f").append(db.getConnectorSet().getPort())
+                            .append(" &7/ &f").append(db.getConnectorSet().getDatabase());
+                } else if (db.getConnectorSet().hasSqliteFile()) {
+                    builder.append(" &7| &bFile&7: &f").append(db.getConnectorSet().getSqliteFileName());
+                }
+                if (db.getConnectorSet().getTablePrefix() != null && !db.getConnectorSet().getTablePrefix().isBlank()) {
+                    builder.append(" &7| &bPrefix&7: &f").append(db.getConnectorSet().getTablePrefix());
+                }
+                builder.append("\n");
             });
         }
         return builder.toString();

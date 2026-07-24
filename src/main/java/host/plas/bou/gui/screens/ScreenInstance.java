@@ -12,7 +12,10 @@ import mc.obliviate.inventory.Gui;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +30,8 @@ import java.util.concurrent.ConcurrentSkipListMap;
  * Represents a GUI screen instance tied to a specific player. Extends {@link Gui}
  * and provides inventory sheet management, click handling, and screen block association.
  */
-@Getter @Setter
+@Getter
+@Setter
 public class ScreenInstance extends Gui implements Identified {
     /**
      * The unique identifier for this screen instance, derived from the player's UUID.
@@ -80,7 +84,6 @@ public class ScreenInstance extends Gui implements Identified {
         super(player, type.name(), ColorUtils.colorizeHard(getTitleByType(type)), inventorySheet.getRows());
 
         this.identifier = player.getUniqueId().toString();
-
         this.type = type;
         this.screenBlock = Optional.empty();
         this.inventorySheet = inventorySheet;
@@ -104,7 +107,7 @@ public class ScreenInstance extends Gui implements Identified {
      * @param block the screen block to associate
      */
     public void setBlock(ScreenBlock block) {
-        this.screenBlock = Optional.of(block);
+        this.screenBlock = Optional.ofNullable(block);
     }
 
     /**
@@ -141,9 +144,8 @@ public class ScreenInstance extends Gui implements Identified {
      * @param sheet the inventory sheet containing slots to render
      */
     public void build(InventorySheet sheet) {
-        sheet.getSlots().forEach(s -> {
-            addItem(s.getIndex(), s.getIcon());
-        });
+        if (sheet == null) return;
+        sheet.forEachSlot(s -> addItem(s.getIndex(), s.getIcon()));
     }
 
     /**
@@ -159,24 +161,27 @@ public class ScreenInstance extends Gui implements Identified {
     public void onClose(InventoryCloseEvent event) {
         super.onClose(event);
 
-        getScreenBlock().ifPresent(block -> block.onClose((Player) event.getPlayer()));
+        Player closer = event.getPlayer() instanceof Player ? (Player) event.getPlayer() : player;
+        if (screenBlock != null && screenBlock.isPresent()) {
+            screenBlock.get().onClose(closer);
+        } else {
+            ScreenManager.removeScreen(closer);
+        }
     }
 
     @Override
     public void onOpen(InventoryOpenEvent event) {
+        super.onOpen(event);
         build(inventorySheet);
-
         ScreenManager.setScreen(player, this);
     }
 
     @Override
     public boolean onClick(InventoryClickEvent event) {
-        if (! (event.getWhoClicked() instanceof Player)) return false;
+        if (!(event.getWhoClicked() instanceof Player)) return false;
         Player p = (Player) event.getWhoClicked();
 
-        ItemStack clickedItem = event.getCurrentItem();
         ItemStack cursor = event.getCursor();
-
         Inventory clickedInventory = event.getClickedInventory();
         Inventory playerInventory = p.getInventory();
         if (clickedInventory == null || playerInventory == null) return false;
@@ -185,33 +190,27 @@ public class ScreenInstance extends Gui implements Identified {
         InventoryAction action = event.getAction();
 
         if (clickedInventory.equals(playerInventory)) {
-            if (
-                    action == InventoryAction.MOVE_TO_OTHER_INVENTORY
-            ) {
+            if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
                 isPlace = true;
             }
         } else {
-
-            if (
-                    action == InventoryAction.DROP_ALL_CURSOR || action == InventoryAction.DROP_ONE_CURSOR ||
-                            action == InventoryAction.PLACE_ALL || action == InventoryAction.PLACE_ONE ||
-                            action == InventoryAction.PLACE_SOME
-            ) {
+            if (action == InventoryAction.DROP_ALL_CURSOR
+                    || action == InventoryAction.DROP_ONE_CURSOR
+                    || action == InventoryAction.PLACE_ALL
+                    || action == InventoryAction.PLACE_ONE
+                    || action == InventoryAction.PLACE_SOME) {
                 isPlace = true;
             }
 
-            if (!isPlace) {
-                if (cursor.getType() != Material.AIR) {
-                    if (action == InventoryAction.SWAP_WITH_CURSOR) {
-                        isPlace = true;
-                    }
-                }
+            if (!isPlace && cursor != null && cursor.getType() != Material.AIR
+                    && action == InventoryAction.SWAP_WITH_CURSOR) {
+                isPlace = true;
             }
         }
 
         if (isPlace && noPlace) {
             event.setCancelled(true);
-            return false; // No force uncancel as we are cancelling the event
+            return false;
         }
 
         return furtherClick(event);
@@ -224,7 +223,6 @@ public class ScreenInstance extends Gui implements Identified {
      * @return {@code true} to force uncancel the event, {@code false} otherwise
      */
     public boolean furtherClick(InventoryClickEvent event) {
-        // do more stuff
         return false;
     }
 
@@ -259,7 +257,6 @@ public class ScreenInstance extends Gui implements Identified {
      */
     public void redraw(boolean reshow, boolean close) {
         build(inventorySheet);
-
         if (reshow) reshow(close);
     }
 
@@ -277,8 +274,8 @@ public class ScreenInstance extends Gui implements Identified {
      * @param close if {@code true}, closes the inventory before reopening
      */
     public void reshow(boolean close) {
-        if (! TaskManager.isThreadSync()) {
-            TaskManager.runTask(player, this::reshow);
+        if (!TaskManager.isThreadSync()) {
+            TaskManager.runTask(player, () -> reshow(close));
             return;
         }
 
@@ -295,13 +292,11 @@ public class ScreenInstance extends Gui implements Identified {
     public ConcurrentSkipListMap<String, HumanEntity> getViewers() {
         ConcurrentSkipListMap<String, HumanEntity> map = new ConcurrentSkipListMap<>();
         List<HumanEntity> viewers = new ArrayList<>(getInventory().getViewers());
-
-        viewers.forEach(v -> {
-            if (v instanceof Player) {
-                map.put(v.getUniqueId().toString(), v);
+        for (HumanEntity viewer : viewers) {
+            if (viewer instanceof Player) {
+                map.put(viewer.getUniqueId().toString(), viewer);
             }
-        });
-
+        }
         return map;
     }
 }

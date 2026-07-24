@@ -50,19 +50,69 @@ public class PluginUtils {
      * @return true if a matching plugin was found and removed
      */
     public static boolean unregisterPlugin(BetterPlugin plugin) {
-        if (! isPluginRegistered(plugin.getIdentifier())) return false;
-
-        return getLoadedBOUPlugins().removeIf(loadedPlugin -> loadedPlugin.getIdentifier().equals(plugin.getIdentifier()));
+        if (plugin == null) return false;
+        return getLoadedBOUPlugins().removeIf(loadedPlugin -> loadedPlugin.getIdentifier().equalsIgnoreCase(plugin.getIdentifier()));
     }
 
     /**
-     * Retrieves a registered plugin by its identifier (name).
+     * Unregisters a plugin by identifier (case-insensitive).
+     *
+     * @param identifier the plugin identifier
+     * @return true if a matching plugin was found and removed
+     */
+    public static boolean unregisterPlugin(String identifier) {
+        if (identifier == null || identifier.isBlank()) return false;
+        return getLoadedBOUPlugins().removeIf(loadedPlugin -> loadedPlugin.getIdentifier().equalsIgnoreCase(identifier));
+    }
+
+    /**
+     * Retrieves a registered plugin by its identifier (name), case-sensitive exact match first.
      *
      * @param identifier the plugin identifier to search for
      * @return an Optional containing the plugin if found, or empty otherwise
      */
     public static Optional<BetterPlugin> getPlugin(String identifier) {
-        return getLoadedBOUPlugins().stream().filter(plugin -> plugin.getName().equals(identifier)).findFirst();
+        if (identifier == null) return Optional.empty();
+        Optional<BetterPlugin> exact = getLoadedBOUPlugins().stream()
+                .filter(plugin -> plugin.getName().equals(identifier))
+                .findFirst();
+        if (exact.isPresent()) return exact;
+        return getPluginIgnoreCase(identifier);
+    }
+
+    /**
+     * Case-insensitive lookup among registered BOU plugins and BukkitOfUtils itself.
+     *
+     * @param identifier plugin name
+     * @return matching BetterPlugin if found
+     */
+    public static Optional<BetterPlugin> getPluginIgnoreCase(String identifier) {
+        if (identifier == null || identifier.isBlank()) return Optional.empty();
+        if (identifier.equalsIgnoreCase("bou") || identifier.equalsIgnoreCase("bukkitofutils")) {
+            BukkitOfUtils bou = BukkitOfUtils.getInstance();
+            return bou == null ? Optional.empty() : Optional.of(bou);
+        }
+        return getAllBOUPlugins().stream()
+                .filter(plugin -> plugin.getName().equalsIgnoreCase(identifier)
+                        || plugin.getIdentifier().equalsIgnoreCase(identifier))
+                .findFirst();
+    }
+
+    /**
+     * All known BetterPlugins including BukkitOfUtils (which is not added via {@link #registerPlugin}).
+     *
+     * @return sorted set of BetterPlugin instances
+     */
+    public static ConcurrentSkipListSet<BetterPlugin> getAllBOUPlugins() {
+        ConcurrentSkipListSet<BetterPlugin> all = new ConcurrentSkipListSet<>(getLoadedBOUPlugins());
+        BukkitOfUtils bou = BukkitOfUtils.getInstance();
+        if (bou != null) {
+            boolean present = all.stream().anyMatch(p -> p.getIdentifier().equalsIgnoreCase(bou.getIdentifier()));
+            if (!present) {
+                all.add(bou);
+            }
+        }
+        return all;
     }
 
     /**
@@ -72,7 +122,7 @@ public class PluginUtils {
      * @return true if a plugin with the given identifier is registered
      */
     public static boolean isPluginRegistered(String identifier) {
-        return getPlugin(identifier).isPresent();
+        return getPluginIgnoreCase(identifier).isPresent();
     }
 
     /**
@@ -122,6 +172,6 @@ public class PluginUtils {
      * @return a sorted set of HelpfulPlugin instances
      */
     public static ConcurrentSkipListSet<HelpfulPlugin> getHelpfulPlugins() {
-        return getLoadedBOUPlugins().stream().filter((plugin) -> plugin instanceof HelpfulPlugin).map((plugin) -> (HelpfulPlugin)plugin).collect(ConcurrentSkipListSet::new, ConcurrentSkipListSet::add, AbstractCollection::addAll);
+        return getAllBOUPlugins().stream().filter((plugin) -> plugin instanceof HelpfulPlugin).map((plugin) -> (HelpfulPlugin)plugin).collect(ConcurrentSkipListSet::new, ConcurrentSkipListSet::add, AbstractCollection::addAll);
     }
 }

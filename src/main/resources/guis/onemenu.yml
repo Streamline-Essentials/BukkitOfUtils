@@ -1,0 +1,37 @@
+# OneMenu — edit this file at plugins/BukkitOfUtils/guis/onemenu.yml
+# Click actions (left-click / right-click lists):
+#   player-command:<cmd>   — run as the player (without leading /)
+#   console-command:<cmd>  — run as console (%player% replaced)
+#   message:<text>         — send a message to the player
+#   close                  — close the inventory
+#   open-gui:<file.yml>    — open another GUI under plugins/BukkitOfUtils/guis/
+#   firestring:<string>    — fire a FireString
+
+title: "&6&lOne Menu"
+rows: 3
+
+items:
+  "11":
+    material: COMPASS
+    name: "&bServer Info"
+    lore:
+      - "&7A sample OneMenu button."
+      - "&7Edit guis/onemenu.yml to customize."
+    left-click:
+      - "message:&aWelcome to OneMenu!"
+      - "player-command:bouhelp"
+  "13":
+    material: BOOK
+    name: "&eBOU Help"
+    lore:
+      - "&7Opens BukkitOfUtils help."
+    left-click:
+      - "close"
+      - "player-command:bouhelp"
+  "15":
+    material: BARRIER
+    name: "&cClose"
+    lore:
+      - "&7Close this menu."
+    left-click:
+      - "close"

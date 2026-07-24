@@ -6,10 +6,10 @@ import lombok.Setter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Represents a database argument index tracker, providing methods to
- * increment, reset, and manage the current argument position.
+ * Tracks JDBC prepared-statement parameter indexes (1-based when using {@link #next()} from start 0).
  */
-@Getter @Setter
+@Getter
+@Setter
 public class DbArg {
     /**
      * The start index of the argument.
@@ -27,8 +27,9 @@ public class DbArg {
     private AtomicInteger i;
 
     /**
-     * Constructor with specified start index
-     * Note: when calling {@link #next()}, {@link #next()} is incremented and then returned, so it will be 1 more than the start value when being called.
+     * Constructor with specified start index.
+     * Note: {@link #next()} increments then returns, so the first call yields {@code start + 1}.
+     *
      * @param start The start index of the argument
      */
     public DbArg(int start) {
@@ -37,15 +38,16 @@ public class DbArg {
     }
 
     /**
-     * Constructor with default start index of 0
-     * Note: when calling {@link #next()}, {@link #next()} is incremented and then returned, so it will be 1 more than the start value when being called.
+     * Constructor with default start index of 0.
+     * Note: the first {@link #next()} call returns 1.
      */
     public DbArg() {
         this(0);
     }
 
     /**
-     * Increment and get the next argument index
+     * Increment and get the next argument index.
+     *
      * @return The next argument index
      */
     public int next() {
@@ -53,7 +55,17 @@ public class DbArg {
     }
 
     /**
-     * Set the argument index to the specified value
+     * Returns the current index without incrementing.
+     *
+     * @return current index value
+     */
+    public int current() {
+        return i.get();
+    }
+
+    /**
+     * Set the argument index to the specified value.
+     *
      * @param i The new argument index
      */
     public void set(int i) {
@@ -61,7 +73,7 @@ public class DbArg {
     }
 
     /**
-     * Reset the argument index to the start value
+     * Reset the argument index to the start value.
      */
     public void reset() {
         this.set(this.start);
