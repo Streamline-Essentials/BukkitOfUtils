@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class BukkitOfUtils extends BetterPlugin implements HelpfulPlugin {
     /** Modrinth project slug for BukkitOfUtils. */
-    public static final String MODRINTH_ID = "bukkitofutils";
+    public static final String MODRINTH_ID = "6owv5fWs";
 
     /**
      * The singleton instance of this plugin.

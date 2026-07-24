@@ -63,11 +63,11 @@ public class BaseConfig extends SimpleConfiguration {
     /**
      * Modrinth project ID or slug used by the built-in version checker.
      *
-     * @return Modrinth project id/slug (default {@code bukkitofutils})
+     * @return Modrinth project id/slug (default {@code 6owv5fWs})
      */
     public String getModrinthProjectSlug() {
         reloadResource();
-        return getOrSetDefault("version-checker.modrinth-project", "bukkitofutils");
+        return getOrSetDefault("version-checker.modrinth-project", "6owv5fWs");
     }
 
     /**

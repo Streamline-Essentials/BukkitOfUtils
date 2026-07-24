@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * @see <a href="https://api.drak.gg/api-docs">Drak API docs</a>
  */
 public final class VersionChecker {
-    public static final String BUKKITOFUTILS_SLUG = "bukkitofutils";
+    public static final String BUKKITOFUTILS_SLUG = "6owv5fWs";
 
     private static final Map<String, VersionCheckResult> CACHE = new ConcurrentHashMap<>();
 
