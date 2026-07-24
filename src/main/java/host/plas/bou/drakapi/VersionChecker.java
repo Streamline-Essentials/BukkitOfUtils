@@ -124,6 +124,60 @@ public final class VersionChecker {
     }
 
     /**
+     * Resolves the best Modrinth id/slug for a {@link BetterPlugin}.
+     * Prefers {@link BetterPlugin#getModrinthId()} when non-blank.
+     *
+     * @param plugin BetterPlugin instance
+     * @return Modrinth id/slug, or {@code null} if none is available
+     */
+    @Nullable
+    public static String resolveModrinthId(BetterPlugin plugin) {
+        if (plugin == null) return null;
+        String fromPlugin = plugin.getModrinthId();
+        if (fromPlugin != null && !fromPlugin.isBlank()) {
+            return fromPlugin.trim();
+        }
+        return null;
+    }
+
+    /**
+     * Asynchronously checks a BetterPlugin using {@link #resolveModrinthId(BetterPlugin)}.
+     *
+     * @param plugin   BetterPlugin to check
+     * @param callback consumer invoked on the main thread with the result
+     * @return future completing with the check result
+     */
+    public static CompletableFuture<VersionCheckResult> checkThen(BetterPlugin plugin,
+                                                                  Consumer<VersionCheckResult> callback) {
+        String id = resolveModrinthId(plugin);
+        if (id == null || id.isBlank()) {
+            VersionCheckResult failure = VersionCheckResult.failure(
+                    "No Modrinth project id configured for " + safeName(plugin) + ".");
+            if (callback != null) {
+                runOnMain(() -> callback.accept(failure));
+            }
+            return CompletableFuture.completedFuture(failure);
+        }
+        return checkThen(plugin, id, callback);
+    }
+
+    /**
+     * Asynchronously checks and logs using the plugin's {@link BetterPlugin#getModrinthId()}.
+     *
+     * @param plugin BetterPlugin to check
+     * @return future completing with the check result
+     */
+    public static CompletableFuture<VersionCheckResult> checkAndLog(BetterPlugin plugin) {
+        String id = resolveModrinthId(plugin);
+        if (id == null || id.isBlank()) {
+            MessageUtils.logWarning("No Modrinth project id configured for " + safeName(plugin) + ".", plugin);
+            return CompletableFuture.completedFuture(
+                    VersionCheckResult.failure("No Modrinth project id configured."));
+        }
+        return checkAndLog(plugin, id);
+    }
+
+    /**
      * Returns the last successful cached result for a project slug/id, if any.
      *
      * @param idOrSlug Modrinth project ID or slug
