@@ -61,15 +61,22 @@ dependencies {
     compileOnly(COMP_ONLY)
     compileOnly(OTHER_PLUGINS)
 
-    // Framework (shaded).
+    // Framework: compile against full graph; shade only non-Central artifacts (no transitives).
+    // Hikari / JDBC / Gson / etc. come from plugin.yml libraries: + RuntimeLibraryLoader.
     implementation(FRAMEWORK)
-    shadow(FRAMEWORK)
+    FRAMEWORK.each { coord ->
+        shadow(coord) { transitive = false }
+    }
 
-    // OblivateInvs — not available on Maven Central under these coordinates; keep shaded.
-    implementation("mc.obliviate:core:4.1.13.3").exclude(group: 'com.google.code.gson', module: 'gson')
-    shadow("mc.obliviate:core:4.1.13.3").exclude(group: 'com.google.code.gson', module: 'gson')
+    // OblivateInvs — not on Maven Central; shade with its small modules, never Gson.
+    implementation("mc.obliviate:core:4.1.13.3") {
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
+    shadow("mc.obliviate:core:4.1.13.3") {
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
 
-    // Slim runtime: compile against Central libs, do not package them.
+    // Slim runtime: compile against Central libs, never package them.
     SPIGOT_LIBRARIES.each { coord ->
         compileOnly(coord)
     }
@@ -110,13 +117,13 @@ shadowJar {
     configurations = [project.configurations.shadow]
 
     relocate('com.github.Anon8281.universalScheduler', 'host.plas.bou.libs.universalScheduler')
-    relocate('de.leonhard', 'host.plas.bou.libs.de.leonhard')
 
-    // TheBase is a fat artifact. Strip copies of jars that Spigot `libraries:` / RuntimeLibraryLoader
-    // already provide, plus test junk, to keep this plugin slim.
+    // TheBase is published as a fat artifact. Strip anything Spigot `libraries:` /
+    // RuntimeLibraryLoader already provides, plus unused fat-jar junk (junit/protobuf).
     exclude 'org/sqlite/**'
     exclude 'sqlite-jdbc.properties'
     exclude 'com/mysql/**'
+    exclude 'mysql/**'
     exclude 'com/zaxxer/hikari/**'
     exclude 'com/google/gson/**'
     exclude 'com/github/benmanes/caffeine/**'
@@ -126,17 +133,28 @@ shadowJar {
     exclude 'org/apache/commons/logging/**'
     exclude 'org/slf4j/**'
     exclude 'org/junit/**'
+    exclude 'com/google/protobuf/**'
+    exclude 'google/protobuf/**'
+    exclude 'com/esotericsoftware/yamlbeans/**'
+
+    // TheBase relocates JDBC stack under gg.drak.thebase.lib — drop those copies too.
+    exclude 'gg/drak/thebase/lib/mysql/**'
+    exclude 'gg/drak/thebase/lib/hikari/**'
+    exclude 'gg/drak/thebase/lib/sqlite/**'
+
     exclude 'META-INF/maven/org.junit.*/**'
     exclude 'META-INF/maven/com.zaxxer/HikariCP/**'
     exclude 'META-INF/maven/org.xerial/sqlite-jdbc/**'
     exclude 'META-INF/maven/com.mysql/**'
     exclude 'META-INF/maven/mysql/**'
-
-    // Drop exotic sqlite natives embedded under TheBase's relocated package (keep common server OS).
-    exclude 'gg/drak/thebase/lib/sqlite/native/Linux-Android/**'
-    exclude 'gg/drak/thebase/lib/sqlite/native/FreeBSD/**'
-    exclude 'gg/drak/thebase/lib/sqlite/native/Linux/ppc64/**'
-    exclude 'gg/drak/thebase/lib/sqlite/native/Linux-Musl/**'
+    exclude 'META-INF/maven/com.google.protobuf/**'
+    exclude 'META-INF/maven/com.google.code.gson/**'
+    exclude 'META-INF/maven/com.github.ben-manes.caffeine/**'
+    exclude 'META-INF/maven/com.konghq/**'
+    exclude 'META-INF/maven/org.apache.httpcomponents/**'
+    exclude 'META-INF/maven/commons-codec/**'
+    exclude 'META-INF/maven/commons-logging/**'
+    exclude 'META-INF/maven/org.slf4j/**'
 }
 
 artifacts {

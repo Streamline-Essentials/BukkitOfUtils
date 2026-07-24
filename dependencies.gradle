@@ -1,12 +1,13 @@
 ext {
-    // Framework deps compiled + shaded into the plugin JAR (not on Maven Central / needed early).
+    // Framework deps compiled against; shaded with transitive=false (see build.gradle).
+    // Not on Maven Central — cannot use Spigot libraries: for these.
     FRAMEWORK = [
             'gg.drak:TheBase:1.1.0',
             'gg.drak:UniversalScheduler:1.5-SNAPSHOT',
     ]
 
     // Declared in plugin.yml and downloaded by Spigot (modern) or RuntimeLibraryLoader (legacy).
-    // Spigot only resolves Maven Central and does not pull transitives — list them explicitly.
+    // NEVER shaded — Spigot only resolves Maven Central and does not pull transitives.
     SPIGOT_LIBRARIES = [
             'com.zaxxer:HikariCP:5.1.0',
             'org.slf4j:slf4j-api:2.0.13',
