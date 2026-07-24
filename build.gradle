@@ -27,8 +27,6 @@ repositories {
     maven {
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
 
-        // As of Gradle 5.1, you can limit this to only those
-        // dependencies you expect from it
         content {
             includeGroup 'org.bukkit'
             includeGroup 'org.spigotmc'
@@ -46,63 +44,55 @@ repositories {
     }
     maven { url 'https://repo.papermc.io/repository/maven-snapshots/' }
     maven { url 'https://repo.papermc.io/repository/maven-public/' }
+    maven { url 'https://jitpack.io' }
     // NMS
     maven {
         url = uri("https://repo.codemc.org/repository/nms/")
     }
     // Streamline Essentials
     maven {
-        url = uri("https://repo.codemc.org/repository/streamline-essentials/")
+        url = uri("https://repo.codemc.io/repository/streamline-essentials/")
     }
 }
 
 dependencies {
-    // Defaults.
     implementation(compileOnly(files(FILES)))
     annotationProcessor(ANNO)
-    implementation(IMPL)
     compileOnly(COMP_ONLY)
-    shadow(SHADOW)
+    compileOnly(OTHER_PLUGINS)
 
-    implementation('org.xerial:sqlite-jdbc:3.46.1.0')
-            .exclude(group: 'org.slf4j', module: 'slf4j-api')
-    shadow('org.xerial:sqlite-jdbc:3.46.1.0')
-            .exclude(group: 'org.slf4j', module: 'slf4j-api')
+    // Framework (shaded).
+    implementation(FRAMEWORK)
+    shadow(FRAMEWORK)
 
-    implementation('com.zaxxer:HikariCP:5.1.0')
-            .exclude(group: 'org.slf4j', module: 'slf4j-api')
-            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-api')
-            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-core')
-            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl')
-    shadow('com.zaxxer:HikariCP:5.1.0')
-            .exclude(group: 'org.slf4j', module: 'slf4j-api')
-            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-api')
-            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-core')
-            .exclude(group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl')
-
-    // OblivateInvs
+    // OblivateInvs — not available on Maven Central under these coordinates; keep shaded.
     implementation("mc.obliviate:core:4.1.13.3").exclude(group: 'com.google.code.gson', module: 'gson')
     shadow("mc.obliviate:core:4.1.13.3").exclude(group: 'com.google.code.gson', module: 'gson')
 
-    // Other Plugins
-    compileOnly(OTHER_PLUGINS)
+    // Slim runtime: compile against Central libs, do not package them.
+    SPIGOT_LIBRARIES.each { coord ->
+        compileOnly(coord)
+    }
 }
 
 processResources {
-    // Debugging: Print values
     doFirst {
         println "Version: ${project.version}, Name: ${project.name}, Main: ${project.ext.pluginMain}"
+        println "Spigot libraries (${project.ext.SPIGOT_LIBRARIES.size()}):"
+        project.ext.SPIGOT_LIBRARIES.each { println "  - ${it}" }
     }
 
     inputs.property('name', "${project.name}")
     inputs.property('version', "${project.version}")
     inputs.property('main', "${project.ext.pluginMain}")
+    inputs.property('libraries', project.ext.SPIGOT_LIBRARIES.join('|'))
 
     filesMatching('**/plugin.yml') {
         expand (
                 'name': "${project.name}",
                 'version': "${project.version}",
                 'main': "${project.ext.pluginMain}",
+                'librariesBlock': project.ext.SPIGOT_LIBRARIES.collect { "  - ${it}" }.join('\n'),
         )
     }
 }
@@ -114,16 +104,39 @@ java {
 
 shadowJar {
     archiveClassifier.set('')
-
     archiveFileName = "${project.name}-${project.version}.jar"
 
-    relocate('com.github.Anon8281.universalScheduler', 'host.plas.bou.libs.universalScheduler')
-    relocate('com.github.benmanes.caffeine', 'host.plas.bou.libs.caffeine')
-    relocate('com.google.gson', 'host.plas.bou.libs.gson')
+    // Only package the shadow configuration (framework + Oblivate), not the wider runtime classpath.
+    configurations = [project.configurations.shadow]
 
+    relocate('com.github.Anon8281.universalScheduler', 'host.plas.bou.libs.universalScheduler')
     relocate('de.leonhard', 'host.plas.bou.libs.de.leonhard')
 
-    relocate('org.bstats', 'host.plas.bou.libs.org.bstats')
+    // TheBase is a fat artifact. Strip copies of jars that Spigot `libraries:` / RuntimeLibraryLoader
+    // already provide, plus test junk, to keep this plugin slim.
+    exclude 'org/sqlite/**'
+    exclude 'sqlite-jdbc.properties'
+    exclude 'com/mysql/**'
+    exclude 'com/zaxxer/hikari/**'
+    exclude 'com/google/gson/**'
+    exclude 'com/github/benmanes/caffeine/**'
+    exclude 'kong/unirest/**'
+    exclude 'org/apache/http/**'
+    exclude 'org/apache/commons/codec/**'
+    exclude 'org/apache/commons/logging/**'
+    exclude 'org/slf4j/**'
+    exclude 'org/junit/**'
+    exclude 'META-INF/maven/org.junit.*/**'
+    exclude 'META-INF/maven/com.zaxxer/HikariCP/**'
+    exclude 'META-INF/maven/org.xerial/sqlite-jdbc/**'
+    exclude 'META-INF/maven/com.mysql/**'
+    exclude 'META-INF/maven/mysql/**'
+
+    // Drop exotic sqlite natives embedded under TheBase's relocated package (keep common server OS).
+    exclude 'gg/drak/thebase/lib/sqlite/native/Linux-Android/**'
+    exclude 'gg/drak/thebase/lib/sqlite/native/FreeBSD/**'
+    exclude 'gg/drak/thebase/lib/sqlite/native/Linux/ppc64/**'
+    exclude 'gg/drak/thebase/lib/sqlite/native/Linux-Musl/**'
 }
 
 artifacts {

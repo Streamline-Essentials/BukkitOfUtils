@@ -3,6 +3,10 @@ version: '${version}'
 main: '${main}'
 folia-supported: true
 authors: [ Drak ]
+# Spigot native Maven Central library loader (supported on modern Spigot/Paper).
+# Older servers ignore this and RuntimeLibraryLoader downloads the same artifacts.
+libraries:
+${librariesBlock}
 
 commands:
   entity-count:
