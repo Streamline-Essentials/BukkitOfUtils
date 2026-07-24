@@ -10,8 +10,10 @@ import lombok.Getter;
 public enum BouGuiTypes implements GuiType {
     /** The task menu GUI type. */
     TASK_MENU("Task Menu"),
-    /** BOU plugin info menu opened via /boup menu. */
+    /** BOU plugin info menu opened via /boup menu &lt;plugin&gt;. */
     BOU_PLUGIN_INFO("BOU Plugin Info"),
+    /** List of BetterPlugins opened via /boup menu. */
+    BOU_PLUGINS_LIST("BOU Plugins"),
     /** Configurable OneMenu YAML GUI. */
     ONE_MENU("One Menu"),
     ;
