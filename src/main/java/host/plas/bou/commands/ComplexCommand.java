@@ -7,6 +7,9 @@ import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * An abstract command class that extends BukkitCommand and implements BetterCommand,
  * providing a base for complex commands that are registered dynamically via the command map.
@@ -97,5 +100,16 @@ public abstract class ComplexCommand extends BukkitCommand implements BetterComm
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         return BetterCommand.super.execute(sender, label, args);
+    }
+
+    /**
+     * Delegates Bukkit command-map tab completion to {@link BetterCommand#onTabComplete}.
+     * Without this, map-registered commands only get the default player-name completions.
+     */
+    @Override
+    public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args)
+            throws IllegalArgumentException {
+        List<String> completions = onTabComplete(sender, this, alias, args);
+        return completions != null ? completions : Collections.emptyList();
     }
 }

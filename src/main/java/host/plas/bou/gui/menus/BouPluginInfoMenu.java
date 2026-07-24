@@ -32,7 +32,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Info GUI for a {@link BetterPlugin}, opened via {@code /boup menu <plugin>}.
+ * Info GUI for a {@link BetterPlugin}, opened via {@code /boup menu <plugin>}
+ * or by clicking a plugin icon in {@link BouPluginsMenu}.
  */
 public class BouPluginInfoMenu extends ScreenInstance {
     private final BetterPlugin target;
