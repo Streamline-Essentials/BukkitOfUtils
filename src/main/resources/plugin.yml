@@ -1,6 +1,7 @@
 name: '${name}'
 version: '${version}'
 main: '${main}'
+api-version: '1.13'
 folia-supported: true
 authors: [ Drak ]
 # Spigot native Maven Central library loader (supported on modern Spigot/Paper).
