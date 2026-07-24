@@ -8,6 +8,7 @@ import host.plas.bou.commands.CommandResult;
 import host.plas.bou.drakapi.VersionCheckResult;
 import host.plas.bou.drakapi.VersionChecker;
 import host.plas.bou.gui.menus.BouPluginInfoMenu;
+import host.plas.bou.gui.menus.BouPluginsMenu;
 import host.plas.bou.utils.PluginLifecycleHelper;
 import host.plas.bou.utils.PluginUtils;
 import org.bukkit.entity.Player;
@@ -34,6 +35,14 @@ public final class BouPluginsCMD {
                 .setTabCompleter(BouPluginsCMD::tabComplete)
                 .build();
     }
+
+    private static final String[] SUBCOMMANDS = {
+            "list", "enable", "disable", "info", "unload", "load", "menu"
+    };
+
+    private static final String[] PLUGIN_ARG_SUBCOMMANDS = {
+            "enable", "disable", "info", "unload", "menu"
+    };
 
     private static boolean execute(CommandContext ctx) {
         if (!ctx.getCommandSender().hasPermission("bou.plugins")
@@ -72,7 +81,7 @@ public final class BouPluginsCMD {
     private static void sendUsage(CommandContext ctx) {
         ctx.sendMessage("&e/boup list");
         ctx.sendMessage("&e/boup <enable|disable|info|unload|load> <plugin>");
-        ctx.sendMessage("&e/boup menu <plugin>");
+        ctx.sendMessage("&e/boup menu [plugin]");
     }
 
     private static boolean list(CommandContext ctx) {
@@ -163,9 +172,14 @@ public final class BouPluginsCMD {
             ctx.sendMessage("&cOnly players can open the plugin menu.");
             return CommandResult.FAILURE;
         }
+        Player player = playerOpt.get();
+        if (!ctx.isArgUsable(1)) {
+            BouPluginsMenu.open(player);
+            return CommandResult.SUCCESS;
+        }
         Optional<BetterPlugin> pluginOpt = requirePlugin(ctx, 1);
         if (!pluginOpt.isPresent()) return CommandResult.FAILURE;
-        BouPluginInfoMenu.open(playerOpt.get(), pluginOpt.get());
+        BouPluginInfoMenu.open(player, pluginOpt.get());
         return CommandResult.SUCCESS;
     }
 
@@ -186,32 +200,19 @@ public final class BouPluginsCMD {
         ConcurrentSkipListSet<String> out = new ConcurrentSkipListSet<>(String.CASE_INSENSITIVE_ORDER);
         int count = ctx.getArgCount();
         if (count <= 1) {
-            out.addAll(Arrays.asList("list", "enable", "disable", "info", "unload", "load", "menu"));
-            return filterPrefix(out, ctx.isArgUsable(0) ? ctx.getStringArg(0) : "");
+            out.addAll(Arrays.asList(SUBCOMMANDS));
+            return out;
         }
-        String sub = ctx.getStringArg(0).toLowerCase(Locale.ROOT);
         if (count == 2) {
+            String sub = ctx.getStringArg(0).toLowerCase(Locale.ROOT);
             if (sub.equals("load")) {
                 out.addAll(PluginLifecycleHelper.listPluginJarNames());
-            } else if (Arrays.asList("enable", "disable", "info", "unload", "menu").contains(sub)) {
+            } else if (Arrays.asList(PLUGIN_ARG_SUBCOMMANDS).contains(sub)) {
                 for (BetterPlugin plugin : PluginUtils.getAllBOUPlugins()) {
                     out.add(plugin.getName());
                 }
             }
-            return filterPrefix(out, ctx.getStringArg(1));
         }
         return out;
-    }
-
-    private static ConcurrentSkipListSet<String> filterPrefix(ConcurrentSkipListSet<String> values, String prefix) {
-        if (prefix == null || prefix.isEmpty()) return values;
-        String lower = prefix.toLowerCase(Locale.ROOT);
-        ConcurrentSkipListSet<String> filtered = new ConcurrentSkipListSet<>(String.CASE_INSENSITIVE_ORDER);
-        for (String value : values) {
-            if (value.toLowerCase(Locale.ROOT).startsWith(lower)) {
-                filtered.add(value);
-            }
-        }
-        return filtered;
     }
 }
