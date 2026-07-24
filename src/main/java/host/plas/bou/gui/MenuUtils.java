@@ -1,6 +1,7 @@
 package host.plas.bou.gui;
 
 import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.gui.slots.SlotType;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -12,12 +13,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * Utility class for GUI menu operations including computing outer border slots,
  * creating namespaced keys, and managing static/button metadata tags on items.
  */
-public class MenuUtils {
-    /**
-     * Private constructor to prevent instantiation of this utility class.
-     */
+public final class MenuUtils {
     private MenuUtils() {
-        // utility class
     }
 
     /**
@@ -31,32 +28,32 @@ public class MenuUtils {
         if (rows < 1) return set;
         if (rows > 6) rows = 6;
 
-        // top and bottom
-        for (int r = 1; r <= rows; r++) {
-            for (int i = 1; i <= 9; i++) {
-                int real = i * r - 1;
-
-                if (real > 9 && real < 17) {
-                    continue;
-                }
-                if (real > 18 && real < 26) {
-                    continue;
-                }
-                if (real > 27 && real < 35) {
-                    continue;
-                }
-                if (real > 36 && real < 44) {
-                    continue;
-                }
-                if (real > 45 && real < 53) {
-                    continue;
-                }
-
-                set.add(real);
+        int size = rows * 9;
+        int lastRow = rows - 1;
+        for (int slot = 0; slot < size; slot++) {
+            int row = slot / 9;
+            int col = slot % 9;
+            if (row == 0 || row == lastRow || col == 0 || col == 8) {
+                set.add(slot);
             }
         }
-
         return set;
+    }
+
+    /**
+     * Applies a themed shell (black border + colored corners) onto an {@link InventorySheet}.
+     *
+     * @param sheet       the sheet to modify
+     * @param cornerColor the corner accent color
+     */
+    public static void applyShell(InventorySheet sheet, CornerColor cornerColor) {
+        if (sheet == null) return;
+        ItemStack[] shell = GuiLayout.createShell(sheet.getSize(), cornerColor == null ? CornerColor.YELLOW : cornerColor);
+        for (int i = 0; i < shell.length; i++) {
+            if (shell[i] != null) {
+                sheet.setIcon(i, shell[i], SlotType.STATIC);
+            }
+        }
     }
 
     /**
@@ -94,6 +91,7 @@ public class MenuUtils {
      * @param stack the item stack to mark as static
      */
     public static void injectStatic(ItemStack stack) {
+        if (stack == null) return;
         ItemMeta meta = stack.getItemMeta();
         if (meta != null) {
             meta.getPersistentDataContainer().set(getStaticKey(), PersistentDataType.INTEGER, 1);
@@ -108,6 +106,7 @@ public class MenuUtils {
      * @param stack the item stack to mark as a button
      */
     public static void injectButton(ItemStack stack) {
+        if (stack == null) return;
         ItemMeta meta = stack.getItemMeta();
         if (meta != null) {
             meta.getPersistentDataContainer().set(getButtonKey(), PersistentDataType.INTEGER, 1);
@@ -122,9 +121,9 @@ public class MenuUtils {
      * @return {@code true} if the item has the static marker, {@code false} otherwise
      */
     public static boolean isStatic(ItemStack stack) {
+        if (stack == null) return false;
         ItemMeta meta = stack.getItemMeta();
         if (meta == null) return false;
-
         return meta.getPersistentDataContainer().has(getStaticKey(), PersistentDataType.INTEGER);
     }
 
@@ -135,9 +134,9 @@ public class MenuUtils {
      * @return {@code true} if the item has the button marker, {@code false} otherwise
      */
     public static boolean isButton(ItemStack stack) {
+        if (stack == null) return false;
         ItemMeta meta = stack.getItemMeta();
         if (meta == null) return false;
-
         return meta.getPersistentDataContainer().has(getButtonKey(), PersistentDataType.INTEGER);
     }
 }

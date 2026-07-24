@@ -15,7 +15,6 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -255,37 +254,32 @@ public class PaginatedMenu extends ScreenInstance {
                         try {
                             int pageIndex = getPageIndexOfSheetSlot(sheet, i, slotsPerPage, padLeft, padRight, padTop, padBottom);
                             Icon icon = whenFilled.apply(player, pageIndex);
-                            if (icon != null) sheet.addIcon(i, icon);
+                            if (icon != null) sheet.setIcon(i, icon);
                             else {
                                 ItemStack stack = fullSlots.getItem((page - 1) * slotsPerPage + pageIndex);
                                 if (stack != null) {
-                                    BasicIcon basicIcon = new BasicIcon(stack);
-                                    sheet.addIcon(i, basicIcon);
+                                    sheet.setIcon(i, new BasicIcon(stack));
                                 }
                             }
                         } catch (Throwable e) {
                             BukkitOfUtils.getInstance().logSevere("Error while building filled icon", e);
-                            Icon basicIcon = buildPageIcon(i);
-                            sheet.addIcon(i, basicIcon);
+                            sheet.setIcon(i, buildPageIcon(i));
                         }
                     } else {
                         try {
                             Icon icon = whenNotFilled.apply(player, i);
-                            if (icon != null) sheet.addIcon(i, icon);
+                            if (icon != null) sheet.setIcon(i, icon);
                             else {
-                                Icon basicIcon = buildPageIcon(i);
-                                sheet.addIcon(i, basicIcon);
+                                sheet.setIcon(i, buildPageIcon(i));
                             }
                         } catch (Throwable e) {
                             BukkitOfUtils.getInstance().logSevere("Error while building not filled icon", e);
-                            Icon basicIcon = buildPageIcon(i);
-                            sheet.addIcon(i, basicIcon);
+                            sheet.setIcon(i, buildPageIcon(i));
                         }
                     }
                 } catch (Throwable e) {
                     BukkitOfUtils.getInstance().logSevere("Error while building icon", e);
-                    Icon basicIcon = buildPageIcon(i);
-                    sheet.addIcon(i, basicIcon);
+                    sheet.setIcon(i, buildPageIcon(i));
                 }
             }
         } catch (Throwable e) {
@@ -383,7 +377,7 @@ public class PaginatedMenu extends ScreenInstance {
      * @return the previous page {@link Icon}
      */
     public static Icon buildPreviousPageIcon() {
-        return new BasicIcon(getPreviousPageItemStack()).onClick(TaskMenu::previousPage);
+        return new BasicIcon(getPreviousPageItemStack()).onClick(PaginatedMenu::previousPage);
     }
 
     /**
@@ -392,7 +386,7 @@ public class PaginatedMenu extends ScreenInstance {
      * @return the next page {@link Icon}
      */
     public static Icon buildNextPageIcon() {
-        return new BasicIcon(getNextPageItemStack()).onClick(TaskMenu::nextPage);
+        return new BasicIcon(getNextPageItemStack()).onClick(PaginatedMenu::nextPage);
     }
 
     /**
@@ -402,20 +396,12 @@ public class PaginatedMenu extends ScreenInstance {
      * @param event the inventory event that triggered the action
      */
     public static void previousPage(InventoryEvent event) {
-        Inventory inventory = event.getInventory();
-        Optional<ScreenInstance> optional = ScreenManager.getScreen(inventory);
+        Optional<ScreenInstance> optional = ScreenManager.getScreen(event.getInventory());
         if (optional.isEmpty()) return;
         ScreenInstance screen = optional.get();
-
-        screen.getViewers().forEach((uuid, viewer) -> {
-            if (viewer instanceof Player) {
-                Player player = (Player) viewer;
-                if (screen instanceof TaskMenu) {
-                    TaskMenu taskMenu = (TaskMenu) screen;
-                    taskMenu.previousPage();
-                }
-            }
-        });
+        if (screen instanceof PaginatedMenu) {
+            ((PaginatedMenu) screen).previousPage();
+        }
     }
 
     /**
@@ -425,48 +411,21 @@ public class PaginatedMenu extends ScreenInstance {
      * @param event the inventory event that triggered the action
      */
     public static void nextPage(InventoryEvent event) {
-        Inventory inventory = event.getInventory();
-        Optional<ScreenInstance> optional = ScreenManager.getScreen(inventory);
+        Optional<ScreenInstance> optional = ScreenManager.getScreen(event.getInventory());
         if (optional.isEmpty()) return;
         ScreenInstance screen = optional.get();
-
-        screen.getViewers().forEach((uuid, viewer) -> {
-            if (viewer instanceof Player) {
-                Player player = (Player) viewer;
-                if (screen instanceof TaskMenu) {
-                    TaskMenu taskMenu = (TaskMenu) screen;
-                    taskMenu.nextPage();
-                }
-            }
-        });
+        if (screen instanceof PaginatedMenu) {
+            ((PaginatedMenu) screen).nextPage();
+        }
     }
 
     /**
-     * Creates a filler item stack using black stained glass pane, with fallback to legacy materials.
+     * Creates a filler item stack using black stained glass pane.
      *
      * @return the filler {@link ItemStack}
      */
     public static ItemStack getFiller() {
-        Material material;
-        try {
-            material = Material.BLACK_STAINED_GLASS_PANE; // Default to modern material
-        } catch (Throwable e) {
-            try {
-                // Attempt to use the modern material
-                material = Material.valueOf("BLACK_STAINED_GLASS_PANE");
-            } catch (Throwable t) {
-                try {
-                    // Fallback to a legacy alternative, if available
-                    material = Material.valueOf("STAINED_GLASS_PANE");
-                } catch (Throwable legacyEx) {
-                    // Log an error if no valid material is found
-                    BukkitOfUtils.getInstance().logSevere("Could not find material for filler icon", legacyEx);
-                    material = Material.AIR; // Fallback to AIR to avoid crashes
-                }
-            }
-        }
-
-        return ItemUtils.make(material, "");
+        return ItemUtils.make(Material.BLACK_STAINED_GLASS_PANE, " ");
     }
 
     /**
@@ -476,7 +435,7 @@ public class PaginatedMenu extends ScreenInstance {
      */
     public static Icon buildFillerIcon() {
         try {
-            return new BasicIcon(getFiller()).onClick(TaskMenu::fillerAction).onDrag(TaskMenu::fillerAction);
+            return new BasicIcon(getFiller()).onClick(PaginatedMenu::fillerAction).onDrag(PaginatedMenu::fillerAction);
         } catch (Throwable e) {
             BukkitOfUtils.getInstance().logSevere("Error while building filler icon", e);
             return new BasicIcon(ItemUtils.make(Material.AIR, ""));
@@ -503,6 +462,11 @@ public class PaginatedMenu extends ScreenInstance {
      * @param page the page number to open (1-based)
      */
     public void openPage(int page) {
+        int maxPages = getMaxPages(fullSlots, slotsPerPage);
+        if (page < 1) page = 1;
+        if (page > maxPages) page = maxPages;
+        this.currentPage = page;
+
         InventorySheet sheet = buildSheet(player, fullSlots, page, slotsPerPage, padLeft, padRight, padTop, padBottom, whenNotFilled, whenFilled);
         setInventorySheet(sheet);
         open();
@@ -521,7 +485,10 @@ public class PaginatedMenu extends ScreenInstance {
      * @return the total number of pages
      */
     public static int getMaxPages(ManagedInventory fullSlots, int pageSize) {
-        return (int) Math.ceil((double) fullSlots.size() / pageSize);
+        if (pageSize <= 0) return 1;
+        int size = fullSlots == null ? 0 : fullSlots.size();
+        if (size <= 0) return 1;
+        return Math.max(1, (int) Math.ceil((double) size / pageSize));
     }
 
     // pad <direction> is the number of slots to pad in that direction (there are 9 slots per row and 6 rows)
