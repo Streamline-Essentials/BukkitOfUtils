@@ -8,11 +8,13 @@ import host.plas.bou.utils.DatabaseUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,11 +28,19 @@ import java.util.function.Consumer;
  * Abstract base class for database operations using HikariCP connection pooling.
  * Supports both MySQL and SQLite databases, providing methods for executing
  * statements, queries, and managing the database lifecycle.
+ *
+ * <p>Connections returned by {@link #getConnection()} are borrowed from the pool and
+ * <strong>must be closed</strong> by the caller (prefer try-with-resources). Higher-level
+ * {@link #execute} / {@link #executeQuery} helpers already handle borrow/return.</p>
  */
-@Getter @Setter
+@Getter
+@Setter
 public abstract class DBOperator implements Comparable<DBOperator> {
     /** The cooldown period in milliseconds between shutdown checks (2 seconds). */
-    public static final long COOLDOWN_MILLIS = 1000 * 2; // 2 seconds
+    public static final long COOLDOWN_MILLIS = 1000L * 2;
+
+    private static final Consumer<PreparedStatement> NO_PARAMS = stmt -> {
+    };
 
     /**
      * The unique numeric identifier for this operator.
@@ -63,11 +73,14 @@ public abstract class DBOperator implements Comparable<DBOperator> {
     private BetterPlugin pluginUser;
 
     /**
-     * The raw JDBC connection currently held by this operator.
+     * Legacy field retained for API compatibility. No longer used as a shared connection;
+     * callers should borrow via {@link #getConnection()} and close when finished.
      *
      * @param rawConnection the raw connection to set
      * @return the raw connection
+     * @deprecated Connections are borrowed from the pool per operation; do not share this field.
      */
+    @Deprecated
     private Connection rawConnection;
 
     /**
@@ -103,14 +116,12 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      */
     public DBOperator(ConnectorSet connectorSet, BetterPlugin pluginUser) {
         this.id = DatabaseUtils.getNextId(pluginUser);
-
         this.connectorSet = connectorSet;
         this.pluginUser = pluginUser;
-
         this.alterMap = new ConcurrentSkipListMap<>();
-
         this.usable = false;
 
+        ensureFile();
         this.dataSource = buildDataSource();
 
         register();
@@ -152,44 +163,57 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      * Builds and configures a HikariCP data source based on the connector set configuration.
      * Configures connection pooling, timeouts, and driver settings for the appropriate database type.
      *
-     * @return the configured HikariDataSource
+     * @return the configured HikariDataSource, or {@code null} if construction fails
      */
     public HikariDataSource buildDataSource() {
-        HikariConfig config = new HikariConfig();
+        if (connectorSet == null || connectorSet.getType() == null) {
+            setUnusable();
+            if (pluginUser != null) {
+                pluginUser.logSevere("Cannot build data source: connector set or type is null.");
+            }
+            return null;
+        }
 
-        switch (connectorSet.getType()) {
-            case MYSQL:
-                String mysqlJdbcUrl = connectorSet.getUri();
-                if (! mysqlJdbcUrl.contains("?")) {
-                    mysqlJdbcUrl += "?autoReconnect=true";
-                } else {
-                    mysqlJdbcUrl += "&autoReconnect=true";
-                }
+        try {
+            ensureFile();
 
-                config.setJdbcUrl(mysqlJdbcUrl);
+            HikariConfig config = new HikariConfig();
+            DatabaseType type = connectorSet.getType();
+
+            String jdbcUrl = connectorSet.buildJdbcUrl(getDatabaseFolder());
+            config.setJdbcUrl(jdbcUrl);
+            config.setDriverClassName(type.getDriver());
+            config.setPoolName(getIdentifier() + " - Pool");
+
+            if (type == DatabaseType.MYSQL) {
                 config.setUsername(connectorSet.getUsername());
                 config.setPassword(connectorSet.getPassword());
+                config.addDataSourceProperty("cachePrepStmts", "true");
+                config.addDataSourceProperty("prepStmtCacheSize", "250");
+                config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+                config.addDataSourceProperty("useServerPrepStmts", "true");
+            }
 
-                break;
-            case SQLITE:
-                config.setJdbcUrl(connectorSet.getUri() + getDatabaseFolder().getPath() + File.separator + connectorSet.getSqliteFileName());
+            config.setMaximumPoolSize(type.recommendedMaxPoolSize());
+            config.setMinimumIdle(type.recommendedMinimumIdle());
+            config.setConnectionTimeout(30_000);
+            config.setIdleTimeout(600_000);
+            config.setMaxLifetime(1_800_000);
+            config.setLeakDetectionThreshold(60_000);
+            // Prefer JDBC4 Connection.isValid() (Hikari default) over a custom test query.
 
-                break;
+            HikariDataSource source = new HikariDataSource(config);
+            this.dataSource = source;
+            setUsable();
+            return source;
+        } catch (Throwable t) {
+            this.dataSource = null;
+            setUnusable();
+            if (pluginUser != null) {
+                pluginUser.logSevereWithInfo("Failed to build data source for " + getPrettyName() + "!", t);
+            }
+            return null;
         }
-        config.setPoolName(getIdentifier() + " - Pool");
-        config.setMaximumPoolSize(10);
-        config.setMinimumIdle(2);
-        config.setConnectionTimeout(30000);
-        config.setIdleTimeout(600000);
-        config.setMaxLifetime(1800000);
-        config.setDriverClassName(connectorSet.getType().getDriver());
-        config.setConnectionTestQuery("SELECT 1");
-
-        dataSource = new HikariDataSource(config);
-
-        setUsable();
-
-        return dataSource;
     }
 
     /**
@@ -200,42 +224,53 @@ public abstract class DBOperator implements Comparable<DBOperator> {
     }
 
     /**
-     * Gets a database connection, reusing an existing open connection if available.
-     * Rebuilds the data source if it is null.
+     * Whether the pool is open and this operator is marked usable.
      *
-     * @param qStart the timestamp of the query start (used for connection tracking)
-     * @return a database Connection, or null if an error occurs
+     * @return {@code true} if connections can be borrowed
      */
-    public Connection getConnection(Date qStart) {
-        try {
-            if (dataSource == null) {
-                dataSource = buildDataSource();
-            }
-
-//            Connection rawConnection = getConnectionMap().get(qStart);
-
-            if (rawConnection != null && !rawConnection.isClosed()) {
-                updateLastConnection();
-                return rawConnection;
-            }
-
-            rawConnection = dataSource.getConnection();
-
-            updateLastConnection();
-            return rawConnection;
-        } catch (Exception e) {
-            getPluginUser().logSevereWithInfo("Failed to get connection!", e);
-            return null;
-        }
+    public boolean isPoolOpen() {
+        return usable && dataSource != null && !dataSource.isClosed();
     }
 
     /**
-     * Gets a database connection using the current time as the query start.
+     * Borrows a database connection from the pool.
+     * Rebuilds the data source if it is missing or closed.
+     * The unused {@code qStart} parameter is retained for API compatibility.
+     *
+     * <p>Callers <strong>must</strong> close the returned connection (try-with-resources).</p>
+     *
+     * @param qStart retained for API compatibility; unused
+     * @return a database Connection, or null if an error occurs
+     */
+    public Connection getConnection(@Nullable Date qStart) {
+        return getConnection();
+    }
+
+    /**
+     * Borrows a database connection from the pool.
+     *
+     * <p>Callers <strong>must</strong> close the returned connection (try-with-resources).</p>
      *
      * @return a database Connection, or null if an error occurs
      */
     public Connection getConnection() {
-        return getConnection(new Date()); // TODO: Fix this
+        try {
+            if (!isPoolOpen()) {
+                dataSource = buildDataSource();
+            }
+            if (dataSource == null || dataSource.isClosed()) {
+                return null;
+            }
+
+            Connection connection = dataSource.getConnection();
+            updateLastConnection();
+            return connection;
+        } catch (Exception e) {
+            if (pluginUser != null) {
+                pluginUser.logSevereWithInfo("Failed to get connection!", e);
+            }
+            return null;
+        }
     }
 
     /**
@@ -270,38 +305,63 @@ public abstract class DBOperator implements Comparable<DBOperator> {
     }
 
     /**
-     * Forces a commit on the current connection by disabling auto-commit and committing.
+     * Best-effort commit helper retained for API compatibility.
+     * With pooled auto-commit connections this is usually a no-op; safe to call on shutdown.
      */
     public void forceCommit() {
+        if (!isPoolOpen()) return;
+
         try (Connection connection = getConnection()) {
-            connection.setAutoCommit(false);
+            if (connection == null || connection.getAutoCommit()) return;
             connection.commit();
         } catch (Exception e) {
-            getPluginUser().logSevereWithInfo("Failed to close connection!", e);
+            if (pluginUser != null) {
+                pluginUser.logSevereWithInfo("Failed to force-commit connection!", e);
+            }
         }
     }
 
     /**
-     * Performs a threaded shutdown of the given operator: commits pending changes,
-     * closes the data source, unregisters, and marks as unusable.
+     * Performs a threaded shutdown of the given operator: closes the data source,
+     * unregisters, and marks as unusable.
      *
      * @param operator the DBOperator to shut down
      */
     public static void threadedShutdown(DBOperator operator) {
-        if (! operator.isUsable()) return;
+        if (operator == null || !operator.isUsable()) return;
 
-        operator.getPluginUser().logInfo("Shutting down database connection (" + operator.getPrettyName() + ")...");
+        BetterPlugin plugin = operator.getPluginUser();
+        if (plugin != null) {
+            plugin.logInfo("Shutting down database connection (" + operator.getPrettyName() + ")...");
+        }
 
-        if (operator.getDataSource() != null) {
+        try {
             operator.forceCommit();
-            operator.getDataSource().close();
+        } catch (Throwable ignored) {
+            // Best-effort only.
+        }
+
+        HikariDataSource source = operator.getDataSource();
+        if (source != null) {
+            try {
+                if (!source.isClosed()) {
+                    source.close();
+                }
+            } catch (Throwable t) {
+                if (plugin != null) {
+                    plugin.logWarning("Failed to close data source for " + operator.getPrettyName() + ": " + t.getMessage());
+                }
+            }
             operator.setDataSource(null);
         }
 
+        operator.setRawConnection(null);
         operator.unregister();
         operator.setUnusable();
 
-        operator.getPluginUser().logInfo("Database connection (" + operator.getPrettyName() + ") has been shut down.");
+        if (plugin != null) {
+            plugin.logInfo("Database connection (" + operator.getPrettyName() + ") has been shut down.");
+        }
     }
 
     /**
@@ -311,8 +371,7 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      */
     public boolean isPastCooldown() {
         if (lastConnection == null) return true;
-
-        return new Date().getTime() - lastConnection.getTime() >= COOLDOWN_MILLIS;
+        return System.currentTimeMillis() - lastConnection.getTime() >= COOLDOWN_MILLIS;
     }
 
     /**
@@ -324,10 +383,14 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      */
     public CompletableFuture<Consumer<DBOperator>> awaitShutdown(Consumer<DBOperator> whenDone) {
         return CompletableFuture.supplyAsync(() -> {
-            while (! isPastCooldown()) {
-                Thread.onSpinWait();
+            while (!isPastCooldown()) {
+                try {
+                    Thread.sleep(50L);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
-
             return whenDone;
         }).completeOnTimeout(whenDone, 10, TimeUnit.SECONDS);
     }
@@ -339,6 +402,7 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      * @param statement the SQL ALTER statement
      */
     public void addAlter(String version, String statement) {
+        if (version == null || statement == null) return;
         alterMap.put(version, statement);
     }
 
@@ -348,6 +412,7 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      * @param version the version identifier of the alteration to remove
      */
     public void removeAlter(String version) {
+        if (version == null) return;
         alterMap.remove(version);
     }
 
@@ -357,31 +422,44 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      * @return the DatabaseType
      */
     public DatabaseType getType() {
-        return connectorSet.getType();
+        return connectorSet == null ? null : connectorSet.getType();
     }
 
     /**
      * Executes a single SQL statement with the given statement builder.
      *
-     * @param statementBuilder a consumer that configures the PreparedStatement parameters
      * @param statement        the SQL statement to execute
+     * @param statementBuilder a consumer that configures the PreparedStatement parameters
      * @param ignoreErrors     if true, errors are silently ignored; otherwise they are logged
      * @return YES if the statement returned a result set, NO if it did not, or ERROR on failure
      */
     public ExecutionResult executeSingle(String statement, Consumer<PreparedStatement> statementBuilder, boolean ignoreErrors) {
         AtomicReference<ExecutionResult> result = new AtomicReference<>(ExecutionResult.ERROR);
 
-        try {
-            Date qStart = new Date();
-            Connection connection = getConnection(qStart);
-            PreparedStatement stmt = connection.prepareStatement(statement);
+        if (!isPoolOpen() && buildDataSource() == null) {
+            return ExecutionResult.ERROR;
+        }
 
-            statementBuilder.accept(stmt);
+        String sql = normalizeStatement(statement);
+        if (sql == null) return ExecutionResult.ERROR;
 
-            if (stmt.execute()) result.set(ExecutionResult.YES);
-            else result.set(ExecutionResult.NO);
+        Consumer<PreparedStatement> binder = statementBuilder == null ? NO_PARAMS : statementBuilder;
+
+        try (Connection connection = getConnection()) {
+            if (connection == null) return ExecutionResult.ERROR;
+
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                binder.accept(stmt);
+                if (stmt.execute()) {
+                    result.set(ExecutionResult.YES);
+                } else {
+                    result.set(ExecutionResult.NO);
+                }
+            }
         } catch (Exception e) {
-            if (! ignoreErrors) getPluginUser().logSevereWithInfo("Failed to execute statement: " + statement, e);
+            if (!ignoreErrors && pluginUser != null) {
+                pluginUser.logSevereWithInfo("Failed to execute statement: " + sql, e);
+            }
         }
 
         return result.get();
@@ -408,14 +486,13 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      */
     public List<ExecutionResult> execute(String statement, Consumer<PreparedStatement> statementBuilder, boolean ignoreErrors) {
         List<ExecutionResult> results = new ArrayList<>();
+        if (statement == null || statement.isBlank()) return results;
 
         String[] statements = statement.split(";;");
-
-        for (String s : statements) {
-            if (s == null || s.isEmpty() || s.isBlank()) continue;
-            String fs = s;
-            if (!fs.endsWith(";")) fs += ";";
-            results.add(executeSingle(fs, statementBuilder, ignoreErrors));
+        for (String part : statements) {
+            String sql = normalizeStatement(part);
+            if (sql == null) continue;
+            results.add(executeSingle(sql, statementBuilder, ignoreErrors));
         }
 
         return results;
@@ -423,6 +500,7 @@ public abstract class DBOperator implements Comparable<DBOperator> {
 
     /**
      * Executes a SQL query and passes the result set to the given action, logging errors.
+     * The {@link ResultSet} is only valid inside {@code action}; it is closed afterward.
      *
      * @param statement        the SQL query to execute
      * @param statementBuilder a consumer that configures the PreparedStatement parameters
@@ -434,6 +512,7 @@ public abstract class DBOperator implements Comparable<DBOperator> {
 
     /**
      * Executes a SQL query and passes the result set to the given action.
+     * The {@link ResultSet} is only valid inside {@code action}; it is closed afterward.
      *
      * @param statement        the SQL query to execute
      * @param statementBuilder a consumer that configures the PreparedStatement parameters
@@ -441,18 +520,30 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      * @param ignoreErrors     if true, errors are silently ignored; otherwise they are logged
      */
     public void executeQuery(String statement, Consumer<PreparedStatement> statementBuilder, DBAction action, boolean ignoreErrors) {
-        try {
-            Date qStart = new Date();
-            Connection connection = getConnection(qStart);
-            PreparedStatement stmt = connection.prepareStatement(statement);
+        if (action == null) return;
 
-            statementBuilder.accept(stmt);
+        if (!isPoolOpen() && buildDataSource() == null) {
+            return;
+        }
 
-            ResultSet set = stmt.executeQuery();
+        String sql = normalizeStatement(statement);
+        if (sql == null) return;
 
-            action.accept(set);
+        Consumer<PreparedStatement> binder = statementBuilder == null ? NO_PARAMS : statementBuilder;
+
+        try (Connection connection = getConnection()) {
+            if (connection == null) return;
+
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                binder.accept(stmt);
+                try (ResultSet set = stmt.executeQuery()) {
+                    action.accept(set);
+                }
+            }
         } catch (Exception e) {
-            if (! ignoreErrors) getPluginUser().logSevereWithInfo("Failed to execute query: " + statement, e);
+            if (!ignoreErrors && pluginUser != null) {
+                pluginUser.logSevereWithInfo("Failed to execute query: " + sql, e);
+            }
         }
     }
 
@@ -460,14 +551,27 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      * Creates the SQLite database file if the database type is SQLITE and the file does not exist.
      */
     public void createSqliteFileIfNotExists() {
-        if (connectorSet.getType() != DatabaseType.SQLITE) return;
+        if (connectorSet == null || connectorSet.getType() != DatabaseType.SQLITE) return;
+        if (!connectorSet.hasSqliteFile()) return;
 
         File file = new File(getDatabaseFolder(), connectorSet.getSqliteFileName());
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists() && !parent.mkdirs()) {
+            if (pluginUser != null) {
+                pluginUser.logWarning("Failed to create SQLite parent folder: " + parent.getAbsolutePath());
+            }
+        }
         if (!file.exists()) {
             try {
-                file.createNewFile();
+                if (!file.createNewFile() && pluginUser != null) {
+                    pluginUser.logWarning("Failed to create SQLite file: " + file.getAbsolutePath());
+                }
             } catch (Exception e) {
-                e.printStackTrace();
+                if (pluginUser != null) {
+                    pluginUser.logSevereWithInfo("Failed to create SQLite file: " + file.getAbsolutePath(), e);
+                } else {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -485,12 +589,8 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      * Ensures the SQLite file exists if the database type is SQLITE and a file name is configured.
      */
     public void ensureFile() {
-        if (this.getConnectorSet().getType() != DatabaseType.SQLITE) return;
-
-        String s1 = this.getConnectorSet().getSqliteFileName();
-        if (s1 == null) return;
-        if (s1.isBlank() || s1.isEmpty()) return;
-
+        if (connectorSet == null || connectorSet.getType() != DatabaseType.SQLITE) return;
+        if (!connectorSet.hasSqliteFile()) return;
         createSqliteFileIfNotExists();
     }
 
@@ -510,11 +610,12 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      * Executes all registered ALTER statements from the alter map, ignoring errors.
      */
     public void alterTables() {
-        getAlterMap().forEach((version, statement) -> {
-            if (version == null || version.isEmpty() || version.isBlank()) return;
-            if (statement == null || statement.isEmpty() || statement.isBlank()) return;
+        if (alterMap == null || alterMap.isEmpty()) return;
 
-            execute(statement, stmt -> {}, true);
+        alterMap.forEach((version, statement) -> {
+            if (version == null || version.isBlank()) return;
+            if (statement == null || statement.isBlank()) return;
+            execute(statement, NO_PARAMS, true);
         });
     }
 
@@ -524,6 +625,9 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      */
     public void ensureUsable() {
         this.ensureFile();
+        if (!isPoolOpen()) {
+            this.dataSource = buildDataSource();
+        }
         this.ensureDatabase();
         this.ensureTables();
         this.alterTables();
@@ -542,11 +646,9 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      */
     public static File getDatabaseFolder(DBOperator operator) {
         File folder = new File(operator.getPluginUser().getDataFolder(), "storage");
-
-        if (! folder.exists()) {
-            folder.mkdirs();
+        if (!folder.exists() && !folder.mkdirs() && operator.getPluginUser() != null) {
+            operator.getPluginUser().logWarning("Failed to create database folder: " + folder.getAbsolutePath());
         }
-
         return folder;
     }
 
@@ -557,11 +659,48 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      */
     public static File getMainDatabaseFolder() {
         File folder = new File(BaseManager.getBaseInstance().getDataFolder(), "storage");
-
-        if (! folder.exists()) {
+        if (!folder.exists()) {
             folder.mkdirs();
         }
-
         return folder;
+    }
+
+    @Nullable
+    private static String normalizeStatement(@Nullable String statement) {
+        if (statement == null) return null;
+        String sql = statement.trim();
+        if (sql.isEmpty()) return null;
+        // Keep a trailing semicolon for drivers/tools that expect it; harmless for most JDBC drivers.
+        if (!sql.endsWith(";")) {
+            sql = sql + ";";
+        }
+        return sql;
+    }
+
+    /**
+     * Quietly closes an AutoCloseable, swallowing exceptions.
+     *
+     * @param closeable resource to close
+     */
+    public static void closeQuietly(@Nullable AutoCloseable closeable) {
+        if (closeable == null) return;
+        try {
+            closeable.close();
+        } catch (Exception ignored) {
+            // Intentionally ignored.
+        }
+    }
+
+    /**
+     * Quietly closes JDBC resources in order: result set, statement, connection.
+     *
+     * @param resultSet  result set to close
+     * @param statement  statement to close
+     * @param connection connection to close (returns it to the pool when using Hikari)
+     */
+    public static void closeQuietly(@Nullable ResultSet resultSet, @Nullable Statement statement, @Nullable Connection connection) {
+        closeQuietly(resultSet);
+        closeQuietly(statement);
+        closeQuietly(connection);
     }
 }

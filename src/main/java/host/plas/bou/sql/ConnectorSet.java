@@ -2,11 +2,15 @@ package host.plas.bou.sql;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
 
 /**
- * A class that holds the information for a database connection.
+ * Holds connection configuration for a MySQL or SQLite database.
  */
-@Getter @Setter
+@Getter
+@Setter
 public class ConnectorSet {
     /**
      * The database type (MYSQL or SQLITE).
@@ -92,17 +96,92 @@ public class ConnectorSet {
 
     /**
      * Builds the JDBC connection URI based on the database type and connection parameters.
+     * For SQLite, prefer {@link #buildJdbcUrl(File)} so the file path is absolute.
      *
      * @return the JDBC URI string, or an empty string for unsupported types
      */
     public String getUri() {
+        if (type == null) return "";
         switch (type) {
             case MYSQL:
-                return type.getUrlPrefix() + host + ":" + port + "/" + database;
+                return type.getUrlPrefix() + nullToEmpty(host) + ":" + port + "/" + nullToEmpty(database);
             case SQLITE:
                 return type.getUrlPrefix();
             default:
                 return "";
         }
+    }
+
+    /**
+     * Builds a full JDBC URL, resolving SQLite against the given folder.
+     *
+     * @param sqliteFolder folder containing the SQLite file (ignored for MySQL)
+     * @return JDBC URL string
+     */
+    public String buildJdbcUrl(@Nullable File sqliteFolder) {
+        if (type == null) return "";
+        switch (type) {
+            case MYSQL:
+                return appendMysqlParams(getUri());
+            case SQLITE:
+                if (sqliteFolder == null || sqliteFileName == null || sqliteFileName.isBlank()) {
+                    return type.getUrlPrefix();
+                }
+                File dbFile = new File(sqliteFolder, sqliteFileName);
+                return type.getUrlPrefix() + dbFile.getAbsolutePath();
+            default:
+                return "";
+        }
+    }
+
+    /**
+     * Applies a table prefix to a bare table name when a prefix is configured.
+     *
+     * @param tableName bare table name
+     * @return prefixed table name, or the original when no prefix is set
+     */
+    public String prefixTable(String tableName) {
+        if (tableName == null) return null;
+        if (tablePrefix == null || tablePrefix.isBlank()) return tableName;
+        return tablePrefix + tableName;
+    }
+
+    /**
+     * Whether this connector is configured for SQLite with a usable file name.
+     *
+     * @return {@code true} when type is SQLITE and a non-blank file name is set
+     */
+    public boolean hasSqliteFile() {
+        return type == DatabaseType.SQLITE && sqliteFileName != null && !sqliteFileName.isBlank();
+    }
+
+    private static String appendMysqlParams(String jdbcUrl) {
+        if (jdbcUrl == null || jdbcUrl.isBlank()) return "";
+        StringBuilder url = new StringBuilder(jdbcUrl);
+        if (!jdbcUrl.contains("?")) {
+            url.append('?');
+        } else if (!jdbcUrl.endsWith("&") && !jdbcUrl.endsWith("?")) {
+            url.append('&');
+        }
+        if (!jdbcUrl.contains("autoReconnect=")) {
+            url.append("autoReconnect=true&");
+        }
+        if (!jdbcUrl.contains("useSSL=")) {
+            // Keep older MySQL drivers happy without forcing SSL for local/plugin use.
+            url.append("useSSL=false&");
+        }
+        if (!jdbcUrl.contains("allowPublicKeyRetrieval=")) {
+            url.append("allowPublicKeyRetrieval=true&");
+        }
+        // Trim trailing separator
+        char last = url.charAt(url.length() - 1);
+        if (last == '&' || last == '?') {
+            url.deleteCharAt(url.length() - 1);
+        }
+        return url.toString();
+    }
+
+    private static String nullToEmpty(String value) {
+        return value == null ? "" : value;
     }
 }

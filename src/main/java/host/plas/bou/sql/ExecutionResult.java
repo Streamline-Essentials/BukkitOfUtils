@@ -2,8 +2,6 @@ package host.plas.bou.sql;
 
 /**
  * Represents the result of a SQL statement execution.
- * ERROR indicates a failure, YES indicates the statement returned a result set,
- * and NO indicates the statement did not return a result set.
  */
 public enum ExecutionResult {
     /** Indicates that the SQL execution failed with an error. */
@@ -13,4 +11,18 @@ public enum ExecutionResult {
     /** Indicates that the SQL statement did not return a result set. */
     NO,
     ;
+
+    /**
+     * @return {@code true} when execution completed without error
+     */
+    public boolean isSuccess() {
+        return this == YES || this == NO;
+    }
+
+    /**
+     * @return {@code true} when execution failed
+     */
+    public boolean isError() {
+        return this == ERROR;
+    }
 }
