@@ -6,6 +6,8 @@ import host.plas.bou.BukkitOfUtils;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Locale;
+
 /**
  * A composite key used to uniquely identify a retrievable item by plugin name and item key.
  * The identifier format is "plugin:key".
@@ -35,8 +37,30 @@ public class RetrievableKey implements Identified {
      * @param key the unique key for the item within the plugin
      */
     public RetrievableKey(String plugin, String key) {
-        this.plugin = plugin;
-        this.key = key;
+        this.plugin = normalize(plugin);
+        this.key = normalize(key);
+    }
+
+    private static String normalize(String value) {
+        return value == null ? null : value.toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Sets the owning plugin identifier in its canonical lowercase form.
+     *
+     * @param plugin the plugin identifier
+     */
+    public void setPlugin(String plugin) {
+        this.plugin = normalize(plugin);
+    }
+
+    /**
+     * Sets the item identifier in its canonical lowercase form.
+     *
+     * @param key the item identifier
+     */
+    public void setKey(String key) {
+        this.key = normalize(key);
     }
 
     /**
