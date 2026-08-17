@@ -30,18 +30,18 @@ public final class BouPluginsCMD {
                 .addAliases("boup")
                 .setBasePermission("bou.plugins")
                 .setDescription("Manage BetterPlugins using BukkitOfUtils.")
-                .setUsage("/boup <list|enable|disable|info|unload|load|menu> [plugin]")
+                .setUsage("/boup <list|enable|disable|info|reload|unload|load|menu> [plugin]")
                 .setExecutionHandler(BouPluginsCMD::execute)
                 .setTabCompleter(BouPluginsCMD::tabComplete)
                 .build();
     }
 
     private static final String[] SUBCOMMANDS = {
-            "list", "enable", "disable", "info", "unload", "load", "menu"
+            "list", "enable", "disable", "info", "reload", "unload", "load", "menu"
     };
 
     private static final String[] PLUGIN_ARG_SUBCOMMANDS = {
-            "enable", "disable", "info", "unload", "menu"
+            "enable", "disable", "info", "reload", "unload", "menu"
     };
 
     private static boolean execute(CommandContext ctx) {
@@ -66,6 +66,8 @@ public final class BouPluginsCMD {
                 return lifecycle(ctx, "enable");
             case "disable":
                 return lifecycle(ctx, "disable");
+            case "reload":
+                return lifecycle(ctx, "reload");
             case "unload":
                 return lifecycle(ctx, "unload");
             case "load":
@@ -80,7 +82,7 @@ public final class BouPluginsCMD {
 
     private static void sendUsage(CommandContext ctx) {
         ctx.sendMessage("&e/boup list");
-        ctx.sendMessage("&e/boup <enable|disable|info|unload|load> <plugin>");
+        ctx.sendMessage("&e/boup <enable|disable|info|reload|unload|load> <plugin>");
         ctx.sendMessage("&e/boup menu [plugin]");
     }
 
@@ -144,6 +146,9 @@ public final class BouPluginsCMD {
                 break;
             case "disable":
                 result = PluginLifecycleHelper.disable(name);
+                break;
+            case "reload":
+                result = PluginLifecycleHelper.reload(name);
                 break;
             case "unload":
                 result = PluginLifecycleHelper.unload(name);
