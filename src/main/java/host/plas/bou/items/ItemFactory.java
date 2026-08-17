@@ -6,6 +6,7 @@ import host.plas.bou.items.retrievables.RetrievableItem;
 import host.plas.bou.items.retrievables.RetrievableKey;
 import host.plas.bou.utils.PluginUtils;
 import java.util.AbstractCollection;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -44,7 +45,7 @@ public class ItemFactory {
      * @param item the retrievable item supplier
      */
     public static void registerFactory(RetrievableKey key, RetrievableItem item) {
-        retreivableItems.put(key, item);
+        retreivableItems.put(normalize(key), item);
     }
 
     /**
@@ -64,7 +65,7 @@ public class ItemFactory {
      * @param key the retrievable key to remove
      */
     public static void unregisterFactory(RetrievableKey key) {
-        retreivableItems.remove(key);
+        retreivableItems.remove(normalize(key));
     }
 
     /**
@@ -84,7 +85,7 @@ public class ItemFactory {
      * @return an Optional containing the retrievable item, or empty if not registered
      */
     public static Optional<RetrievableItem> getFactory(RetrievableKey key) {
-        return Optional.ofNullable((RetrievableItem)retreivableItems.get(key));
+        return Optional.ofNullable((RetrievableItem)retreivableItems.get(normalize(key)));
     }
 
     /**
@@ -120,7 +121,10 @@ public class ItemFactory {
      * @return a sorted set of plugin identifier strings
      */
     public static ConcurrentSkipListSet<String> getPluginsWithItemsNames() {
-        return getPluginsWithItems().stream().map(BetterPlugin::getIdentifier).collect(ConcurrentSkipListSet::new, ConcurrentSkipListSet::add, AbstractCollection::addAll);
+        return getPluginsWithItems().stream()
+                .map(BetterPlugin::getIdentifier)
+                .map(ItemFactory::normalize)
+                .collect(ConcurrentSkipListSet::new, ConcurrentSkipListSet::add, AbstractCollection::addAll);
     }
 
     /**
@@ -131,9 +135,10 @@ public class ItemFactory {
      */
     public static ConcurrentSkipListMap<String, RetrievableItem> getItemsForPlugin(String pluginName) {
         ConcurrentSkipListMap<String, RetrievableItem> items = new ConcurrentSkipListMap<>();
+        String normalizedPlugin = normalize(pluginName);
 
         for(RetrievableKey key : retreivableItems.keySet()) {
-            if (key.getPlugin().equals(pluginName)) {
+            if (Objects.equals(key.getPlugin(), normalizedPlugin)) {
                 items.put(key.getKey(), (RetrievableItem)retreivableItems.get(key));
             }
         }
@@ -149,5 +154,14 @@ public class ItemFactory {
      */
     public static ConcurrentSkipListSet<String> getItemKeysForPlugin(String pluginName) {
         return new ConcurrentSkipListSet<>(getItemsForPlugin(pluginName).keySet());
+    }
+
+    private static RetrievableKey normalize(RetrievableKey key) {
+        Objects.requireNonNull(key, "key");
+        return RetrievableKey.of(normalize(key.getPlugin()), normalize(key.getKey()));
+    }
+
+    private static String normalize(String identifier) {
+        return identifier == null ? null : identifier.toLowerCase(Locale.ROOT);
     }
 }
