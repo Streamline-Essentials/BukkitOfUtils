@@ -56,9 +56,14 @@ public class VersionTool {
                 ConcurrentSkipListMap<String, Object> map = new ConcurrentSkipListMap<>(stack.serialize());
                 map.entrySet().removeIf(entry -> entry.getValue() == null);  // Remove null entries
 
-                ItemMeta meta = stack.getItemMeta();
-                if (meta != null) {
-                    map.put("meta", meta.serialize());
+                // Paper 26.2 serializes ItemStacks using the schema_version/id/count/components
+                // format. Adding the legacy Bukkit "meta" entry to that map makes
+                // CraftMagicNumbers.deserializeStack reject it as an unexpected key.
+                if (!map.containsKey("schema_version")) {
+                    ItemMeta meta = stack.getItemMeta();
+                    if (meta != null) {
+                        map.put("meta", meta.serialize());
+                    }
                 }
 
                 return GSON.toJson(map);
@@ -100,6 +105,15 @@ public class VersionTool {
         if (getServerVersion().isEmpty()) {
             try {
                 ConcurrentSkipListMap<String, Object> map = new ConcurrentSkipListMap<>((Map<String, ?>) GSON.fromJson(nbtJson, Map.class));
+
+                // ItemStack.serialize() on Paper 26.2 uses the schema-based format,
+                // while older BukkitOfUtils versions appended a legacy "meta" map.
+                // The schema deserializer only accepts its documented keys, so drop
+                // the duplicate legacy value before handing the map to Bukkit.
+                if (map.containsKey("schema_version")) {
+                    map.remove("meta");
+                }
+
                 ItemStack stack = ItemStack.deserialize(map);
 
                 try {
