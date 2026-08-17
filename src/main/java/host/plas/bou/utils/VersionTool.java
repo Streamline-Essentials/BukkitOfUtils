@@ -21,6 +21,7 @@ import org.checkerframework.checker.units.qual.N;
 
 import java.awt.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -806,7 +807,11 @@ public class VersionTool {
         } catch (NoSuchMethodException e) {
             BukkitOfUtils.getInstance().logWarningWithInfo("syncCommands method not found: ", e);
         } catch (Throwable e) {
-            BukkitOfUtils.getInstance().logWarningWithInfo("Failed to invoke syncCommands method: ", e);
+            Throwable cause = e;
+            if (e instanceof InvocationTargetException && e.getCause() != null) {
+                cause = e.getCause();
+            }
+            BukkitOfUtils.getInstance().logWarningWithInfo("Failed to invoke syncCommands method: ", cause);
         }
     }
 

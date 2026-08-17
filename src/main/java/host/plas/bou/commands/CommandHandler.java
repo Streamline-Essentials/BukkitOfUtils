@@ -1,6 +1,7 @@
 package host.plas.bou.commands;
 
 import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.scheduling.TaskManager;
 import host.plas.bou.utils.VersionTool;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,8 +13,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Central handler for managing command registration, unregistration, and lookup.
@@ -37,6 +38,9 @@ public class CommandHandler {
     private static ConcurrentSkipListSet<BetterCommand> loadedCommands = new ConcurrentSkipListSet<>();
 
     private static CommandMap COMMAND_MAP = null;
+
+    /** Prevents multiple command-tree rebuilds from being queued at once. */
+    private static final AtomicBoolean COMMAND_SYNC_QUEUED = new AtomicBoolean(false);
 
     /**
      * Initializes the command map by reflecting into the Bukkit server instance.
@@ -177,7 +181,7 @@ public class CommandHandler {
                 }
             }
 
-            CompletableFuture.runAsync(CommandHandler::syncCommands);
+            syncCommands();
         } catch (final Exception exception) {
             exception.printStackTrace();
         }
@@ -212,21 +216,35 @@ public class CommandHandler {
                 }
             }
 
-            CompletableFuture.runAsync(CommandHandler::syncCommands);
+            syncCommands();
         } catch (final Exception e) {
             BukkitOfUtils.getInstance().logWarningWithInfo("Failed to unregister commands: ", e);
         }
     }
 
     /**
-     * Synchronizes the server command map with registered commands.
+     * Schedules a synchronization of the server command map with registered commands.
+     * The synchronization is coalesced and always runs on the server's sync thread.
      * Delegates to VersionTool for version-specific synchronization.
      */
     public static void syncCommands() {
+        if (!COMMAND_SYNC_QUEUED.compareAndSet(false, true)) {
+            return;
+        }
+
         try {
-            VersionTool.syncCommands();
-        } catch (Exception e) {
-            BukkitOfUtils.getInstance().logDebugWithInfo("An unknown error occurred while syncing commands: ", e);
+            TaskManager.getScheduler().runTask(() -> {
+                try {
+                    VersionTool.syncCommands();
+                } catch (Throwable e) {
+                    BukkitOfUtils.getInstance().logDebugWithInfo("An unknown error occurred while syncing commands: ", e);
+                } finally {
+                    COMMAND_SYNC_QUEUED.set(false);
+                }
+            });
+        } catch (Throwable e) {
+            COMMAND_SYNC_QUEUED.set(false);
+            BukkitOfUtils.getInstance().logWarningWithInfo("Failed to schedule command synchronization: ", e);
         }
     }
 
