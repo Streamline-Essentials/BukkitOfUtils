@@ -117,15 +117,14 @@ public final class PluginLifecycleHelper {
         if (plugin.isEnabled()) {
             manager.disablePlugin(plugin);
         }
-        if (plugin instanceof BetterPlugin) {
-            PluginUtils.unregisterPlugin((BetterPlugin) plugin);
-        }
 
         try {
             Method unloadMethod = manager.getClass().getMethod("unloadPlugin", Plugin.class);
             Object result = unloadMethod.invoke(manager, plugin);
             boolean ok = !(result instanceof Boolean) || (Boolean) result;
             if (ok) {
+                unregisterBOUPlugin(plugin);
+                syncCommands();
                 return Result.ok("Unloaded plugin '" + pluginName + "'.", null);
             }
         } catch (NoSuchMethodException ignored) {
@@ -135,9 +134,64 @@ public final class PluginLifecycleHelper {
         }
 
         if (reflectiveUnload(plugin)) {
+            unregisterBOUPlugin(plugin);
+            syncCommands();
             return Result.ok("Unloaded plugin '" + pluginName + "' (reflective).", null);
         }
         return Result.fail("Disabled '" + pluginName + "' but could not fully unload it on this server.");
+    }
+
+    /**
+     * Reloads a plugin in the same order used by PlugMan: disable it, remove it
+     * from the server's loaded plugin state, then load and enable a fresh instance
+     * from its jar. BOU plugins are also removed from BOU's plugin registry during
+     * the unload phase.
+     *
+     * @param name the loaded plugin name or jar name
+     * @return the result of the reload operation
+     */
+    public static Result reload(String name) {
+        Plugin plugin = resolveLoaded(name);
+        if (plugin == null) {
+            return Result.fail("Plugin '" + name + "' is not loaded.");
+        }
+        if (isBukkitOfUtils(plugin)) {
+            return Result.fail("Cannot reload BukkitOfUtils via /boup.");
+        }
+
+        String pluginName = plugin.getName();
+        Result unloadResult = unload(pluginName);
+        if (!unloadResult.isSuccess()) {
+            return Result.fail("Could not reload plugin '" + pluginName + "': " + unloadResult.getMessage());
+        }
+
+        Result loadResult = load(pluginName);
+        if (!loadResult.isSuccess()) {
+            return Result.fail("Unloaded plugin '" + pluginName + "' but failed to reload it: "
+                    + loadResult.getMessage());
+        }
+        return Result.ok("Reloaded plugin '" + pluginName + "'.", loadResult.getPlugin());
+    }
+
+    private static void unregisterBOUPlugin(Plugin plugin) {
+        if (plugin instanceof BetterPlugin) {
+            PluginUtils.unregisterPlugin((BetterPlugin) plugin);
+        }
+    }
+
+    private static void registerBOUPlugin(Plugin plugin) {
+        if (plugin instanceof BetterPlugin) {
+            PluginUtils.registerPlugin((BetterPlugin) plugin);
+        }
+    }
+
+    private static void syncCommands() {
+        try {
+            Method syncCommands = Bukkit.getServer().getClass().getMethod("syncCommands");
+            syncCommands.invoke(Bukkit.getServer());
+        } catch (Throwable ignored) {
+            // Command synchronization is not available on every Bukkit version.
+        }
     }
 
     public static Result load(String nameOrJar) {
@@ -147,10 +201,6 @@ public final class PluginLifecycleHelper {
 
         Plugin already = resolveLoaded(stripJar(nameOrJar));
         if (already != null) {
-            if (!already.isEnabled()) {
-                Bukkit.getPluginManager().enablePlugin(already);
-                return Result.ok("Plugin '" + already.getName() + "' was already loaded; enabled it.", already);
-            }
             return Result.fail("Plugin '" + already.getName() + "' is already loaded.");
         }
 
@@ -164,7 +214,13 @@ public final class PluginLifecycleHelper {
             if (plugin == null) {
                 return Result.fail("Failed to load plugin from " + jar.getName() + ".");
             }
+            plugin.onLoad();
             Bukkit.getPluginManager().enablePlugin(plugin);
+            if (!plugin.isEnabled()) {
+                return Result.fail("Loaded plugin '" + plugin.getName() + "' but could not enable it.");
+            }
+            registerBOUPlugin(plugin);
+            syncCommands();
             return Result.ok("Loaded and enabled plugin '" + plugin.getName() + "' from " + jar.getName() + ".", plugin);
         } catch (InvalidPluginException | InvalidDescriptionException | UnknownDependencyException e) {
             return Result.fail("Failed to load " + jar.getName() + ": " + e.getMessage());
@@ -265,19 +321,19 @@ public final class PluginLifecycleHelper {
         PluginManager manager = Bukkit.getPluginManager();
         String name = plugin.getName();
         try {
-            Field pluginsField = manager.getClass().getDeclaredField("plugins");
+            Field pluginsField = findField(manager.getClass(), "plugins");
             pluginsField.setAccessible(true);
             List<Plugin> plugins = (List<Plugin>) pluginsField.get(manager);
             plugins.remove(plugin);
 
-            Field lookupNamesField = manager.getClass().getDeclaredField("lookupNames");
+            Field lookupNamesField = findField(manager.getClass(), "lookupNames");
             lookupNamesField.setAccessible(true);
             Map<String, Plugin> lookupNames = (Map<String, Plugin>) lookupNamesField.get(manager);
             lookupNames.entrySet().removeIf(e -> e.getValue() == plugin
                     || (e.getKey() != null && e.getKey().equalsIgnoreCase(name)));
 
             try {
-                Field commandsField = manager.getClass().getDeclaredField("commandMap");
+                Field commandsField = findField(manager.getClass(), "commandMap");
                 commandsField.setAccessible(true);
                 Object commandMap = commandsField.get(manager);
                 Method getCommands = commandMap.getClass().getMethod("getKnownCommands");
@@ -299,6 +355,7 @@ public final class PluginLifecycleHelper {
 
             ClassLoader classLoader = plugin.getClass().getClassLoader();
             if (classLoader instanceof URLClassLoader) {
+                clearPluginClassLoader((URLClassLoader) classLoader);
                 ((URLClassLoader) classLoader).close();
             }
 
@@ -307,6 +364,30 @@ public final class PluginLifecycleHelper {
         } catch (Throwable t) {
             Bukkit.getLogger().log(Level.WARNING, "Reflective unload failed for " + name, t);
             return false;
+        }
+    }
+
+    private static Field findField(Class<?> type, String name) throws NoSuchFieldException {
+        Class<?> current = type;
+        while (current != null) {
+            try {
+                return current.getDeclaredField(name);
+            } catch (NoSuchFieldException ignored) {
+                current = current.getSuperclass();
+            }
+        }
+        throw new NoSuchFieldException(name);
+    }
+
+    private static void clearPluginClassLoader(URLClassLoader classLoader) {
+        for (String fieldName : new String[]{"plugin", "pluginInit"}) {
+            try {
+                Field field = findField(classLoader.getClass(), fieldName);
+                field.setAccessible(true);
+                field.set(classLoader, null);
+            } catch (Throwable ignored) {
+                // These fields vary between Bukkit implementations.
+            }
         }
     }
 }
