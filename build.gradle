@@ -15,6 +15,14 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+// `release` links against the Java 11 API, not just the bytecode version. With only
+// source/targetCompatibility, a JDK 21 build happily accepts Java 12+ methods such as
+// Stream#toList() or String#formatted() and emits 55.0 classes that then die with
+// NoSuchMethodError on a real Java 11 runtime (the servers we support run 1.8.9 on Java 11).
+tasks.withType(JavaCompile).configureEach {
+    options.release = 11
+}
+
 ext {
     pluginMain = properties['plugin.main'] == 'default' ?
             "${project.group}.${project.name.toLowerCase()}.${project.name}" :
