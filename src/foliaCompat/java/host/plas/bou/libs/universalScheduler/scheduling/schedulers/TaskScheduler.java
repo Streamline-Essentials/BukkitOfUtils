@@ -1,6 +1,7 @@
 package host.plas.bou.libs.universalScheduler.scheduling.schedulers;
 
 import host.plas.bou.libs.universalScheduler.scheduling.tasks.MyScheduledTask;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -31,7 +32,7 @@ public interface TaskScheduler {
      * @return true if the current thread ticks any region
      */
     default boolean isTickThread() {
-        return isGlobalThread();
+        return Bukkit.getServer().isPrimaryThread();
     }
 
     /**

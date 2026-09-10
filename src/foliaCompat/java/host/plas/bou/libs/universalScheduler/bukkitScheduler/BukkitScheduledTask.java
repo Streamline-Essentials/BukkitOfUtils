@@ -11,6 +11,22 @@ import org.bukkit.scheduler.BukkitTask;
  * <p>Vendored from UniversalScheduler so BOU controls its bytecode level.</p>
  */
 public class BukkitScheduledTask implements MyScheduledTask {
+    /**
+     * BukkitTask#isCancelled() was added after 1.8 — that API declares only getTaskId,
+     * getOwner, isSync and cancel. Probe once so modern servers keep the upstream
+     * behaviour while 1.8.x falls back to the scheduler's queue state.
+     */
+    private static final boolean HAS_IS_CANCELLED = hasIsCancelled();
+
+    private static boolean hasIsCancelled() {
+        try {
+            BukkitTask.class.getMethod("isCancelled");
+            return true;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
     final BukkitTask task;
     final boolean isRepeating;
 
@@ -41,7 +57,11 @@ public class BukkitScheduledTask implements MyScheduledTask {
 
     @Override
     public boolean isCancelled() {
-        return task.isCancelled();
+        if (HAS_IS_CANCELLED) return task.isCancelled();
+
+        // 1.8.x fallback: a live task is either waiting to run or running right now.
+        int id = task.getTaskId();
+        return ! Bukkit.getScheduler().isQueued(id) && ! Bukkit.getScheduler().isCurrentlyRunning(id);
     }
 
     @Override
