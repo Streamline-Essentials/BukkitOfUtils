@@ -150,6 +150,12 @@ tasks.named('sourcesJar') {
     from sourceSets.foliaCompat.allJava
 }
 
+// Same gap for javadoc: it only documents `main` unless told otherwise.
+tasks.named('javadoc') {
+    source += sourceSets.foliaCompat.allJava
+    classpath += sourceSets.foliaCompat.compileClasspath
+}
+
 shadowJar {
     archiveClassifier.set('')
     archiveFileName = "${project.name}-${project.version}.jar"
