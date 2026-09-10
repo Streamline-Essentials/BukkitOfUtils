@@ -81,10 +81,10 @@ public class GuiMaintenanceListener implements Listener {
         InventorySheet sheet = screen.get().getInventorySheet();
         if (sheet == null) return false;
 
-        int rawSlot = event.getSlot();
-        if (rawSlot < 0 || rawSlot >= sheet.getSize()) return false;
+        int slotIndex = event.getSlot();
+        if (slotIndex < 0 || slotIndex >= sheet.getSize()) return false;
 
-        Slot slot = sheet.getSlot(rawSlot);
+        Slot slot = sheet.getSlot(slotIndex);
         if (slot == null) return false;
 
         SlotType type = slot.getType();
