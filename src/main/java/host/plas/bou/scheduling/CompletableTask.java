@@ -1,6 +1,6 @@
 package host.plas.bou.scheduling;
 
-import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
+import host.plas.bou.libs.universalScheduler.scheduling.tasks.MyScheduledTask;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Chunk;
