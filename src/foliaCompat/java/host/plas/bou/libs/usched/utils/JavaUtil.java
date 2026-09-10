@@ -1,4 +1,4 @@
-package host.plas.bou.libs.universalScheduler.utils;
+package host.plas.bou.libs.usched.utils;
 
 /**
  * Small reflection helpers used to probe for optional server APIs.

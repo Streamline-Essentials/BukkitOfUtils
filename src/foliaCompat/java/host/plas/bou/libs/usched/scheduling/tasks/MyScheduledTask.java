@@ -1,4 +1,4 @@
-package host.plas.bou.libs.universalScheduler.scheduling.tasks;
+package host.plas.bou.libs.usched.scheduling.tasks;
 
 import org.bukkit.plugin.Plugin;
 

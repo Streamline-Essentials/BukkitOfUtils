@@ -96,18 +96,11 @@ dependencies {
         shadow(coord) { transitive = false }
     }
 
-    // OblivateInvs — not on Maven Central; shade with its small modules, never Gson.
-    // It also drags in gg.drak:UniversalScheduler, whose published classes are Java 21
-    // (class file 65.0) and crash on the Java 11 runtimes BOU supports. We vendor that
-    // library in src/foliaCompat instead, so the upstream artifact must stay out.
-    implementation("mc.obliviate:core:4.1.13.3") {
-        exclude group: 'com.google.code.gson', module: 'gson'
-        exclude group: 'gg.drak', module: 'UniversalScheduler'
-    }
-    shadow("mc.obliviate:core:4.1.13.3") {
-        exclude group: 'com.google.code.gson', module: 'gson'
-        exclude group: 'gg.drak', module: 'UniversalScheduler'
-    }
+    // OblivateInvs is NOT a dependency any more. Its published classes are Java 21
+    // (class file 65.0) and crash on the Java 11 runtimes BOU supports, and only one
+    // version is published so there is no older build to fall back to. The API is
+    // reimplemented in src/main/java/mc/obliviate/inventory at the original package
+    // names, so the ~85 files across dependent plugins keep compiling unchanged.
 
     // Slim runtime: compile against Central libs, never package them.
     SPIGOT_LIBRARIES.each { coord ->
@@ -145,6 +138,12 @@ java {
 // main only needs the vendored classes on its compile classpath; they are packaged below.
 sourceSets.main.compileClasspath += sourceSets.foliaCompat.output
 
+// main now references the vendored scheduler types directly (mc.obliviate.inventory.Gui
+// holds a List<MyScheduledTask>), so foliaCompat must be compiled first.
+tasks.named('compileJava') {
+    dependsOn tasks.named('foliaCompatClasses')
+}
+
 // withSourcesJar() only sees `main`, so add the vendored sources explicitly.
 tasks.named('sourcesJar') {
     from sourceSets.foliaCompat.allJava
@@ -171,6 +170,11 @@ shadowJar {
     // `exclude` on the dependency cannot reach those entries. Drop them here: they are
     // Java 21 (class file 65.0) and BOU now vendors the library in src/foliaCompat.
     exclude 'com/github/Anon8281/**'
+
+    // Same for OblivateInvs, now reimplemented in this project. Our own
+    // mc/obliviate/inventory classes come from sourceSets.main, not the shadow config,
+    // so this only strips copies baked into other fat jars.
+    exclude 'mc/obliviate/util/**'
 
     // TheBase is published as a fat artifact. Strip anything Spigot `libraries:` /
     // RuntimeLibraryLoader already provides, plus unused fat-jar junk (junit/protobuf).
@@ -247,3 +251,4 @@ publishing {
         }
     }
 }
+

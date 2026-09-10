@@ -1,6 +1,6 @@
-package host.plas.bou.libs.universalScheduler.paperScheduler;
+package host.plas.bou.libs.usched.paper;
 
-import host.plas.bou.libs.universalScheduler.foliaScheduler.FoliaScheduler;
+import host.plas.bou.libs.usched.folia.FoliaScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
