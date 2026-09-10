@@ -104,7 +104,7 @@ public final class GuiLayout {
      * @param cornerColor corner accent color
      */
     public static void fillShell(ItemStack[] contents, int size, CornerColor cornerColor) {
-        ItemStack border = GuiItems.filler(Material.BLACK_STAINED_GLASS_PANE);
+        ItemStack border = GuiItems.filler(GuiItems.borderPaneMaterial());
         ItemStack corner = GuiItems.cornerPane(cornerColor == null ? CornerColor.YELLOW : cornerColor);
         Set<Integer> cornerSet = new HashSet<>();
         for (int slot : cornerSlots(size)) {

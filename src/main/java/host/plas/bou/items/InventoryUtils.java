@@ -1,5 +1,6 @@
 package host.plas.bou.items;
 
+import host.plas.bou.compat.LegacySupport;
 import host.plas.bou.gui.InventorySheet;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -317,16 +318,10 @@ public class InventoryUtils {
      * @param plugin the plugin whose keys should be removed
      */
     public static void stripPluginKeys(ItemStack stack, JavaPlugin plugin) {
-        ItemMeta meta = stack.getItemMeta();
-        if (meta == null) return;
+        if (stack == null) return;
+        if (! LegacySupport.hasPersistentDataContainer()) return;
 
-        meta.getPersistentDataContainer().getKeys().forEach(key -> {
-            if (key.getNamespace().equalsIgnoreCase(plugin.getName())) {
-                meta.getPersistentDataContainer().remove(key);
-            }
-        });
-
-        stack.setItemMeta(meta);
+        PdcTags.stripNamespace(stack, plugin.getName());
     }
 
     /**

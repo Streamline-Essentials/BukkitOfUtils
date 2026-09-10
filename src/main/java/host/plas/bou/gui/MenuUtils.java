@@ -1,11 +1,10 @@
 package host.plas.bou.gui;
 
 import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.compat.LegacySupport;
 import host.plas.bou.gui.slots.SlotType;
-import org.bukkit.NamespacedKey;
+import host.plas.bou.items.PdcTags;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -56,87 +55,73 @@ public final class MenuUtils {
         }
     }
 
-    /**
-     * Creates a namespaced key for inventory-related persistent data with the given suffix.
-     *
-     * @param string the suffix to append to the "inventory-" prefix
-     * @return the namespaced key
-     */
-    public static NamespacedKey getInventoryKey(String string) {
-        return new NamespacedKey(BukkitOfUtils.getInstance(), "inventory-" + string);
-    }
+    /** The key name used to mark items as static (non-interactive). */
+    private static final String STATIC_KEY = "inventory-static";
 
-    /**
-     * Returns the namespaced key used to mark items as static (non-interactive).
-     *
-     * @return the static namespaced key
-     */
-    public static NamespacedKey getStaticKey() {
-        return getInventoryKey("static");
-    }
-
-    /**
-     * Returns the namespaced key used to mark items as buttons.
-     *
-     * @return the button namespaced key
-     */
-    public static NamespacedKey getButtonKey() {
-        return getInventoryKey("button");
-    }
+    /** The key name used to mark items as buttons. */
+    private static final String BUTTON_KEY = "inventory-button";
 
     /**
      * Injects a static marker into the item's persistent data container,
      * preventing it from being moved by players.
      *
+     * <p>On legacy servers without the persistent data container API (1.8-1.13) this is a
+     * no-op. Click protection there is handled by
+     * {@link GuiMaintenanceListener}, which resolves the slot type from the open
+     * {@link host.plas.bou.gui.screens.ScreenInstance} rather than from item metadata.</p>
+     *
      * @param stack the item stack to mark as static
      */
     public static void injectStatic(ItemStack stack) {
         if (stack == null) return;
-        ItemMeta meta = stack.getItemMeta();
-        if (meta != null) {
-            meta.getPersistentDataContainer().set(getStaticKey(), PersistentDataType.INTEGER, 1);
-            stack.setItemMeta(meta);
-        }
+        if (! LegacySupport.hasPersistentDataContainer()) return;
+
+        PdcTags.setMarker(stack, PdcTags.key(BukkitOfUtils.getInstance(), STATIC_KEY));
     }
 
     /**
      * Injects a button marker into the item's persistent data container,
      * preventing it from being moved by players.
      *
+     * <p>On legacy servers without the persistent data container API this is a no-op; see
+     * {@link #injectStatic(ItemStack)}.</p>
+     *
      * @param stack the item stack to mark as a button
      */
     public static void injectButton(ItemStack stack) {
         if (stack == null) return;
-        ItemMeta meta = stack.getItemMeta();
-        if (meta != null) {
-            meta.getPersistentDataContainer().set(getButtonKey(), PersistentDataType.INTEGER, 1);
-            stack.setItemMeta(meta);
-        }
+        if (! LegacySupport.hasPersistentDataContainer()) return;
+
+        PdcTags.setMarker(stack, PdcTags.key(BukkitOfUtils.getInstance(), BUTTON_KEY));
     }
 
     /**
      * Checks whether the given item stack is marked as static.
+     *
+     * <p>Always {@code false} on legacy servers, where no marker is ever written.</p>
      *
      * @param stack the item stack to check
      * @return {@code true} if the item has the static marker, {@code false} otherwise
      */
     public static boolean isStatic(ItemStack stack) {
         if (stack == null) return false;
-        ItemMeta meta = stack.getItemMeta();
-        if (meta == null) return false;
-        return meta.getPersistentDataContainer().has(getStaticKey(), PersistentDataType.INTEGER);
+        if (! LegacySupport.hasPersistentDataContainer()) return false;
+
+        return PdcTags.hasMarker(stack, PdcTags.key(BukkitOfUtils.getInstance(), STATIC_KEY));
     }
 
     /**
      * Checks whether the given item stack is marked as a button.
+     *
+     * <p>Always {@code false} on legacy servers, where no marker is ever written.</p>
      *
      * @param stack the item stack to check
      * @return {@code true} if the item has the button marker, {@code false} otherwise
      */
     public static boolean isButton(ItemStack stack) {
         if (stack == null) return false;
-        ItemMeta meta = stack.getItemMeta();
-        if (meta == null) return false;
-        return meta.getPersistentDataContainer().has(getButtonKey(), PersistentDataType.INTEGER);
+        if (! LegacySupport.hasPersistentDataContainer()) return false;
+
+        return PdcTags.hasMarker(stack, PdcTags.key(BukkitOfUtils.getInstance(), BUTTON_KEY));
     }
 }

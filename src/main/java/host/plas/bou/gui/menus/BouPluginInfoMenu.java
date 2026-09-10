@@ -9,6 +9,7 @@ import host.plas.bou.gui.icons.BasicIcon;
 import host.plas.bou.gui.screens.ScreenInstance;
 import host.plas.bou.gui.slots.SlotType;
 import host.plas.bou.gui.type.BouGuiTypes;
+import host.plas.bou.compat.LegacySupport;
 import host.plas.bou.items.ItemUtils;
 import host.plas.bou.sql.ConnectorSet;
 import host.plas.bou.sql.DBOperator;
@@ -194,20 +195,16 @@ public class BouPluginInfoMenu extends ScreenInstance {
         return ItemUtils.make(Material.COMPASS, "&eUp to date?", lore);
     }
 
+    /**
+     * Resolves the first material name that exists on this server.
+     *
+     * @param primary    preferred (modern) material name
+     * @param fallback   legacy material name
+     * @param lastResort value used when neither name resolves
+     * @return the resolved material
+     */
     private static Material resolveMaterial(String primary, String fallback, Material lastResort) {
-        Material mat = Material.matchMaterial(primary);
-        if (mat != null) return mat;
-        mat = Material.matchMaterial(fallback);
-        if (mat != null) return mat;
-        try {
-            return Material.valueOf(primary);
-        } catch (IllegalArgumentException ignored) {
-            try {
-                return Material.valueOf(fallback);
-            } catch (IllegalArgumentException ignored2) {
-                return lastResort;
-            }
-        }
+        return LegacySupport.material(lastResort, primary, fallback);
     }
 
     private static List<String> buildDatabaseLore(BetterPlugin target) {

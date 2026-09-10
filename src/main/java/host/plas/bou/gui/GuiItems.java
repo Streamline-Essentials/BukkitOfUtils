@@ -1,5 +1,6 @@
 package host.plas.bou.gui;
 
+import host.plas.bou.compat.LegacySupport;
 import host.plas.bou.items.ItemUtils;
 import host.plas.bou.utils.ColorUtils;
 import org.bukkit.Material;
@@ -18,12 +19,25 @@ public final class GuiItems {
     private GuiItems() {
     }
 
+    /**
+     * Standard black border pane, resolved per server version.
+     *
+     * @return the black stained glass pane material, or a legacy/fallback equivalent
+     */
+    public static Material borderPaneMaterial() {
+        return LegacySupport.material(Material.AIR, "BLACK_STAINED_GLASS_PANE", "STAINED_GLASS_PANE");
+    }
+
     public static ItemStack cornerPane(CornerColor color) {
-        return filler(color == null ? CornerColor.YELLOW.paneMaterial() : color.paneMaterial());
+        CornerColor resolved = color == null ? CornerColor.YELLOW : color;
+
+        ItemStack item = filler(resolved.paneMaterial());
+        // On pre-1.13 every pane color shares one material and is selected by data value.
+        return LegacySupport.applyLegacyData(item, resolved.legacyData());
     }
 
     public static ItemStack filler(Material material) {
-        ItemStack item = new ItemStack(material == null ? Material.BLACK_STAINED_GLASS_PANE : material);
+        ItemStack item = new ItemStack(material == null ? borderPaneMaterial() : material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.setDisplayName(" ");
@@ -52,7 +66,7 @@ public final class GuiItems {
 
     public static ItemStack returnButton() {
         return button(
-                Material.OAK_DOOR,
+                LegacySupport.material(Material.CHEST, "OAK_DOOR", "WOOD_DOOR", "WOODEN_DOOR"),
                 "#FFED6A&lBack",
                 "#bdc8c9Return to the previous menu.",
                 "",
@@ -62,7 +76,7 @@ public final class GuiItems {
 
     public static ItemStack pagePreviousButton(int displayPage) {
         return button(
-                Material.OAK_BUTTON,
+                LegacySupport.material(Material.STONE_BUTTON, "OAK_BUTTON", "WOOD_BUTTON"),
                 "#FFED6APrevious Page",
                 "#bdc8c9Page " + displayPage
         );
@@ -70,7 +84,7 @@ public final class GuiItems {
 
     public static ItemStack pageNextButton(int displayPage) {
         return button(
-                Material.OAK_BUTTON,
+                LegacySupport.material(Material.STONE_BUTTON, "OAK_BUTTON", "WOOD_BUTTON"),
                 "#FFED6ANext Page",
                 "#bdc8c9Page " + displayPage
         );
@@ -104,6 +118,6 @@ public final class GuiItems {
         if (lines != null) {
             Collections.addAll(lore, lines);
         }
-        return button(Material.LIME_STAINED_GLASS_PANE, title, lore);
+        return button(LegacySupport.material(Material.PAPER, "LIME_STAINED_GLASS_PANE", "STAINED_GLASS_PANE"), title, lore);
     }
 }
