@@ -1,6 +1,6 @@
-package host.plas.bou.libs.universalScheduler.foliaScheduler;
+package host.plas.bou.libs.usched.folia;
 
-import host.plas.bou.libs.universalScheduler.scheduling.tasks.MyScheduledTask;
+import host.plas.bou.libs.usched.scheduling.tasks.MyScheduledTask;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.plugin.Plugin;
 

@@ -1,10 +1,10 @@
-package host.plas.bou.libs.universalScheduler;
+package host.plas.bou.libs.usched;
 
-import host.plas.bou.libs.universalScheduler.bukkitScheduler.BukkitScheduler;
-import host.plas.bou.libs.universalScheduler.foliaScheduler.FoliaScheduler;
-import host.plas.bou.libs.universalScheduler.paperScheduler.PaperScheduler;
-import host.plas.bou.libs.universalScheduler.scheduling.schedulers.TaskScheduler;
-import host.plas.bou.libs.universalScheduler.utils.JavaUtil;
+import host.plas.bou.libs.usched.bukkit.BukkitScheduler;
+import host.plas.bou.libs.usched.folia.FoliaScheduler;
+import host.plas.bou.libs.usched.paper.PaperScheduler;
+import host.plas.bou.libs.usched.scheduling.schedulers.TaskScheduler;
+import host.plas.bou.libs.usched.utils.JavaUtil;
 import org.bukkit.plugin.Plugin;
 
 /**

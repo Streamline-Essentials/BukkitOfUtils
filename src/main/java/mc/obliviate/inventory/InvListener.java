@@ -1,0 +1,133 @@
+package mc.obliviate.inventory;
+
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.entity.Player;
+
+/**
+ * Routes Bukkit inventory events to the {@link Gui} the viewer currently has open.
+ *
+ * <p>BOU's own implementation of the OblivateInvs API. The published
+ * {@code mc.obliviate:core} artifact is compiled to class file version 65.0 (Java 21) and
+ * cannot load on the Java 11 runtimes BOU supports, so the API is reimplemented here at
+ * the original package names.</p>
+ *
+ * <p>The upstream {@code GuiPre*} wrapper events are not reproduced: nothing in BOU or the
+ * plugins built on it listened for them, so events are dispatched straight to the menu.</p>
+ */
+public class InvListener implements Listener {
+    private final InventoryAPI inventoryAPI;
+
+    /**
+     * @param inventoryAPI the API instance owning this listener
+     */
+    protected InvListener(InventoryAPI inventoryAPI) {
+        this.inventoryAPI = inventoryAPI;
+    }
+
+    /**
+     * Cancels clicks as the menu dictates, then runs the clicked icon's handler.
+     *
+     * @param event the click
+     */
+    @EventHandler
+    public void onClick(InventoryClickEvent event) {
+        if (! (event.getWhoClicked() instanceof Player)) return;
+
+        Gui gui = inventoryAPI.getPlayersCurrentGui((Player) event.getWhoClicked());
+        if (gui == null) return;
+
+        // A Gui returning true from onClick keeps the default protection; returning false
+        // opts that menu into letting the player move items.
+        boolean allowInteraction = ! gui.onClick(event);
+        int rawSlot = event.getRawSlot();
+
+        if (allowInteraction) {
+            event.setCancelled(false);
+        } else if (event.getSlot() == rawSlot) {
+            // The click landed in the menu itself.
+            event.setCancelled(true);
+        } else {
+            // The click landed in the player's own inventory; only block the actions that
+            // could pull items out of, or shuffle items into, the menu.
+            InventoryAction action = event.getAction();
+            if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY
+                    || action == InventoryAction.COLLECT_TO_CURSOR
+                    || action == InventoryAction.UNKNOWN) {
+                event.setCancelled(true);
+            }
+        }
+
+        GuiIcon icon = gui.getItems().get(rawSlot);
+        if (icon == null) return;
+
+        icon.getClickAction().accept(event);
+    }
+
+    /**
+     * Runs the menu's close hook and forgets the viewer.
+     *
+     * @param event the close event
+     */
+    @EventHandler
+    public void onClose(InventoryCloseEvent event) {
+        if (! (event.getPlayer() instanceof Player)) return;
+        Player player = (Player) event.getPlayer();
+
+        Gui gui = inventoryAPI.getPlayersCurrentGui(player);
+        if (gui == null) return;
+
+        // Ignore a close for some other inventory the player happens to have open.
+        if (! event.getInventory().equals(gui.getInventory())) return;
+
+        gui.onClose(event);
+        gui.setClosed(true);
+        inventoryAPI.getPlayers().remove(player.getUniqueId());
+    }
+
+    /**
+     * Cancels drags as the menu dictates, then runs each affected icon's handler.
+     *
+     * @param event the drag
+     */
+    @EventHandler
+    public void onDrag(InventoryDragEvent event) {
+        if (! (event.getWhoClicked() instanceof Player)) return;
+
+        Gui gui = inventoryAPI.getPlayersCurrentGui((Player) event.getWhoClicked());
+        if (gui == null) return;
+
+        if (gui.onDrag(event)) {
+            event.setCancelled(true);
+        }
+
+        for (int rawSlot : event.getRawSlots()) {
+            GuiIcon icon = gui.getItems().get(rawSlot);
+            if (icon == null) continue;
+
+            icon.getDragAction().accept(event);
+        }
+    }
+
+    /**
+     * Runs the menu's open hook.
+     *
+     * @param event the open event
+     */
+    @EventHandler
+    public void onOpen(InventoryOpenEvent event) {
+        if (! (event.getPlayer() instanceof Player)) return;
+
+        Gui gui = inventoryAPI.getPlayersCurrentGui((Player) event.getPlayer());
+        if (gui == null) return;
+
+        if (event.isCancelled()) return;
+
+        gui.onOpen(event);
+    }
+}

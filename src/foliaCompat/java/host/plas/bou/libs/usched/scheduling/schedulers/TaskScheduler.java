@@ -1,6 +1,6 @@
-package host.plas.bou.libs.universalScheduler.scheduling.schedulers;
+package host.plas.bou.libs.usched.scheduling.schedulers;
 
-import host.plas.bou.libs.universalScheduler.scheduling.tasks.MyScheduledTask;
+import host.plas.bou.libs.usched.scheduling.tasks.MyScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

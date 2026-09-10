@@ -1,7 +1,7 @@
-package host.plas.bou.libs.universalScheduler.foliaScheduler;
+package host.plas.bou.libs.usched.folia;
 
-import host.plas.bou.libs.universalScheduler.scheduling.schedulers.TaskScheduler;
-import host.plas.bou.libs.universalScheduler.scheduling.tasks.MyScheduledTask;
+import host.plas.bou.libs.usched.scheduling.schedulers.TaskScheduler;
+import host.plas.bou.libs.usched.scheduling.tasks.MyScheduledTask;
 import io.papermc.paper.threadedregions.scheduler.AsyncScheduler;
 import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
 import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * <p>The fields below are Folia-only types, so loading this class on a non-Folia server
  * throws {@link NoClassDefFoundError}. That is why nothing outside this package may name
  * it in a signature and why
- * {@link host.plas.bou.libs.universalScheduler.UniversalScheduler} only constructs it
+ * {@link host.plas.bou.libs.usched.UniversalScheduler} only constructs it
  * after detecting Folia.</p>
  */
 public class FoliaScheduler implements TaskScheduler {

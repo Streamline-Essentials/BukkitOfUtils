@@ -1,6 +1,6 @@
 package host.plas.bou.instances;
 
-import host.plas.bou.libs.universalScheduler.UniversalScheduler;
+import host.plas.bou.libs.usched.UniversalScheduler;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.events.MainListener;

@@ -8,12 +8,12 @@ import host.plas.bou.gui.icons.BasicIcon;
 import host.plas.bou.gui.screens.ScreenInstance;
 import host.plas.bou.gui.GuiItems;
 import host.plas.bou.items.ItemUtils;
+import host.plas.bou.utils.VersionTool;
 import host.plas.bou.utils.obj.ManagedInventory;
 import lombok.Getter;
 import lombok.Setter;
 import mc.obliviate.inventory.Icon;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.inventory.ItemStack;
@@ -453,7 +453,10 @@ public class PaginatedMenu extends ScreenInstance {
         event.getViewers().forEach((viewer) -> {
             if (viewer instanceof Player) {
                 Player player = (Player) viewer;
-                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 1f);
+                // Resolved by name: this constant is BLOCK_NOTE_BLOCK_BASS on 1.13+,
+                // BLOCK_NOTE_BASS on 1.9-1.12 and NOTE_BASS on 1.8.
+                VersionTool.playSound(player, 1f, 1f,
+                        "BLOCK_NOTE_BLOCK_BASS", "BLOCK_NOTE_BASS", "NOTE_BASS");
             }
         });
     }
