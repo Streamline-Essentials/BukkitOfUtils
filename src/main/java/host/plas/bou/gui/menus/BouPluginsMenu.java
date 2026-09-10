@@ -5,6 +5,7 @@ import host.plas.bou.gui.InventorySheet;
 import host.plas.bou.gui.icons.BasicIcon;
 import host.plas.bou.gui.screens.ScreenInstance;
 import host.plas.bou.gui.type.BouGuiTypes;
+import host.plas.bou.compat.LegacySupport;
 import host.plas.bou.items.ItemUtils;
 import host.plas.bou.utils.MessageUtils;
 import host.plas.bou.utils.PluginUtils;
@@ -46,7 +47,8 @@ public class BouPluginsMenu extends ScreenInstance {
             }
             BetterPlugin target = plugin;
             ItemStack stack = ItemUtils.make(
-                    plugin.isEnabled() ? Material.NETHER_STAR : Material.GRAY_DYE,
+                    plugin.isEnabled() ? Material.NETHER_STAR
+                            : LegacySupport.material(Material.STONE, "GRAY_DYE", "INK_SACK"),
                     plugin.getColorizedIdentifier(),
                     "&7v&b" + plugin.getDescription().getVersion(),
                     "&7Status: " + (plugin.isEnabled() ? "&aEnabled" : "&cDisabled"),

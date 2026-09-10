@@ -1,6 +1,7 @@
 package host.plas.bou.items;
 
 import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.compat.LegacySupport;
 import host.plas.bou.compat.papi.PAPICompat;
 import host.plas.bou.serialization.items.ItemStackSerializer;
 import host.plas.bou.utils.ColorUtils;
@@ -16,7 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -453,11 +453,32 @@ public class ItemUtils {
      * @param value  the tag value
      */
     public static void setTag(ItemStack stack, JavaPlugin plugin, String key, String value) {
-        ItemMeta meta = stack.getItemMeta();
-        if (meta != null) {
-            meta.getPersistentDataContainer().set(PluginUtils.getPluginKey(plugin, key), PersistentDataType.STRING, value);
-            stack.setItemMeta(meta);
+        if (stack == null) return;
+        if (! LegacySupport.hasPersistentDataContainer()) {
+            warnUnsupportedTagging();
+            return;
         }
+
+        PdcTags.setString(stack, PdcTags.key(plugin, key), value);
+    }
+
+    /** Guards {@link #warnUnsupportedTagging()} so the warning is logged at most once. */
+    private static boolean warnedUnsupportedTagging = false;
+
+    /**
+     * Logs a one-time warning that item tagging is unavailable on this server.
+     *
+     * <p>Persistent item tags require the persistent data container API (1.14+). There is no
+     * equivalent that survives on 1.8 without NMS NBT reflection, so tagging degrades to a
+     * no-op and {@link #getTag(ItemStack, JavaPlugin, String)} always returns empty.</p>
+     */
+    private static synchronized void warnUnsupportedTagging() {
+        if (warnedUnsupportedTagging) return;
+        warnedUnsupportedTagging = true;
+
+        BukkitOfUtils.getInstance().logWarning("Item tagging (ItemUtils#setTag / #getTag) requires " +
+                "the persistent data container API added in Minecraft 1.14. This server does not have it, " +
+                "so item tags will not be stored or read. GUI click protection is unaffected.");
     }
 
     /**
@@ -471,14 +492,8 @@ public class ItemUtils {
     public static Optional<String> getTag(ItemStack stack, JavaPlugin plugin, String key) {
         if (stack == null) return Optional.empty();
 
-        ItemMeta meta = stack.getItemMeta();
+        if (! LegacySupport.hasPersistentDataContainer()) return Optional.empty();
 
-        String value = null;
-        if (meta != null) {
-            if (meta.getPersistentDataContainer().has(PluginUtils.getPluginKey(plugin, key), PersistentDataType.STRING))
-                value = meta.getPersistentDataContainer().get(PluginUtils.getPluginKey(plugin, key), PersistentDataType.STRING);
-        }
-
-        return Optional.ofNullable(value);
+        return Optional.ofNullable(PdcTags.getString(stack, PdcTags.key(plugin, key)));
     }
 }

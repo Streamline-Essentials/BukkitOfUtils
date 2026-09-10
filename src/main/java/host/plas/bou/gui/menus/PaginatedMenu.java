@@ -6,6 +6,7 @@ import host.plas.bou.gui.InventorySheet;
 import host.plas.bou.gui.ScreenManager;
 import host.plas.bou.gui.icons.BasicIcon;
 import host.plas.bou.gui.screens.ScreenInstance;
+import host.plas.bou.gui.GuiItems;
 import host.plas.bou.items.ItemUtils;
 import host.plas.bou.utils.obj.ManagedInventory;
 import lombok.Getter;
@@ -425,7 +426,7 @@ public class PaginatedMenu extends ScreenInstance {
      * @return the filler {@link ItemStack}
      */
     public static ItemStack getFiller() {
-        return ItemUtils.make(Material.BLACK_STAINED_GLASS_PANE, " ");
+        return ItemUtils.make(GuiItems.borderPaneMaterial(), " ");
     }
 
     /**
