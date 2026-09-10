@@ -426,7 +426,8 @@ public class PaginatedMenu extends ScreenInstance {
      * @return the filler {@link ItemStack}
      */
     public static ItemStack getFiller() {
-        return ItemUtils.make(GuiItems.borderPaneMaterial(), " ");
+        // borderPane() already builds a blank-named filler, correct on legacy servers.
+        return GuiItems.borderPane();
     }
 
     /**
