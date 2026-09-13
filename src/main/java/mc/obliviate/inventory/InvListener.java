@@ -1,6 +1,7 @@
 package mc.obliviate.inventory;
 
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -105,9 +106,11 @@ public class InvListener implements Listener {
         // If the menu forces an uncancel, uncancel; otherwise cancel.
         event.setCancelled(! gui.onDrag(event));
 
+        // The first slot without an icon ends the dispatch: a drag that touches any empty
+        // slot fires no further drag handlers, which is the contract dependent menus expect.
         for (int rawSlot : event.getRawSlots()) {
             GuiIcon icon = gui.getItems().get(rawSlot);
-            if (icon == null) continue;
+            if (icon == null) return;
 
             icon.getDragAction().accept(event);
         }
@@ -116,9 +119,12 @@ public class InvListener implements Listener {
     /**
      * Runs the menu's open hook.
      *
+     * <p>Listens at {@link EventPriority#MONITOR} so the menu builds itself only after every
+     * other plugin has had its say on the open, including any decision to cancel it.</p>
+     *
      * @param event the open event
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onOpen(InventoryOpenEvent event) {
         if (! (event.getPlayer() instanceof Player)) return;
 
