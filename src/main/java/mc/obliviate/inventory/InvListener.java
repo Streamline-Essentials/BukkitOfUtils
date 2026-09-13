@@ -42,12 +42,12 @@ public class InvListener implements Listener {
         Gui gui = inventoryAPI.getPlayersCurrentGui((Player) event.getWhoClicked());
         if (gui == null) return;
 
-        // A Gui returning true from onClick keeps the default protection; returning false
-        // opts that menu into letting the player move items.
-        boolean allowInteraction = ! gui.onClick(event);
+        // A Gui returning true from onClick forces the click to be uncancelled; returning
+        // false keeps the default protection.
+        boolean doNotProtect = gui.onClick(event);
         int rawSlot = event.getRawSlot();
 
-        if (allowInteraction) {
+        if (doNotProtect) {
             event.setCancelled(false);
         } else if (event.getSlot() == rawSlot) {
             // The click landed in the menu itself.
@@ -102,9 +102,8 @@ public class InvListener implements Listener {
         Gui gui = inventoryAPI.getPlayersCurrentGui((Player) event.getWhoClicked());
         if (gui == null) return;
 
-        if (gui.onDrag(event)) {
-            event.setCancelled(true);
-        }
+        // If the menu forces an uncancel, uncancel; otherwise cancel.
+        event.setCancelled(! gui.onDrag(event));
 
         for (int rawSlot : event.getRawSlots()) {
             GuiIcon icon = gui.getItems().get(rawSlot);
