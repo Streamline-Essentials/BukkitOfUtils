@@ -54,7 +54,6 @@ repositories {
     }
     maven { url 'https://repo.papermc.io/repository/maven-snapshots/' }
     maven { url 'https://repo.papermc.io/repository/maven-public/' }
-    maven { url 'https://jitpack.io' }
     // NMS
     maven {
         url = uri("https://repo.codemc.org/repository/nms/")

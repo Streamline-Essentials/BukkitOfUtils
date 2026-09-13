@@ -93,21 +93,21 @@ public abstract class Gui implements InventoryHolder {
      * Called when the viewer clicks a slot, before the clicked icon's handler runs.
      *
      * @param event the click
-     * @return true to keep the default protection (clicks in the menu are cancelled);
-     *         false to let the player move items freely
+     * @return true to force the click to be uncancelled, letting the player move items;
+     *         false to keep the default protection (clicks in the menu are cancelled)
      */
     public boolean onClick(InventoryClickEvent event) {
-        return true;
+        return false;
     }
 
     /**
      * Called when the viewer drags across slots, before the icons' handlers run.
      *
      * @param event the drag
-     * @return true to cancel the drag, false to allow it
+     * @return true to force the drag to be uncancelled, allowing it; false to cancel it
      */
     public boolean onDrag(InventoryDragEvent event) {
-        return true;
+        return false;
     }
 
     /**
