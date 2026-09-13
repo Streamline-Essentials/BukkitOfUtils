@@ -1076,6 +1076,27 @@ public class VersionTool {
      * @param stack  the item to set, or null to clear
      * @see #getItemInMainHand(org.bukkit.entity.Player)
      */
+    /**
+     * Reads the item in the player's off hand.
+     *
+     * <p>The off hand did not exist before 1.9, so there is no legacy equivalent: servers
+     * older than that always report an empty hand.</p>
+     *
+     * @param player the player
+     * @return the off-hand item, or null on servers without an off hand
+     */
+    public static ItemStack getItemInOffHand(org.bukkit.entity.Player player) {
+        if (player == null) return null;
+
+        org.bukkit.inventory.PlayerInventory inv = player.getInventory();
+        try {
+            Method m = inv.getClass().getMethod("getItemInOffHand");
+            return (ItemStack) m.invoke(inv);
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
     public static void setItemInMainHand(org.bukkit.entity.Player player, ItemStack stack) {
         if (player == null) return;
 

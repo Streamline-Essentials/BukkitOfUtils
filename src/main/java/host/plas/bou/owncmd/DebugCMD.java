@@ -76,12 +76,13 @@ public class DebugCMD extends SimplifiedCommand {
                     return false;
                 }
 
-                ItemStack itemN = player.getInventory().getItemInMainHand();
-                if (itemN.getType() == Material.AIR) {
-                    itemN = player.getInventory().getItemInOffHand();
+                ItemStack itemN = VersionTool.getItemInMainHand(player);
+                if (itemN == null || itemN.getType() == Material.AIR) {
+                    itemN = VersionTool.getItemInOffHand(player);
                 }
 
-                if (itemN.getType() == Material.AIR) {
+                // getItemInOffHand returns null on servers with no off hand (pre-1.9).
+                if (itemN == null || itemN.getType() == Material.AIR) {
                     ctx.sendMessage("&cYou must be holding an item.");
                     return false;
                 }
@@ -96,12 +97,13 @@ public class DebugCMD extends SimplifiedCommand {
                     return false;
                 }
 
-                ItemStack itemNs = player.getInventory().getItemInMainHand();
-                if (itemNs.getType() == Material.AIR) {
-                    itemNs = player.getInventory().getItemInOffHand();
+                ItemStack itemNs = VersionTool.getItemInMainHand(player);
+                if (itemNs == null || itemNs.getType() == Material.AIR) {
+                    itemNs = VersionTool.getItemInOffHand(player);
                 }
 
-                if (itemNs.getType() == Material.AIR) {
+                // getItemInOffHand returns null on servers with no off hand (pre-1.9).
+                if (itemNs == null || itemNs.getType() == Material.AIR) {
                     ctx.sendMessage("&cYou must be holding an item.");
                     return false;
                 }
@@ -152,12 +154,13 @@ public class DebugCMD extends SimplifiedCommand {
                     return false;
                 }
 
-                ItemStack itemST = player.getInventory().getItemInMainHand();
-                if (itemST.getType() == Material.AIR) {
-                    itemST = player.getInventory().getItemInOffHand();
+                ItemStack itemST = VersionTool.getItemInMainHand(player);
+                if (itemST == null || itemST.getType() == Material.AIR) {
+                    itemST = VersionTool.getItemInOffHand(player);
                 }
 
-                if (itemST.getType() == Material.AIR) {
+                // getItemInOffHand returns null on servers with no off hand (pre-1.9).
+                if (itemST == null || itemST.getType() == Material.AIR) {
                     ctx.sendMessage("&cYou must be holding an item.");
                     return false;
                 }
@@ -318,6 +321,28 @@ public class DebugCMD extends SimplifiedCommand {
                 LocationUtils.teleport(player, topLoc);
 
                 ctx.sendMessage("&7Teleported you to the top-most space available above you.");
+                break;
+            case "center":
+                if (player == null) {
+                    ctx.sendMessage("&cOnly players can use this command.");
+                    return false;
+                }
+
+                Location centerLoc = LocationUtils.getCenteredHorizontally(player.getLocation());
+                LocationUtils.teleport(player, centerLoc);
+
+                ctx.sendMessage("&7Teleported you to the center of your block.");
+                break;
+            case "center3d":
+                if (player == null) {
+                    ctx.sendMessage("&cOnly players can use this command.");
+                    return false;
+                }
+
+                Location center3dLoc = LocationUtils.getCenteredFully(player.getLocation());
+                LocationUtils.teleport(player, center3dLoc);
+
+                ctx.sendMessage("&7Teleported you to the exact middle of your block.");
                 break;
             case "worlds":
                 StringBuilder worldsList = new StringBuilder();
@@ -535,7 +560,8 @@ public class DebugCMD extends SimplifiedCommand {
         if (ctx.getArgs().size() <= 1) {
             completions.addAll(List.of(
                     "item-nbt", "list-bou-plugins", "store-item", "get-item", "make-item", "uuid",
-                    "up", "down", "top", "tasks", "item-nbt-strict", "make-item-strict", "worlds", "dump", "drakapi"
+                    "up", "down", "top", "center", "center3d", "tasks", "item-nbt-strict", "make-item-strict",
+                    "worlds", "dump", "drakapi"
             ));
         }
 

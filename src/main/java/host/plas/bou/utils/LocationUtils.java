@@ -130,6 +130,47 @@ public class LocationUtils {
     }
 
     /**
+     * Centers a location on its block's X and Z axis while keeping the original Y and the
+     * direction the entity was facing.
+     *
+     * <p>{@link #getCenteredLocation(Location)} builds a bare {@link Location}, which resets
+     * yaw and pitch to zero and snaps the entity to face south. That is harmless when the
+     * entity is being relocated anyway, but jarring when it is only being nudged within the
+     * block it already occupies.</p>
+     *
+     * @param location the location to center
+     * @return a location centered horizontally, retaining Y, yaw and pitch
+     */
+    public static Location getCenteredHorizontally(Location location) {
+        if (location == null) return null;
+
+        return new Location(location.getWorld(),
+                location.getBlockX() + 0.5,
+                location.getY(),
+                location.getBlockZ() + 0.5,
+                location.getYaw(),
+                location.getPitch());
+    }
+
+    /**
+     * Centers a location on all three axes of the block it sits in, keeping the direction
+     * the entity was facing.
+     *
+     * @param location the location to center
+     * @return a location at the exact middle of its block, retaining yaw and pitch
+     */
+    public static Location getCenteredFully(Location location) {
+        if (location == null) return null;
+
+        return new Location(location.getWorld(),
+                location.getBlockX() + 0.5,
+                location.getBlockY() + 0.5,
+                location.getBlockZ() + 0.5,
+                location.getYaw(),
+                location.getPitch());
+    }
+
+    /**
      * Finds a safe top location at the given coordinates, searching down first then up.
      *
      * @param location the starting location
@@ -205,7 +246,39 @@ public class LocationUtils {
      */
     private static boolean isAirLike(Block block) {
         return block.getType() == Material.AIR ||
-                block.isPassable() && ! block.getType().isSolid(); // This covers flowers, tall grass, etc.
+                isPassable(block) && ! block.getType().isSolid(); // This covers flowers, tall grass, etc.
+    }
+
+    /**
+     * Reads {@code Block#isPassable()}, which only exists from 1.13 onwards.
+     *
+     * <p>On older servers a non-solid material is the closest equivalent, and
+     * {@code Material#isSolid()} has been present since 1.8.</p>
+     *
+     * @param block the block to test
+     * @return true if an entity can move through the block
+     */
+    private static boolean isPassable(Block block) {
+        try {
+            return (boolean) Block.class.getMethod("isPassable").invoke(block);
+        } catch (Throwable t) {
+            return ! block.getType().isSolid();
+        }
+    }
+
+    /**
+     * Reads {@code World#getMinHeight()}, which only exists from 1.17 onwards.
+     *
+     * @param world the world to query
+     * @return the lowest buildable Y, or 0 on servers predating the call
+     */
+    private static int getMinHeight(World world) {
+        try {
+            return (int) World.class.getMethod("getMinHeight").invoke(world);
+        } catch (Throwable t) {
+            // Worlds started at Y=0 until 1.17 made the floor configurable.
+            return 0;
+        }
     }
 
     /**
@@ -223,11 +296,15 @@ public class LocationUtils {
         World world = top.getWorld();
         if (world == null) return null; // not going to be null, but just in case
         while (! checkForTopableBlock(block)) {
-            if (block.getY() < world.getMinHeight() && block.getY() > world.getMaxHeight()) break;
+            if (block.getY() < getMinHeight(world) || block.getY() > world.getMaxHeight()) break;
 
             if (stopAtNonAir) {
                 if (block.getType() != Material.AIR) {
+                    // Step back to the free space in front of the obstruction. `top` is
+                    // what this method returns, so it has to move with `block` -- leaving
+                    // it behind is what put /boud top inside the topmost block.
                     block = block.getRelative(direction.getOppositeFace());
+                    top = block.getLocation();
                     break;
                 }
             }
@@ -236,7 +313,7 @@ public class LocationUtils {
             top = block.getLocation();
         }
 
-        if (block.getY() < world.getMinHeight()) {
+        if (block.getY() < getMinHeight(world)) {
             return null;
         }
         if (block.getY() > world.getMaxHeight()) {
@@ -265,7 +342,11 @@ public class LocationUtils {
      * @return a centered location at the topmost safe position
      */
     public static Location getTopMostTopLocation(Location location, boolean centered) {
-        return getCenteredLocation(getTopMostTopBlock(location).getLocation());
+        Block top = getTopMostTopBlock(location);
+        if (top == null) return null;
+
+        Location loc = top.getLocation();
+        return centered ? getCenteredLocation(loc) : loc;
     }
 
     /**
