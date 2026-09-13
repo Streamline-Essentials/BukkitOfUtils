@@ -31,10 +31,10 @@ replay_pid*
 /lib/
 
 # AI
-/.claude/
-/.vscode/
-/.cursor/
-/.gemini/
+.claude/
+.vscode/
+.cursor/
+.gemini/
 CLAUDE.md
 PLAN.md
 
