@@ -995,4 +995,101 @@ public class VersionTool {
 //
 //        return new Versioning(firstInt, secondInt, thirdInt);
 //    }
+
+    /**
+     * Resolves the first {@link org.bukkit.Sound} that exists on the running server.
+     *
+     * <p>Sound names were rewritten in 1.9 and again in 1.13 (for example
+     * {@code NOTE_BASS} became {@code BLOCK_NOTE_BASS} and then
+     * {@code BLOCK_NOTE_BLOCK_BASS}). Referencing a constant directly binds the field at
+     * class-initialisation time, so a name missing on the running server throws
+     * {@link NoSuchFieldError} and takes the whole calling class down with it. Look the
+     * names up by string instead and let the caller list its preferred spellings.</p>
+     *
+     * @param names candidate sound names, most modern first
+     * @return the first sound that exists, or null if none do
+     */
+    public static org.bukkit.Sound findSound(String... names) {
+        for (String name : names) {
+            try {
+                return org.bukkit.Sound.valueOf(name);
+            } catch (IllegalArgumentException | NoSuchFieldError ignored) {
+                // Try the next spelling.
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Plays a sound to a player, picking whichever name the server recognises.
+     *
+     * @param player the listener
+     * @param volume the volume
+     * @param pitch  the pitch
+     * @param names  candidate sound names, most modern first
+     */
+    public static void playSound(org.bukkit.entity.Player player, float volume, float pitch, String... names) {
+        if (player == null) return;
+
+        org.bukkit.Sound sound = findSound(names);
+        if (sound == null) return;
+
+        try {
+            player.playSound(player.getLocation(), sound, volume, pitch);
+        } catch (Throwable t) {
+            // A sound failing to play is never worth interrupting the caller.
+        }
+    }
+
+    /**
+     * Reads the item in the player's main hand.
+     *
+     * <p>{@code PlayerInventory#getItemInMainHand} arrived with the 1.9 off-hand; 1.8 only
+     * has {@code getItemInHand}. Both are resolved reflectively so this compiles against a
+     * modern API and still runs on 1.8.</p>
+     *
+     * @param player the player
+     * @return the held item, or null
+     */
+    public static ItemStack getItemInMainHand(org.bukkit.entity.Player player) {
+        if (player == null) return null;
+
+        org.bukkit.inventory.PlayerInventory inv = player.getInventory();
+        try {
+            Method m = inv.getClass().getMethod("getItemInMainHand");
+            return (ItemStack) m.invoke(inv);
+        } catch (Throwable ignored) {
+            try {
+                Method legacy = inv.getClass().getMethod("getItemInHand");
+                return (ItemStack) legacy.invoke(inv);
+            } catch (Throwable t) {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Replaces the item in the player's main hand.
+     *
+     * @param player the player
+     * @param stack  the item to set, or null to clear
+     * @see #getItemInMainHand(org.bukkit.entity.Player)
+     */
+    public static void setItemInMainHand(org.bukkit.entity.Player player, ItemStack stack) {
+        if (player == null) return;
+
+        org.bukkit.inventory.PlayerInventory inv = player.getInventory();
+        try {
+            Method m = inv.getClass().getMethod("setItemInMainHand", ItemStack.class);
+            m.invoke(inv, stack);
+        } catch (Throwable ignored) {
+            try {
+                Method legacy = inv.getClass().getMethod("setItemInHand", ItemStack.class);
+                legacy.invoke(inv, stack);
+            } catch (Throwable t) {
+                // Nothing else to try.
+            }
+        }
+    }
 }

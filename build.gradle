@@ -1,3 +1,5 @@
+import org.gradle.api.attributes.java.TargetJvmVersion
+
 plugins {
     id 'java'
     id 'com.gradleup.shadow' version '8.3.6' // for shadowing
@@ -13,6 +15,14 @@ version = properties['version']
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+}
+
+// `release` links against the Java 11 API, not just the bytecode version. With only
+// source/targetCompatibility, a JDK 21 build happily accepts Java 12+ methods such as
+// Stream#toList() or String#formatted() and emits 55.0 classes that then die with
+// NoSuchMethodError on a real Java 11 runtime (the servers we support run 1.8.9 on Java 11).
+tasks.withType(JavaCompile).configureEach {
+    options.release = 11
 }
 
 ext {
@@ -55,11 +65,29 @@ repositories {
     }
 }
 
+// The vendored UniversalScheduler lives here, compiled against folia-api ALONE.
+// Folia's scheduling entry points (Server#getRegionScheduler, Entity#getScheduler, ...)
+// do not exist in the Spigot 1.16.5 API the rest of this project targets, and putting
+// folia-api on the main compile classpath would silently expose every Bukkit 1.17-1.20
+// method to code that must still run on 1.8.x.
+sourceSets {
+    foliaCompat {
+        java.srcDirs = ['src/foliaCompat/java']
+    }
+}
+
 dependencies {
     implementation(compileOnly(files(FILES)))
     annotationProcessor(ANNO)
     compileOnly(COMP_ONLY)
     compileOnly(OTHER_PLUGINS)
+
+    // folia-api only — see the foliaCompat source set comment above. The artifact is
+    // built for Java 17+, so Gradle's variant check must be told this is intentional;
+    // javac still targets 11 via options.release and only reads its class files.
+    foliaCompatCompileOnly('dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT') {
+        attributes { attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 21) }
+    }
 
     // Framework: compile against full graph; shade only non-Central artifacts (no transitives).
     // Hikari / JDBC / Gson / etc. come from plugin.yml libraries: + RuntimeLibraryLoader.
@@ -68,13 +96,11 @@ dependencies {
         shadow(coord) { transitive = false }
     }
 
-    // OblivateInvs — not on Maven Central; shade with its small modules, never Gson.
-    implementation("mc.obliviate:core:4.1.13.3") {
-        exclude group: 'com.google.code.gson', module: 'gson'
-    }
-    shadow("mc.obliviate:core:4.1.13.3") {
-        exclude group: 'com.google.code.gson', module: 'gson'
-    }
+    // OblivateInvs is NOT a dependency any more. Its published classes are Java 21
+    // (class file 65.0) and crash on the Java 11 runtimes BOU supports, and only one
+    // version is published so there is no older build to fall back to. The API is
+    // reimplemented in src/main/java/mc/obliviate/inventory at the original package
+    // names, so the ~85 files across dependent plugins keep compiling unchanged.
 
     // Slim runtime: compile against Central libs, never package them.
     SPIGOT_LIBRARIES.each { coord ->
@@ -109,14 +135,46 @@ java {
     withJavadocJar()
 }
 
+// main only needs the vendored classes on its compile classpath; they are packaged below.
+sourceSets.main.compileClasspath += sourceSets.foliaCompat.output
+
+// main now references the vendored scheduler types directly (mc.obliviate.inventory.Gui
+// holds a List<MyScheduledTask>), so foliaCompat must be compiled first.
+tasks.named('compileJava') {
+    dependsOn tasks.named('foliaCompatClasses')
+}
+
+// withSourcesJar() only sees `main`, so add the vendored sources explicitly.
+tasks.named('sourcesJar') {
+    from sourceSets.foliaCompat.allJava
+}
+
+// Same gap for javadoc: it only documents `main` unless told otherwise.
+tasks.named('javadoc') {
+    source += sourceSets.foliaCompat.allJava
+    classpath += sourceSets.foliaCompat.compileClasspath
+}
+
 shadowJar {
     archiveClassifier.set('')
     archiveFileName = "${project.name}-${project.version}.jar"
 
+    // Vendored UniversalScheduler is its own source set; include its output.
+    from sourceSets.foliaCompat.output
+
     // Only package the shadow configuration (framework + Oblivate), not the wider runtime classpath.
     configurations = [project.configurations.shadow]
 
-    relocate('com.github.Anon8281.universalScheduler', 'host.plas.bou.libs.universalScheduler')
+
+    // mc.obliviate:core is a fat jar with UniversalScheduler baked in, so a Gradle
+    // `exclude` on the dependency cannot reach those entries. Drop them here: they are
+    // Java 21 (class file 65.0) and BOU now vendors the library in src/foliaCompat.
+    exclude 'com/github/Anon8281/**'
+
+    // Same for OblivateInvs, now reimplemented in this project. Our own
+    // mc/obliviate/inventory classes come from sourceSets.main, not the shadow config,
+    // so this only strips copies baked into other fat jars.
+    exclude 'mc/obliviate/util/**'
 
     // TheBase is published as a fat artifact. Strip anything Spigot `libraries:` /
     // RuntimeLibraryLoader already provides, plus unused fat-jar junk (junit/protobuf).
@@ -193,3 +251,4 @@ publishing {
         }
     }
 }
+

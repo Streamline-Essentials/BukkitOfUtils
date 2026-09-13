@@ -1,5 +1,6 @@
 package host.plas.bou.gui.editor;
 
+import host.plas.bou.utils.VersionTool;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
@@ -113,14 +114,14 @@ public final class EditorDragDrop {
     }
 
     public static void takeOneFromPlayerHand(Player player, ItemStack template) {
-        ItemStack hand = player.getInventory().getItemInMainHand();
+        ItemStack hand = VersionTool.getItemInMainHand(player);
         if (hand == null || hand.getType() == Material.AIR) {
             return;
         }
         if (template != null && hand.isSimilar(template)) {
             hand.setAmount(hand.getAmount() - 1);
             if (hand.getAmount() <= 0) {
-                player.getInventory().setItemInMainHand(null);
+                VersionTool.setItemInMainHand(player, null);
             }
         }
     }

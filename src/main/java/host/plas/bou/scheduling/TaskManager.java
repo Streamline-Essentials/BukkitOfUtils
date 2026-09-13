@@ -1,8 +1,7 @@
 package host.plas.bou.scheduling;
 
-import com.github.Anon8281.universalScheduler.foliaScheduler.FoliaScheduler;
-import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
-import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
+import host.plas.bou.libs.usched.scheduling.schedulers.TaskScheduler;
+import host.plas.bou.libs.usched.scheduling.tasks.MyScheduledTask;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.items.ItemUtils;
@@ -665,25 +664,16 @@ public class TaskManager {
                     if (scheduler == null) {
                         return Bukkit.isPrimaryThread();
                     }
-                    try {
-                        FoliaScheduler foliaScheduler = (FoliaScheduler) scheduler;
-                        if (finalE != null) {
-                            return foliaScheduler.isEntityThread(finalE);
-                        } else if (finalL != null) {
-                            return foliaScheduler.isRegionThread(finalL);
-                        }
-
-                        return foliaScheduler.isTickThread() || foliaScheduler.isGlobalThread();
-                    } catch (Throwable t) {
-                        BukkitOfUtils.getInstance().logWarning("Failed to cast scheduler to FoliaScheduler.", t);
-                        if (finalE != null) {
-                            return scheduler.isEntityThread(finalE);
-                        } else if (finalL != null) {
-                            return scheduler.isRegionThread(finalL);
-                        }
-
-                        return scheduler.isTickThread() || scheduler.isGlobalThread();
+                    // All four checks are declared on TaskScheduler, so there is nothing to
+                    // gain by casting to FoliaScheduler — and naming that class here would
+                    // force a non-Folia server to resolve Folia-only types.
+                    if (finalE != null) {
+                        return scheduler.isEntityThread(finalE);
+                    } else if (finalL != null) {
+                        return scheduler.isRegionThread(finalL);
                     }
+
+                    return scheduler.isTickThread() || scheduler.isGlobalThread();
                 },
                 Bukkit::isPrimaryThread
         );

@@ -1,5 +1,6 @@
 package host.plas.bou.gui;
 
+import host.plas.bou.compat.LegacySupport;
 import host.plas.bou.items.ItemUtils;
 import host.plas.bou.utils.ColorUtils;
 import org.bukkit.Material;
@@ -18,12 +19,38 @@ public final class GuiItems {
     private GuiItems() {
     }
 
+    /**
+     * The standard black border pane used to frame shell GUIs.
+     *
+     * <p>Returns a finished stack rather than a {@link Material} because on pre-1.13 servers
+     * the color lives in the stack's data value, not in the material — every pane color there
+     * shares the single {@code STAINED_GLASS_PANE} material. A bare material cannot carry that
+     * information, so callers that need a border pane must use this.</p>
+     *
+     * @return a black (or legacy-equivalent) filler pane
+     */
+    public static ItemStack borderPane() {
+        return cornerPane(CornerColor.BLACK);
+    }
+
+    /**
+     * Builds a filler pane in the given accent color, correct on both modern and legacy servers.
+     *
+     * @param color the accent color; {@link CornerColor#YELLOW} when {@code null}
+     * @return the colored filler pane
+     */
     public static ItemStack cornerPane(CornerColor color) {
-        return filler(color == null ? CornerColor.YELLOW.paneMaterial() : color.paneMaterial());
+        CornerColor resolved = color == null ? CornerColor.YELLOW : color;
+
+        ItemStack item = filler(resolved.paneMaterial());
+        // On pre-1.13 every pane color shares one material and is selected by data value.
+        return LegacySupport.applyLegacyData(item, resolved.legacyData());
     }
 
     public static ItemStack filler(Material material) {
-        ItemStack item = new ItemStack(material == null ? Material.BLACK_STAINED_GLASS_PANE : material);
+        ItemStack item = new ItemStack(material == null
+                ? LegacySupport.material(Material.AIR, "BLACK_STAINED_GLASS_PANE", "STAINED_GLASS_PANE")
+                : material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.setDisplayName(" ");
@@ -43,6 +70,20 @@ public final class GuiItems {
         return ItemUtils.make(material, name, colored);
     }
 
+    /**
+     * Builds a button and applies a legacy data value, for items whose color on pre-1.13
+     * servers is carried by the data value rather than the material.
+     *
+     * @param material    the button material
+     * @param name        the display name
+     * @param lore        the lore lines
+     * @param legacyData  the legacy data value to apply on legacy servers
+     * @return the built button
+     */
+    public static ItemStack button(Material material, String name, List<String> lore, int legacyData) {
+        return LegacySupport.applyLegacyData(button(material, name, lore), legacyData);
+    }
+
     public static ItemStack button(Material material, String name, String... lore) {
         if (lore == null || lore.length == 0) {
             return button(material, name, Collections.emptyList());
@@ -52,7 +93,7 @@ public final class GuiItems {
 
     public static ItemStack returnButton() {
         return button(
-                Material.OAK_DOOR,
+                LegacySupport.material(Material.CHEST, "OAK_DOOR", "WOOD_DOOR", "WOODEN_DOOR"),
                 "#FFED6A&lBack",
                 "#bdc8c9Return to the previous menu.",
                 "",
@@ -62,7 +103,7 @@ public final class GuiItems {
 
     public static ItemStack pagePreviousButton(int displayPage) {
         return button(
-                Material.OAK_BUTTON,
+                LegacySupport.material(Material.STONE_BUTTON, "OAK_BUTTON", "WOOD_BUTTON"),
                 "#FFED6APrevious Page",
                 "#bdc8c9Page " + displayPage
         );
@@ -70,7 +111,7 @@ public final class GuiItems {
 
     public static ItemStack pageNextButton(int displayPage) {
         return button(
-                Material.OAK_BUTTON,
+                LegacySupport.material(Material.STONE_BUTTON, "OAK_BUTTON", "WOOD_BUTTON"),
                 "#FFED6ANext Page",
                 "#bdc8c9Page " + displayPage
         );
@@ -104,6 +145,9 @@ public final class GuiItems {
         if (lines != null) {
             Collections.addAll(lore, lines);
         }
-        return button(Material.LIME_STAINED_GLASS_PANE, title, lore);
+        // Built from a colored pane so the lime tint survives on pre-1.13 servers,
+        // where the color is a data value rather than part of the material.
+        ItemStack base = cornerPane(CornerColor.LIME);
+        return button(base.getType(), title, lore, base.getDurability());
     }
 }

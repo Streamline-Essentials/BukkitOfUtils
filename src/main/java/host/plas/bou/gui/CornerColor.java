@@ -1,5 +1,6 @@
 package host.plas.bou.gui;
 
+import host.plas.bou.compat.LegacySupport;
 import org.bukkit.Material;
 
 import java.util.regex.Matcher;
@@ -9,40 +10,62 @@ import java.util.regex.Pattern;
  * Stained-glass corner accent colors for inventory GUIs.
  */
 public enum CornerColor {
-    WHITE(Material.WHITE_STAINED_GLASS_PANE, 0xF9, 0xFF, 0xFE),
-    ORANGE(Material.ORANGE_STAINED_GLASS_PANE, 0xF9, 0x80, 0x1D),
-    MAGENTA(Material.MAGENTA_STAINED_GLASS_PANE, 0xC7, 0x4E, 0xBD),
-    LIGHT_BLUE(Material.LIGHT_BLUE_STAINED_GLASS_PANE, 0x3A, 0xB3, 0xDA),
-    YELLOW(Material.YELLOW_STAINED_GLASS_PANE, 0xFF, 0xE7, 0x0E),
-    LIME(Material.LIME_STAINED_GLASS_PANE, 0x80, 0xC7, 0x1F),
-    PINK(Material.PINK_STAINED_GLASS_PANE, 0xF3, 0x8B, 0xAA),
-    GRAY(Material.GRAY_STAINED_GLASS_PANE, 0x9D, 0x9D, 0x97),
-    LIGHT_GRAY(Material.LIGHT_GRAY_STAINED_GLASS_PANE, 0xD0, 0xD0, 0xD0),
-    CYAN(Material.CYAN_STAINED_GLASS_PANE, 0x16, 0x9C, 0x9C),
-    PURPLE(Material.PURPLE_STAINED_GLASS_PANE, 0x89, 0x32, 0xB8),
-    BLUE(Material.BLUE_STAINED_GLASS_PANE, 0x3C, 0x44, 0xAA),
-    BROWN(Material.BROWN_STAINED_GLASS_PANE, 0x83, 0x54, 0x32),
-    GREEN(Material.GREEN_STAINED_GLASS_PANE, 0x5E, 0x7C, 0x16),
-    RED(Material.RED_STAINED_GLASS_PANE, 0xB0, 0x2E, 0x26),
-    BLACK(Material.BLACK_STAINED_GLASS_PANE, 0x1D, 0x1D, 0x21);
+    WHITE("WHITE_STAINED_GLASS_PANE", 0, 0xF9, 0xFF, 0xFE),
+    ORANGE("ORANGE_STAINED_GLASS_PANE", 1, 0xF9, 0x80, 0x1D),
+    MAGENTA("MAGENTA_STAINED_GLASS_PANE", 2, 0xC7, 0x4E, 0xBD),
+    LIGHT_BLUE("LIGHT_BLUE_STAINED_GLASS_PANE", 3, 0x3A, 0xB3, 0xDA),
+    YELLOW("YELLOW_STAINED_GLASS_PANE", 4, 0xFF, 0xE7, 0x0E),
+    LIME("LIME_STAINED_GLASS_PANE", 5, 0x80, 0xC7, 0x1F),
+    PINK("PINK_STAINED_GLASS_PANE", 6, 0xF3, 0x8B, 0xAA),
+    GRAY("GRAY_STAINED_GLASS_PANE", 7, 0x9D, 0x9D, 0x97),
+    LIGHT_GRAY("LIGHT_GRAY_STAINED_GLASS_PANE", 8, 0xD0, 0xD0, 0xD0),
+    CYAN("CYAN_STAINED_GLASS_PANE", 9, 0x16, 0x9C, 0x9C),
+    PURPLE("PURPLE_STAINED_GLASS_PANE", 10, 0x89, 0x32, 0xB8),
+    BLUE("BLUE_STAINED_GLASS_PANE", 11, 0x3C, 0x44, 0xAA),
+    BROWN("BROWN_STAINED_GLASS_PANE", 12, 0x83, 0x54, 0x32),
+    GREEN("GREEN_STAINED_GLASS_PANE", 13, 0x5E, 0x7C, 0x16),
+    RED("RED_STAINED_GLASS_PANE", 14, 0xB0, 0x2E, 0x26),
+    BLACK("BLACK_STAINED_GLASS_PANE", 15, 0x1D, 0x1D, 0x21);
 
     private static final Pattern HEX_PATTERN = Pattern.compile("(?:&#|#)([0-9A-Fa-f]{6})");
     private static final Pattern LEGACY_HEX_PATTERN = Pattern.compile("[&§]x(?:[&§][0-9A-Fa-f]){6}");
 
-    private final Material paneMaterial;
+    private final String materialName;
+    private final int legacyData;
     private final int red;
     private final int green;
     private final int blue;
 
-    CornerColor(Material paneMaterial, int red, int green, int blue) {
-        this.paneMaterial = paneMaterial;
+    CornerColor(String materialName, int legacyData, int red, int green, int blue) {
+        this.materialName = materialName;
+        this.legacyData = legacyData;
         this.red = red;
         this.green = green;
         this.blue = blue;
     }
 
+    /**
+     * Resolves the pane material for this color on the running server.
+     *
+     * <p>Materials are resolved by name rather than referenced directly, because the flattened
+     * per-color names only exist on 1.13+. Referencing them as enum constants would make this
+     * whole class fail to initialize on 1.8 with a {@link NoSuchFieldError}. On legacy servers
+     * all colors share {@code STAINED_GLASS_PANE} and are distinguished by
+     * {@link #legacyData()}.</p>
+     *
+     * @return the pane material for this server version
+     */
     public Material paneMaterial() {
-        return this.paneMaterial;
+        return LegacySupport.material(null, this.materialName, "STAINED_GLASS_PANE");
+    }
+
+    /**
+     * Returns the pre-1.13 data value that selects this color on a shared legacy material.
+     *
+     * @return the legacy damage/data value, 0-15
+     */
+    public int legacyData() {
+        return this.legacyData;
     }
 
     /**
