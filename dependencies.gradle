@@ -3,7 +3,6 @@ ext {
     // Not on Maven Central — cannot use Spigot libraries: for these.
     FRAMEWORK = [
             'gg.drak:TheBase:1.1.0',
-            'gg.drak:UniversalScheduler:1.5-SNAPSHOT',
     ]
 
     // Declared in plugin.yml and downloaded by Spigot (modern) or RuntimeLibraryLoader (legacy).

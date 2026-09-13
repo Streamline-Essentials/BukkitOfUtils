@@ -1,6 +1,6 @@
 package host.plas.bou;
 
-import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
+import host.plas.bou.libs.usched.scheduling.schedulers.TaskScheduler;
 import host.plas.bou.events.ListenerConglomerate;
 import host.plas.bou.events.callbacks.DisableCallback;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
