@@ -39,7 +39,7 @@ ext {
     FILES = [
     ]
     OTHER_PLUGINS = [
-            'me.clip:placeholderapi:2.12.2',
+            'me.clip:placeholderapi:2.12.3',
             'net.luckperms:api:5.5',
     ]
 }
