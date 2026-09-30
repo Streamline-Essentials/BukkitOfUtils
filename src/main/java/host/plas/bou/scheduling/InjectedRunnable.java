@@ -25,6 +25,28 @@ public class InjectedRunnable implements Runnable {
      * @return the task answer reference
      */
     private AtomicReference<TaskAnswer> injected;
+    /**
+     * Invoked once after every execution, after the answer has been recorded.
+     *
+     * @param onFinish the hook to set, or null for none
+     * @return the finish hook, or null
+     */
+    private volatile Runnable onFinish;
+    /**
+     * Invoked when the scheduler drops this runnable without running it, for example because
+     * the entity it was bound to was removed from the world.
+     *
+     * @param onRetire the hook to set, or null for none
+     * @return the retire hook, or null
+     */
+    private volatile Runnable onRetire;
+    /**
+     * Whether the scheduler has dropped this runnable without running it.
+     *
+     * @param retired the retired state to set
+     * @return true if this runnable was retired
+     */
+    private volatile boolean retired;
 
     /**
      * Constructs an InjectedRunnable with the given delegate runnable and initial task answer.
@@ -54,7 +76,22 @@ public class InjectedRunnable implements Runnable {
         } catch (Throwable e) {
             e.printStackTrace();
             injected.set(TaskAnswer.ERROR);
+        } finally {
+            Runnable hook = onFinish;
+            if (hook != null) hook.run();
         }
+    }
+
+    /**
+     * Marks this runnable as dropped by the scheduler: records a REJECTED answer and invokes
+     * the retire hook. Passed to entity schedulers as their "retired" callback.
+     */
+    public void retire() {
+        retired = true;
+        injected.set(TaskAnswer.REJECTED);
+
+        Runnable hook = onRetire;
+        if (hook != null) hook.run();
     }
 
     /**

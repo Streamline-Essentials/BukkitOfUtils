@@ -149,7 +149,11 @@ public class BukkitOfUtils extends BetterPlugin implements HelpfulPlugin {
      */
     @Override
     public void onBaseDisable() {
-        BStats.onDisable();
+        try {
+            BStats.onDisable();
+        } catch (Throwable t) {
+            logWarning("Failed to shut down bStats.", t);
+        }
 
         BaseManager.stop();
     }

@@ -2,13 +2,16 @@ package host.plas.bou.scheduling;
 
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.MessageUtils;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import gg.drak.thebase.async.AsyncUtils;
+import org.bukkit.plugin.Plugin;
 
 import javax.swing.*;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An abstract base class for repeating or delayed runnables managed by the TaskManager.
@@ -62,6 +65,21 @@ public abstract class BaseRunnable implements Runnable {
     private Timer timer;
 
     /**
+     * The plugin whose class defines this runnable; it is cancelled when that plugin is disabled.
+     * @return the owning plugin
+     */
+    @Setter(AccessLevel.NONE)
+    private Plugin owningPlugin;
+
+    /**
+     * Set while an execution is in progress. The timer never starts a new execution while the
+     * previous one is still running, so a run that takes longer than the period delays the next
+     * one instead of overlapping it.
+     */
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+    private final AtomicBoolean executing = new AtomicBoolean(false);
+
+    /**
      * Constructs a new BaseRunnable with the specified delay and period.
      * The runnable is automatically registered and started via TaskManager.
      *
@@ -75,6 +93,7 @@ public abstract class BaseRunnable implements Runnable {
         this.index = TaskManager.getNextIndex();
         this.paused = false;
         this.ticksLived = 0;
+        this.owningPlugin = TaskManager.findOwner(getClass());
 
         this.timer = createTimer();
 
@@ -146,8 +165,10 @@ public abstract class BaseRunnable implements Runnable {
     }
 
     /**
-     * Performs a single tick cycle. If the runnable is not paused and the tick count
-     * has reached the period, the runnable is executed asynchronously.
+     * Performs a single tick cycle. If the runnable is not paused, the tick count has reached
+     * the period and no previous execution is still running, the runnable is executed
+     * asynchronously. When the previous execution is still running, the tick count keeps
+     * growing and the runnable executes on the first tick after it finishes.
      *
      * @return a CompletableFuture that completes when the async execution finishes,
      *         or a completed future if the runnable was not executed this tick
@@ -155,12 +176,14 @@ public abstract class BaseRunnable implements Runnable {
     public CompletableFuture<Void> tick() {
         if (this.paused) return CompletableFuture.completedFuture(null);
 
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        if (this.currentTickCount >= this.period) {
+        CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
+        if (this.currentTickCount >= this.period && executing.compareAndSet(false, true)) {
             this.currentTickCount = 0;
             try {
                 future = AsyncUtils.executeAsync(this);
+                future.whenComplete((ignored, error) -> executing.set(false));
             } catch (Throwable e) {
+                executing.set(false);
                 MessageUtils.logDebug("Error while ticking runnable: " + this, e);
             }
         }

@@ -5,6 +5,7 @@ import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.compat.papi.PAPICompat;
 import host.plas.bou.events.self.plugin.PluginDisableEvent;
 import host.plas.bou.gui.screens.events.BlockRedrawEvent;
+import host.plas.bou.scheduling.TaskManager;
 import host.plas.bou.utils.DatabaseUtils;
 import host.plas.bou.utils.PluginUtils;
 import gg.drak.thebase.events.processing.BaseProcessor;
@@ -24,8 +25,8 @@ public class MainListener extends BOUListener {
     }
 
     /**
-     * Handles the custom PluginDisableEvent by flushing database and PAPI resources
-     * for the disabled plugin.
+     * Handles the custom PluginDisableEvent by cancelling the plugin's tracked tasks and
+     * flushing its database and PAPI resources.
      *
      * @param event the plugin disable event
      */
@@ -33,6 +34,7 @@ public class MainListener extends BOUListener {
     public void onPluginDisable(PluginDisableEvent event) {
         try {
             BetterPlugin plugin = event.getPlugin();
+            TaskManager.cancelOwnedBy(plugin);
             DatabaseUtils.flush(plugin);
             if (PAPICompat.isEnabled()) {
                 PAPICompat.flush(plugin);
@@ -56,14 +58,22 @@ public class MainListener extends BOUListener {
     }
 
     /**
-     * Handles the Bukkit PluginDisableEvent to shut down PAPI compatibility
-     * when PlaceholderAPI is disabled.
+     * Handles the Bukkit PluginDisableEvent: cancels tasks BukkitOfUtils tracks for plugins that
+     * do not extend {@link BetterPlugin} (those are handled after their own disable logic by the
+     * BukkitOfUtils disable event), and shuts down PAPI compatibility when PlaceholderAPI is disabled.
      *
      * @param event the Bukkit plugin disable event
      */
     @EventHandler
     public void onPluginDisable(org.bukkit.event.server.PluginDisableEvent event) {
         Plugin plugin = event.getPlugin();
+        if (! (plugin instanceof BetterPlugin)) {
+            try {
+                TaskManager.cancelOwnedBy(plugin);
+            } catch (Throwable t) {
+                BukkitOfUtils.getInstance().logWarning("Failed to cancel tasks of " + plugin.getName() + ".", t);
+            }
+        }
         if (plugin.getName().equalsIgnoreCase("PlaceholderAPI")) {
             PAPICompat.shutdown();
         }
