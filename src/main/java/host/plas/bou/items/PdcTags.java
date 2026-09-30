@@ -6,6 +6,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +28,38 @@ import java.util.List;
  * would require this class to be loaded in order to discover that it must not be loaded.</p>
  */
 public final class PdcTags {
+    /**
+     * Paper's read-only {@code ItemStack#getPersistentDataContainer()} view (1.21+), which reads a
+     * tag without the ItemMeta clone {@code getItemMeta()} makes on every call. Bound reflectively
+     * because BukkitOfUtils compiles against an API that predates it; all three are null when the
+     * server does not have it, and reads fall back to ItemMeta.
+     */
+    private static final MethodHandle VIEW_GETTER;
+    private static final MethodHandle VIEW_HAS;
+    private static final MethodHandle VIEW_GET;
+
+    static {
+        MethodHandle getter = null;
+        MethodHandle has = null;
+        MethodHandle get = null;
+        try {
+            Class<?> viewClass = Class.forName("io.papermc.paper.persistence.PersistentDataContainerView");
+            MethodHandles.Lookup lookup = MethodHandles.publicLookup();
+            getter = lookup.findVirtual(ItemStack.class, "getPersistentDataContainer", MethodType.methodType(viewClass));
+            has = lookup.findVirtual(viewClass, "has",
+                    MethodType.methodType(boolean.class, NamespacedKey.class, PersistentDataType.class));
+            get = lookup.findVirtual(viewClass, "get",
+                    MethodType.methodType(Object.class, NamespacedKey.class, PersistentDataType.class));
+        } catch (Throwable ignored) {
+            getter = null;
+            has = null;
+            get = null;
+        }
+        VIEW_GETTER = getter;
+        VIEW_HAS = has;
+        VIEW_GET = get;
+    }
+
     private PdcTags() {
     }
 
@@ -97,6 +132,18 @@ public final class PdcTags {
      */
     public static String getString(ItemStack stack, NamespacedKey key) {
         if (stack == null || key == null) return null;
+
+        if (VIEW_GETTER != null) {
+            try {
+                if (! stack.hasItemMeta()) return null;
+
+                Object view = VIEW_GETTER.invoke(stack);
+                if (! (boolean) VIEW_HAS.invoke(view, key, PersistentDataType.STRING)) return null;
+                return (String) VIEW_GET.invoke(view, key, PersistentDataType.STRING);
+            } catch (Throwable ignored) {
+                // Fall back to the ItemMeta path below.
+            }
+        }
 
         ItemMeta meta = stack.getItemMeta();
         if (meta == null) return null;
