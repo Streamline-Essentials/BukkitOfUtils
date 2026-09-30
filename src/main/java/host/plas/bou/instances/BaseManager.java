@@ -135,10 +135,21 @@ public class BaseManager {
 
     /**
      * Stops the framework by cancelling the entity lookup timer and stopping the task manager.
+     * Each step runs even if an earlier one fails, which happens when startup did not complete
+     * (for example, a runtime library failed to load and a class could not initialize).
      */
     public static void stop() {
-        EntityUtils.stop();
-        TaskManager.stop();
+        try {
+            EntityUtils.stop();
+        } catch (Throwable t) {
+            getBaseInstance().logWarning("Failed to stop entity utilities.", t);
+        }
+
+        try {
+            TaskManager.stop();
+        } catch (Throwable t) {
+            getBaseInstance().logWarning("Failed to stop the task manager.", t);
+        }
     }
 
     /**

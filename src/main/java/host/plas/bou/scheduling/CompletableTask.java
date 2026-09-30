@@ -1,15 +1,27 @@
 package host.plas.bou.scheduling;
 
+import host.plas.bou.BukkitOfUtils;
+import host.plas.bou.libs.usched.UniversalScheduler;
+import host.plas.bou.libs.usched.scheduling.schedulers.TaskScheduler;
 import host.plas.bou.libs.usched.scheduling.tasks.MyScheduledTask;
+import host.plas.bou.utils.VersionTool;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.plugin.Plugin;
 
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A task wrapper that combines a scheduled Bukkit task with a CompletableFuture,
@@ -37,7 +49,7 @@ public class CompletableTask {
      * @param cancelled the cancelled state to set
      * @return true if the task is cancelled
      */
-    private boolean cancelled;
+    private volatile boolean cancelled;
 
     /**
      * The completable future tracking task lifecycle.
@@ -56,8 +68,38 @@ public class CompletableTask {
     private ConcurrentSkipListMap<Integer, Runnable> completionRunnables;
 
     /**
+     * The plugin whose code this task runs; tasks are scheduled under this plugin and are
+     * cancelled when it is disabled.
+     *
+     * @return the owning plugin
+     */
+    @Setter(AccessLevel.NONE)
+    private Plugin owningPlugin;
+
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+    private final AtomicInteger nextCompletionKey = new AtomicInteger(0);
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+    private final Object settleLock = new Object();
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+    private volatile boolean settled;
+
+    /** Tasks that have neither run nor been cancelled yet. */
+    private static final Set<CompletableTask> PENDING = ConcurrentHashMap.newKeySet();
+    /**
+     * How often pending tasks are checked for having been cancelled outside of
+     * {@link #cancel()} (by the server on plugin disable, or through {@link #getTask()}).
+     */
+    private static final long SWEEP_PERIOD_MILLIS = 1000L;
+    private static final Object SWEEPER_LOCK = new Object();
+    private static ScheduledExecutorService sweeper;
+
+    /**
      * Constructs a CompletableTask wrapping the given scheduled task and injected runnable.
-     * Starts an async future that waits for task completion and runs completion callbacks.
+     *
+     * <p>The task completes once: after the first execution of the runnable (including the first
+     * run of a repeating task), or when it is cancelled. Completion callbacks run asynchronously
+     * on the common fork-join pool, never on the server thread, and only when the task was not
+     * cancelled. {@link #getFuture()} completes after the callbacks have run, or on cancel.</p>
      *
      * @param task             the underlying scheduled task
      * @param injectedRunnable the runnable being executed by the task
@@ -67,28 +109,21 @@ public class CompletableTask {
         this.injectedRunnable = injectedRunnable;
         this.cancelled = false;
         this.completionRunnables = new ConcurrentSkipListMap<>();
+        this.future = new CompletableFuture<>();
+        this.owningPlugin = TaskManager.findOwner(ownerSource(injectedRunnable));
 
-        this.future = CompletableFuture.runAsync(() -> {
-            boolean invalid = ! isTaskValid();
+        injectedRunnable.setOnFinish(this::settle);
+        injectedRunnable.setOnRetire(this::cancel);
 
-            while (! (isDone() || isCancelled() || isTaskCompleted() || invalid)) {
-                if (! isTaskValid()) {
-                    invalid = true;
-                    break;
-                }
+        if (task == null || task.isCancelled() || injectedRunnable.isRetired()) {
+            cancel();
+            return;
+        }
 
-                Thread.onSpinWait();
-            }
+        track(this);
 
-            if (invalid) {
-                cancel();
-                return;
-            }
-
-            if (isCancelled()) cancel();
-
-            runCompletion();
-        });
+        // The runnable may already have finished before the hook above was installed.
+        if (injectedRunnable.isDone()) settle();
     }
 
     /**
@@ -97,7 +132,7 @@ public class CompletableTask {
      * @param runnable the runnable to execute
      */
     public CompletableTask(InjectedRunnable runnable) {
-        this(TaskManager.getScheduler().runTask(runnable), runnable);
+        this(schedulerFor(runnable).runTask(runnable), runnable);
     }
 
     /**
@@ -107,7 +142,7 @@ public class CompletableTask {
      * @param delay    the delay in ticks before execution
      */
     public CompletableTask(InjectedRunnable runnable, long delay) {
-        this(TaskManager.getScheduler().runTaskLater(runnable, delay), runnable);
+        this(schedulerFor(runnable).runTaskLater(runnable, delay), runnable);
     }
 
     /**
@@ -118,7 +153,7 @@ public class CompletableTask {
      * @param period   the period in ticks between subsequent executions
      */
     public CompletableTask(InjectedRunnable runnable, long delay, long period) {
-        this(TaskManager.getScheduler().runTaskTimer(runnable, delay, period), runnable);
+        this(schedulerFor(runnable).runTaskTimer(runnable, delay, period), runnable);
     }
 
     /**
@@ -128,7 +163,7 @@ public class CompletableTask {
      * @param runnable the runnable to execute
      */
     public CompletableTask(Entity entity, InjectedRunnable runnable) {
-        this(TaskManager.getScheduler().runTask(entity, runnable), runnable);
+        this(schedulerFor(runnable).runTask(entity, runnable, runnable::retire), runnable);
     }
 
     /**
@@ -139,7 +174,7 @@ public class CompletableTask {
      * @param delay    the delay in ticks before execution
      */
     public CompletableTask(Entity entity, InjectedRunnable runnable, long delay) {
-        this(TaskManager.getScheduler().runTaskLater(entity, runnable, delay), runnable);
+        this(schedulerFor(runnable).runTaskLater(entity, runnable, runnable::retire, delay), runnable);
     }
 
     /**
@@ -151,7 +186,7 @@ public class CompletableTask {
      * @param period   the period in ticks between subsequent executions
      */
     public CompletableTask(Entity entity, InjectedRunnable runnable, long delay, long period) {
-        this(TaskManager.getScheduler().runTaskTimer(entity, runnable, delay, period), runnable);
+        this(schedulerFor(runnable).runTaskTimer(entity, runnable, runnable::retire, delay, period), runnable);
     }
 
     /**
@@ -163,7 +198,7 @@ public class CompletableTask {
      * @param runnable the runnable to execute
      */
     public CompletableTask(World world, int x, int z, InjectedRunnable runnable) {
-        this(TaskManager.getScheduler().runTask(world, x, z, runnable), runnable);
+        this(schedulerFor(runnable).runTask(world, x, z, runnable), runnable);
     }
 
     /**
@@ -173,7 +208,7 @@ public class CompletableTask {
      * @param runnable the runnable to execute
      */
     public CompletableTask(Chunk chunk, InjectedRunnable runnable) {
-        this(TaskManager.getScheduler().runTask(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable), runnable);
+        this(schedulerFor(runnable).runTask(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable), runnable);
     }
 
     /**
@@ -186,7 +221,7 @@ public class CompletableTask {
      * @param delay    the delay in ticks before execution
      */
     public CompletableTask(World world, int x, int z, InjectedRunnable runnable, long delay) {
-        this(TaskManager.getScheduler().runTaskLater(world, x, z, runnable, delay), runnable);
+        this(schedulerFor(runnable).runTaskLater(world, x, z, runnable, delay), runnable);
     }
 
     /**
@@ -197,7 +232,7 @@ public class CompletableTask {
      * @param delay    the delay in ticks before execution
      */
     public CompletableTask(Chunk chunk, InjectedRunnable runnable, long delay) {
-        this(TaskManager.getScheduler().runTaskLater(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable, delay), runnable);
+        this(schedulerFor(runnable).runTaskLater(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable, delay), runnable);
     }
 
     /**
@@ -211,7 +246,7 @@ public class CompletableTask {
      * @param period   the period in ticks between subsequent executions
      */
     public CompletableTask(World world, int x, int z, InjectedRunnable runnable, long delay, long period) {
-        this(TaskManager.getScheduler().runTaskTimer(world, x, z, runnable, delay, period), runnable);
+        this(schedulerFor(runnable).runTaskTimer(world, x, z, runnable, delay, period), runnable);
     }
 
     /**
@@ -223,7 +258,7 @@ public class CompletableTask {
      * @param period   the period in ticks between subsequent executions
      */
     public CompletableTask(Chunk chunk, InjectedRunnable runnable, long delay, long period) {
-        this(TaskManager.getScheduler().runTaskTimer(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable, delay, period), runnable);
+        this(schedulerFor(runnable).runTaskTimer(chunk.getWorld(), chunk.getX(), chunk.getZ(), runnable, delay, period), runnable);
     }
 
     /**
@@ -233,7 +268,7 @@ public class CompletableTask {
      * @param location         the target location
      */
     public CompletableTask(Entity entityToTeleport, Location location) {
-        this(TaskManager.getScheduler().teleport(entityToTeleport, location), new InjectedRunnable(() -> {})); // fix later...
+        this(entityToTeleport, new InjectedRunnable(() -> teleportNow(entityToTeleport, location)));
     }
 
     /**
@@ -258,13 +293,16 @@ public class CompletableTask {
     }
 
     /**
-     * Completes the injected runnable with the given answer.
+     * Completes the injected runnable with the given answer and completes this task, running
+     * the completion callbacks unless the task was cancelled.
      *
      * @param answer the task answer to set
      * @return the injected runnable after setting the answer
      */
     public InjectedRunnable complete(TaskAnswer answer) {
-        return getInjectedRunnable().setAnswer(answer);
+        InjectedRunnable runnable = getInjectedRunnable().setAnswer(answer);
+        settle();
+        return runnable;
     }
 
     /**
@@ -277,30 +315,39 @@ public class CompletableTask {
     }
 
     /**
-     * Runs all registered completion callbacks in priority order.
+     * Runs all registered completion callbacks in priority order on the calling thread.
+     * A callback that throws is logged and does not stop the ones after it.
      */
     public void runCompletion() {
-        getCompletionRunnables().forEach((priority, runnable) -> {
-            runnable.run();
-        });
+        getCompletionRunnables().forEach((priority, runnable) -> runCallback(runnable));
     }
 
     /**
-     * Registers a callback to run when this task completes.
+     * Registers a callback to run when this task completes. A callback registered after the task
+     * has already completed runs right away (asynchronously); one registered on a cancelled task
+     * never runs.
      *
      * @param runnable the callback to execute on completion
      * @return this CompletableTask for chaining
      */
     public CompletableTask whenComplete(Runnable runnable) {
-        getCompletionRunnables().put(getCompletionRunnables().size(), runnable);
+        if (runnable == null) return this;
 
+        synchronized (settleLock) {
+            if (! settled) {
+                getCompletionRunnables().put(nextCompletionKey.getAndIncrement(), runnable);
+                return this;
+            }
+        }
+
+        if (! isCancelled()) CompletableFuture.runAsync(() -> runCallback(runnable));
         return this;
     }
 
     /**
-     * Checks whether the underlying scheduled task has completed or been cancelled.
+     * Checks whether this task has finished: its runnable has run, or it has been cancelled.
      *
-     * @return true if the task is no longer running
+     * @return true if the task will not run for the first time anymore
      */
     public boolean isTaskCompleted() {
         if (isTaskValid()) {
@@ -308,7 +355,7 @@ public class CompletableTask {
                 cancel();
                 return true;
             }
-            return ! task.isCurrentlyRunning();
+            return isDone();
         }
 
         return false;
@@ -321,6 +368,111 @@ public class CompletableTask {
      */
     public boolean isTaskValid() {
         return task != null;
+    }
+
+    /**
+     * Marks this task complete exactly once: stops tracking it, runs the completion callbacks
+     * asynchronously, then completes {@link #getFuture()}.
+     */
+    private void settle() {
+        synchronized (settleLock) {
+            if (settled) return;
+            settled = true;
+        }
+        PENDING.remove(this);
+
+        CompletableFuture.runAsync(this::runCompletion)
+                .whenComplete((ignored, error) -> future.complete(null));
+    }
+
+    private static void runCallback(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Throwable t) {
+            BukkitOfUtils.getInstance().logWarning("A completion callback of a scheduled task threw an exception.", t);
+        }
+    }
+
+    private static void teleportNow(Entity entity, Location location) {
+        if (UniversalScheduler.isExpandedSchedulingAvailable) {
+            VersionTool.teleportAsync(entity, location);
+        } else {
+            entity.teleport(location);
+        }
+    }
+
+    /**
+     * The object whose class identifies the plugin a runnable belongs to: the caller's own
+     * runnable, not the {@link InjectedRunnable} wrapper that BukkitOfUtils puts around it.
+     */
+    private static Object ownerSource(InjectedRunnable runnable) {
+        if (runnable.getClass() == InjectedRunnable.class && runnable.getRunnable() != null) {
+            return runnable.getRunnable();
+        }
+        return runnable;
+    }
+
+    private static TaskScheduler schedulerFor(InjectedRunnable runnable) {
+        return TaskManager.schedulerFor(ownerSource(runnable));
+    }
+
+    private static void track(CompletableTask task) {
+        PENDING.add(task);
+
+        synchronized (SWEEPER_LOCK) {
+            if (sweeper != null) return;
+
+            sweeper = Executors.newSingleThreadScheduledExecutor(runnable -> {
+                Thread thread = new Thread(runnable, "BukkitOfUtils-CompletableTask-Sweeper");
+                thread.setDaemon(true);
+                return thread;
+            });
+            sweeper.scheduleWithFixedDelay(CompletableTask::sweep, SWEEP_PERIOD_MILLIS, SWEEP_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private static void sweep() {
+        for (CompletableTask task : PENDING) {
+            try {
+                if (task.settled) {
+                    PENDING.remove(task);
+                } else if (task.task == null || task.task.isCancelled()) {
+                    task.cancel();
+                }
+            } catch (Throwable t) {
+                PENDING.remove(task);
+            }
+        }
+    }
+
+    /**
+     * Cancels every pending task owned by the given plugin.
+     *
+     * @param plugin the plugin whose pending tasks to cancel
+     */
+    public static void cancelOwnedBy(Plugin plugin) {
+        if (plugin == null) return;
+
+        for (CompletableTask task : PENDING) {
+            if (task.owningPlugin == plugin) task.cancel();
+        }
+    }
+
+    /**
+     * Cancels every pending task and stops the background sweeper.
+     */
+    public static void cancelAll() {
+        for (CompletableTask task : PENDING) {
+            task.cancel();
+        }
+        PENDING.clear();
+
+        synchronized (SWEEPER_LOCK) {
+            if (sweeper != null) {
+                sweeper.shutdownNow();
+                sweeper = null;
+            }
+        }
     }
 
     /**

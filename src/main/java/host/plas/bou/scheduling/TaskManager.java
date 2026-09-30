@@ -1,5 +1,6 @@
 package host.plas.bou.scheduling;
 
+import host.plas.bou.libs.usched.UniversalScheduler;
 import host.plas.bou.libs.usched.scheduling.schedulers.TaskScheduler;
 import host.plas.bou.libs.usched.scheduling.tasks.MyScheduledTask;
 import host.plas.bou.BukkitOfUtils;
@@ -12,11 +13,16 @@ import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import gg.drak.thebase.async.AsyncTask;
 import gg.drak.thebase.async.AsyncUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -228,6 +234,13 @@ public class TaskManager {
         currentRunnables.clear();
 
         try {
+            CompletableTask.cancelAll();
+        } catch (Throwable t) {
+            BukkitOfUtils.getInstance().logWarning("Failed to cancel completable tasks during stop.", t);
+        }
+        PLUGIN_SCHEDULERS.clear();
+
+        try {
             AsyncUtils.getQueuedTasks().forEach(AsyncTask::remove);
         } catch (Throwable t) {
             BukkitOfUtils.getInstance().logWarning("Failed to clear async tasks during stop.", t);
@@ -252,6 +265,80 @@ public class TaskManager {
      */
     public static TaskScheduler getScheduler() {
         return BetterPlugin.getScheduler();
+    }
+
+    /**
+     * Schedulers for plugins other than BukkitOfUtils, keyed by plugin instance (not name, so a
+     * reloaded plugin never reuses its predecessor's scheduler). Entries are removed when the
+     * plugin is disabled.
+     */
+    private static final Map<Plugin, TaskScheduler> PLUGIN_SCHEDULERS = Collections.synchronizedMap(new IdentityHashMap<>());
+
+    /**
+     * Finds the plugin whose class loader defined the given object's class (or the given class).
+     * Lambdas and method references belong to the plugin that wrote them.
+     *
+     * @param source a runnable or other object, or a {@link Class}
+     * @return the providing plugin, or BukkitOfUtils when it cannot be determined
+     */
+    public static Plugin findOwner(Object source) {
+        if (source != null) {
+            Class<?> type = source instanceof Class ? (Class<?>) source : source.getClass();
+            try {
+                return JavaPlugin.getProvidingPlugin(type);
+            } catch (Throwable ignored) {
+                // Not loaded by a plugin class loader, or the plugin is not constructed yet.
+            }
+        }
+        return BukkitOfUtils.getInstance();
+    }
+
+    /**
+     * Gets the scheduler that registers tasks under the given plugin, so the server cancels them
+     * when that plugin is disabled. Falls back to BukkitOfUtils' scheduler for BukkitOfUtils
+     * itself and for plugins that are not enabled, which the server would refuse to schedule for.
+     *
+     * @param owner the plugin to own the tasks
+     * @return the scheduler for that plugin
+     */
+    public static TaskScheduler getScheduler(Plugin owner) {
+        if (owner == null || owner == BukkitOfUtils.getInstance() || ! owner.isEnabled()) return getScheduler();
+
+        return PLUGIN_SCHEDULERS.computeIfAbsent(owner, UniversalScheduler::getScheduler);
+    }
+
+    /**
+     * Gets the scheduler for the plugin that provides the given runnable.
+     *
+     * @param source the runnable (or other object) whose plugin should own the task
+     * @return the scheduler for the owning plugin
+     * @see #findOwner(Object)
+     */
+    public static TaskScheduler schedulerFor(Object source) {
+        return getScheduler(findOwner(source));
+    }
+
+    /**
+     * Cancels everything BukkitOfUtils tracks for the given plugin: its {@link BaseRunnable}s and
+     * its pending {@link CompletableTask}s. Tasks scheduled through the plugin's own scheduler are
+     * cancelled by the server itself.
+     *
+     * @param plugin the plugin being disabled
+     */
+    public static void cancelOwnedBy(Plugin plugin) {
+        if (plugin == null || plugin == BukkitOfUtils.getInstance()) return;
+
+        for (BaseRunnable runnable : new ArrayList<>(currentRunnables.values())) {
+            if (runnable.getOwningPlugin() != plugin) continue;
+            try {
+                runnable.cancel();
+            } catch (Throwable t) {
+                BukkitOfUtils.getInstance().logWarning("Failed to cancel runnable of " + plugin.getName() + ": " + runnable, t);
+            }
+        }
+
+        CompletableTask.cancelOwnedBy(plugin);
+        PLUGIN_SCHEDULERS.remove(plugin);
     }
 
     /**
@@ -421,7 +508,7 @@ public class TaskManager {
     public static MyScheduledTask runTask(Runnable runnable) {
         if (! isAbleToRun()) return null;
 
-        return getScheduler().runTask(runnable);
+        return schedulerFor(runnable).runTask(runnable);
     }
 
     /**
@@ -434,7 +521,7 @@ public class TaskManager {
     public static MyScheduledTask runTaskLater(Runnable runnable, long delay) {
         if (! isAbleToRun()) return null;
 
-        return getScheduler().runTaskLater(runnable, delay);
+        return schedulerFor(runnable).runTaskLater(runnable, delay);
     }
 
     /**
@@ -448,7 +535,7 @@ public class TaskManager {
     public static MyScheduledTask runTaskTimer(Runnable runnable, long delay, long period) {
         if (! isAbleToRun()) return null;
 
-        return getScheduler().runTaskTimer(runnable, delay, period);
+        return schedulerFor(runnable).runTaskTimer(runnable, delay, period);
     }
 
     /**
@@ -461,7 +548,7 @@ public class TaskManager {
     public static MyScheduledTask runTask(Entity entity, Runnable runnable) {
         if (! isAbleToRun()) return null;
 
-        return getScheduler().runTask(entity, runnable);
+        return schedulerFor(runnable).runTask(entity, runnable);
     }
 
     /**
@@ -475,7 +562,7 @@ public class TaskManager {
     public static MyScheduledTask runTaskLater(Entity entity, Runnable runnable, long delay) {
         if (! isAbleToRun()) return null;
 
-        return getScheduler().runTaskLater(entity, runnable, delay);
+        return schedulerFor(runnable).runTaskLater(entity, runnable, delay);
     }
 
     /**
@@ -490,7 +577,7 @@ public class TaskManager {
     public static MyScheduledTask runTaskTimer(Entity entity, Runnable runnable, long delay, long period) {
         if (! isAbleToRun()) return null;
 
-        return getScheduler().runTaskTimer(entity, runnable, delay, period);
+        return schedulerFor(runnable).runTaskTimer(entity, runnable, delay, period);
     }
 
     /**
@@ -505,7 +592,7 @@ public class TaskManager {
     public static MyScheduledTask runTask(World world, int x, int z, Runnable runnable) {
         if (! isAbleToRun()) return null;
 
-        return getScheduler().runTask(world, x, z, runnable);
+        return schedulerFor(runnable).runTask(world, x, z, runnable);
     }
 
     /**
@@ -534,7 +621,7 @@ public class TaskManager {
     public static MyScheduledTask runTaskLater(World world, int x, int z, Runnable runnable, long delay) {
         if (! isAbleToRun()) return null;
 
-        return getScheduler().runTaskLater(world, x, z, runnable, delay);
+        return schedulerFor(runnable).runTaskLater(world, x, z, runnable, delay);
     }
 
     /**
@@ -565,7 +652,7 @@ public class TaskManager {
     public static MyScheduledTask runTaskTimer(World world, int x, int z, Runnable runnable, long delay, long period) {
         if (! isAbleToRun()) return null;
 
-        return getScheduler().runTaskTimer(world, x, z, runnable, delay, period);
+        return schedulerFor(runnable).runTaskTimer(world, x, z, runnable, delay, period);
     }
 
     /**

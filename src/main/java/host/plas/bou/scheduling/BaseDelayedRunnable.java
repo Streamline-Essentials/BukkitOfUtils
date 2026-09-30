@@ -1,9 +1,13 @@
 package host.plas.bou.scheduling;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * An abstract runnable that executes once after a specified delay and then cancels itself.
  */
 public abstract class BaseDelayedRunnable extends BaseRunnable {
+    private final AtomicBoolean fired = new AtomicBoolean(false);
+
     /**
      * Constructs a new BaseDelayedRunnable with the specified delay.
      *
@@ -15,9 +19,14 @@ public abstract class BaseDelayedRunnable extends BaseRunnable {
 
     @Override
     public void run() {
-        runDelayed();
+        // The timer can still fire between the first run starting and cancel() taking effect.
+        if (! fired.compareAndSet(false, true)) return;
 
-        this.cancel();
+        try {
+            runDelayed();
+        } finally {
+            this.cancel();
+        }
     }
 
     /**

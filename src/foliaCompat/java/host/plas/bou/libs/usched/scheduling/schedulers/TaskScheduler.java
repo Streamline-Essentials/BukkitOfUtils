@@ -192,6 +192,49 @@ public interface TaskScheduler {
     }
 
     /**
+     * Runs a task on the entity's thread. If the entity is removed before the task runs, the
+     * task is dropped and {@code retired} runs instead; on platforms without entity schedulers
+     * the task always runs and {@code retired} is never called.
+     *
+     * @param entity   the entity context
+     * @param runnable the work to run
+     * @param retired  run instead of {@code runnable} if the entity is removed first, or null
+     * @return a handle to the scheduled task; already cancelled if the entity was already removed
+     */
+    default MyScheduledTask runTask(Entity entity, Runnable runnable, Runnable retired) {
+        return runTask(entity, runnable);
+    }
+
+    /**
+     * Runs a task on the entity's thread after a delay.
+     *
+     * @param entity   the entity context
+     * @param runnable the work to run
+     * @param retired  run instead of {@code runnable} if the entity is removed first, or null
+     * @param delay    delay in ticks
+     * @return a handle to the scheduled task; already cancelled if the entity was already removed
+     * @see #runTask(Entity, Runnable, Runnable)
+     */
+    default MyScheduledTask runTaskLater(Entity entity, Runnable runnable, Runnable retired, long delay) {
+        return runTaskLater(entity, runnable, delay);
+    }
+
+    /**
+     * Runs a repeating task on the entity's thread.
+     *
+     * @param entity   the entity context
+     * @param runnable the work to run
+     * @param retired  run when the entity is removed and the task stops, or null
+     * @param delay    initial delay in ticks
+     * @param period   period in ticks
+     * @return a handle to the scheduled task; already cancelled if the entity was already removed
+     * @see #runTask(Entity, Runnable, Runnable)
+     */
+    default MyScheduledTask runTaskTimer(Entity entity, Runnable runnable, Runnable retired, long delay, long period) {
+        return runTaskTimer(entity, runnable, delay, period);
+    }
+
+    /**
      * @param world    the world containing the region
      * @param x        chunk X
      * @param z        chunk Z

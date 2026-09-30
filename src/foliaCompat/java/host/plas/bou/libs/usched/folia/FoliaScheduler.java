@@ -1,10 +1,12 @@
 package host.plas.bou.libs.usched.folia;
 
 import host.plas.bou.libs.usched.scheduling.schedulers.TaskScheduler;
+import host.plas.bou.libs.usched.scheduling.tasks.CancelledScheduledTask;
 import host.plas.bou.libs.usched.scheduling.tasks.MyScheduledTask;
 import io.papermc.paper.threadedregions.scheduler.AsyncScheduler;
 import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
 import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -123,20 +125,50 @@ public class FoliaScheduler implements TaskScheduler {
 
     @Override
     public MyScheduledTask runTask(Entity entity, Runnable runnable) {
-        return new FoliaScheduledTask(entity.getScheduler().run(plugin, task -> runnable.run(), null));
+        return runTask(entity, runnable, null);
     }
 
     @Override
     public MyScheduledTask runTaskLater(Entity entity, Runnable runnable, long delay) {
-        if (delay <= 0) return runTask(entity, runnable);
-
-        return new FoliaScheduledTask(entity.getScheduler().runDelayed(plugin, task -> runnable.run(), null, delay));
+        return runTaskLater(entity, runnable, null, delay);
     }
 
     @Override
     public MyScheduledTask runTaskTimer(Entity entity, Runnable runnable, long delay, long period) {
-        return new FoliaScheduledTask(entity.getScheduler().runAtFixedRate(plugin, task -> runnable.run(), null,
-                getOneIfNotPositive(delay), getOneIfNotPositive(period)));
+        return runTaskTimer(entity, runnable, null, delay, period);
+    }
+
+    @Override
+    public MyScheduledTask runTask(Entity entity, Runnable runnable, Runnable retired) {
+        return wrapEntityTask(entity.getScheduler().run(plugin, task -> runnable.run(), retired), retired);
+    }
+
+    @Override
+    public MyScheduledTask runTaskLater(Entity entity, Runnable runnable, Runnable retired, long delay) {
+        if (delay <= 0) return runTask(entity, runnable, retired);
+
+        return wrapEntityTask(entity.getScheduler().runDelayed(plugin, task -> runnable.run(), retired, delay), retired);
+    }
+
+    @Override
+    public MyScheduledTask runTaskTimer(Entity entity, Runnable runnable, Runnable retired, long delay, long period) {
+        return wrapEntityTask(entity.getScheduler().runAtFixedRate(plugin, task -> runnable.run(), retired,
+                getOneIfNotPositive(delay), getOneIfNotPositive(period)), retired);
+    }
+
+    /**
+     * An entity scheduler returns null instead of a task when the entity has already been
+     * removed; the work is dropped and its retired callback is not called by the server.
+     *
+     * @param task    the task returned by the entity scheduler, possibly null
+     * @param retired the retired callback to run when the task was refused, or null
+     * @return a handle for the task, or a cancelled handle when it was refused
+     */
+    private MyScheduledTask wrapEntityTask(ScheduledTask task, Runnable retired) {
+        if (task != null) return new FoliaScheduledTask(task);
+
+        if (retired != null) retired.run();
+        return new CancelledScheduledTask(plugin);
     }
 
     @Override
@@ -220,7 +252,7 @@ public class FoliaScheduler implements TaskScheduler {
 
     @Override
     public MyScheduledTask teleport(Entity entity, Location location) {
-        return new FoliaScheduledTask(entity.getScheduler().run(plugin,
-                task -> entity.teleportAsync(location), null));
+        return wrapEntityTask(entity.getScheduler().run(plugin,
+                task -> entity.teleportAsync(location), null), null);
     }
 }
