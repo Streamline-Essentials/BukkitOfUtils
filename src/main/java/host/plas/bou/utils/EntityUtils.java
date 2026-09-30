@@ -43,28 +43,121 @@ public class EntityUtils {
      * The cache of entities indexed by their UUID string, with a 1-second expiration.
      *
      * @param cachedEntities the entity cache to set
-     * @return the entity cache
      */
-    @Getter @Setter
+    @Setter
     private static Cache<String, WeakReference<Entity>> cachedEntities = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofSeconds(1))
             .build()
             ;
 
     /**
-     * The periodic timer responsible for refreshing the entity cache.
-     *
-     * @param lookupTimer the entity lookup timer to set
-     * @return the entity lookup timer
+     * How long the lookup timer keeps refreshing the cache after the cache was last read.
+     * Once this passes with no reads, the timer cancels itself, so an idle server does no entity scanning.
      */
-    @Getter @Setter
-    private static EntityLookupTimer lookupTimer;
+    public static final long CACHE_IDLE_MILLIS = 30_000L;
 
     /**
-     * Initializes the entity lookup timer for periodic entity cache updates.
+     * The last time (epoch millis) the entity cache was read.
+     */
+    private static volatile long lastCacheRead = 0L;
+
+    /**
+     * Whether the lookup timer may be started. False before {@link #init()} and after {@link #stop()},
+     * so a late read during shutdown cannot restart the timer.
+     */
+    private static volatile boolean enabled = false;
+
+    /**
+     * Guards starting and stopping {@link #lookupTimer}.
+     */
+    private static final Object TIMER_LOCK = new Object();
+
+    /**
+     * The periodic timer responsible for refreshing the entity cache.
+     * It is null while nothing is reading the cache; it is started by the first read
+     * and cancels itself after {@link #CACHE_IDLE_MILLIS} without reads.
+     *
+     * @return the entity lookup timer, or null if it is not running
+     */
+    @Getter
+    private static volatile EntityLookupTimer lookupTimer;
+
+    /**
+     * Allows the entity lookup timer to be started. The timer itself is started lazily,
+     * the first time something reads the entity cache.
      */
     public static void init() {
-        lookupTimer = new EntityLookupTimer();
+        enabled = true;
+    }
+
+    /**
+     * Stops the entity lookup timer and prevents it from being started again.
+     */
+    public static void stop() {
+        synchronized (TIMER_LOCK) {
+            enabled = false;
+            if (lookupTimer != null) {
+                lookupTimer.cancel();
+                lookupTimer = null;
+            }
+        }
+        clearCache();
+    }
+
+    /**
+     * Gets the cache of entities indexed by their UUID string. Reading the cache marks it as in use
+     * and starts the lookup timer if it is not running, so the cache is only kept filled while
+     * something actually reads it.
+     *
+     * <p>A read that starts the timer sees whatever the cache holds at that moment (usually nothing);
+     * the first refresh is scheduled immediately and lands shortly after.</p>
+     *
+     * @return the entity cache
+     */
+    public static Cache<String, WeakReference<Entity>> getCachedEntities() {
+        lastCacheRead = System.currentTimeMillis();
+        ensureLookupTimer();
+        return cachedEntities;
+    }
+
+    /**
+     * Whether the entity cache has been read within {@link #CACHE_IDLE_MILLIS}.
+     *
+     * @return true if something is using the cache
+     */
+    public static boolean isCacheInUse() {
+        return System.currentTimeMillis() - lastCacheRead <= CACHE_IDLE_MILLIS;
+    }
+
+    /**
+     * Starts the lookup timer if it is enabled and not already running.
+     */
+    private static void ensureLookupTimer() {
+        EntityLookupTimer timer = lookupTimer;
+        if (timer != null && ! timer.isCancelled()) return;
+
+        synchronized (TIMER_LOCK) {
+            if (! enabled) return;
+            if (lookupTimer != null && ! lookupTimer.isCancelled()) return;
+
+            lookupTimer = new EntityLookupTimer();
+        }
+    }
+
+    /**
+     * Cancels the given lookup timer because the cache went idle, and drops the cached entities.
+     *
+     * @param timer the timer that detected the idle cache
+     */
+    private static void stopIdleLookupTimer(EntityLookupTimer timer) {
+        synchronized (TIMER_LOCK) {
+            // A read may have landed between the idle check and acquiring the lock.
+            if (isCacheInUse()) return;
+
+            timer.cancel();
+            if (lookupTimer == timer) lookupTimer = null;
+        }
+        clearCache();
     }
 
     /**
@@ -74,7 +167,8 @@ public class EntityUtils {
      * @return true if the entity is in the cache
      */
     public static boolean containsValue(Entity entity) {
-        return cachedEntities.asMap().containsValue(entity);
+        if (entity == null) return false;
+        return getCachedEntities().asMap().values().stream().anyMatch(ref -> ref.get() == entity);
     }
 
     /**
@@ -84,7 +178,7 @@ public class EntityUtils {
      * @return true if an entry with the given UUID exists in the cache
      */
     public static boolean containsKey(String uniqueId) {
-        return cachedEntities.asMap().containsKey(uniqueId);
+        return getCachedEntities().asMap().containsKey(uniqueId);
     }
 
     /**
@@ -94,11 +188,11 @@ public class EntityUtils {
      * @param entity a weak reference to the entity to cache
      */
     public static void cacheEntityAlreadyInSync(WeakReference<Entity> entity) {
-        if (entity == null || entity.get() == null) return;
-        if (! entity.get().isValid()) return;
-        if (containsKey(entity.get().getUniqueId().toString())) return;
+        Entity e = entity == null ? null : entity.get();
+        if (e == null) return;
+        if (! e.isValid()) return;
 
-        cachedEntities.put(entity.get().getUniqueId().toString(), entity);
+        cachedEntities.asMap().putIfAbsent(e.getUniqueId().toString(), entity);
     }
 
     /**
@@ -128,7 +222,9 @@ public class EntityUtils {
      * Clears the entity cache and re-collects all entities from loaded worlds.
      */
     public static void tickCache() {
-        clearCache();
+        // On non-Folia the cache is swapped in one main-thread task (see collectEntities),
+        // so async readers never observe an empty cache between clear and refill.
+        if (ClassHelper.isFolia()) clearCache();
         collectEntities();
     }
 
@@ -182,7 +278,16 @@ public class EntityUtils {
                 }
             } else {
                 TaskManager.runTask(() -> {
-                    getEntitiesBukkit().values().forEach(EntityUtils::cacheEntity);
+                    // Entities returned by World#getEntities are valid, so they go straight into
+                    // a plain map without the isValid/containsKey checks of cacheEntity.
+                    Map<String, WeakReference<Entity>> fresh = new HashMap<>();
+                    for (World world : Bukkit.getWorlds()) {
+                        for (Entity entity : world.getEntities()) {
+                            fresh.put(entity.getUniqueId().toString(), new WeakReference<>(entity));
+                        }
+                    }
+                    cachedEntities.invalidateAll();
+                    cachedEntities.putAll(fresh);
                 });
             }
         } catch (Exception e) {
@@ -250,7 +355,9 @@ public class EntityUtils {
     public static void collectEntitiesThenDo(Consumer<Entity> consumer) {
         TaskManager.runTask(() -> {
             getEntities(true).forEach((s, entity) -> {
-                TaskManager.runTask(entity.get(), () -> consumer.accept(entity.get()));
+                Entity e = entity.get();
+                if (e == null) return;
+                TaskManager.runTask(e, () -> consumer.accept(e));
             });
         });
     }
@@ -277,11 +384,9 @@ public class EntityUtils {
     public static void collectLivingEntitiesThenDo(Consumer<LivingEntity> consumer) {
         TaskManager.runTask(() -> {
             getEntities(true).forEach((s, entity) -> {
-                TaskManager.runTask(entity.get(), () -> {
-                    if (entity instanceof LivingEntity) {
-                        consumer.accept((LivingEntity) entity);
-                    }
-                });
+                Entity e = entity.get();
+                if (! (e instanceof LivingEntity)) return;
+                TaskManager.runTask(e, () -> consumer.accept((LivingEntity) e));
             });
         });
     }
@@ -360,7 +465,8 @@ public class EntityUtils {
     }
 
     /**
-     * A periodic timer that refreshes the entity cache at a configurable frequency.
+     * A periodic timer that refreshes the entity cache at a configurable frequency while the cache
+     * is being read, and cancels itself once the cache has gone unread for {@link #CACHE_IDLE_MILLIS}.
      */
     public static class EntityLookupTimer extends BaseRunnable {
         /**
@@ -374,6 +480,11 @@ public class EntityUtils {
         public void run() {
             try {
                 if (isCancelled()) return;
+
+                if (! isCacheInUse()) {
+                    stopIdleLookupTimer(this);
+                    return;
+                }
 
                 tickCache();
                 if (getPeriod() != BaseManager.getBaseConfig().getEntityCollectionFrequency()) setPeriod(BaseManager.getBaseConfig().getEntityCollectionFrequency());

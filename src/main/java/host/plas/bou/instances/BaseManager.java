@@ -137,7 +137,7 @@ public class BaseManager {
      * Stops the framework by cancelling the entity lookup timer and stopping the task manager.
      */
     public static void stop() {
-        EntityUtils.getLookupTimer().cancel();
+        EntityUtils.stop();
         TaskManager.stop();
     }
 
