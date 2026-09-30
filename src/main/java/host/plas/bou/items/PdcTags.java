@@ -8,6 +8,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The single place in BukkitOfUtils where the persistent data container API is touched.
@@ -29,14 +31,34 @@ public final class PdcTags {
     }
 
     /**
-     * Creates a namespaced key owned by the given plugin.
+     * Upper bound on {@link #KEYS}. Plugins normally use a small fixed set of tag names, but a caller
+     * building key names from dynamic data must not be able to grow the cache without limit; past
+     * this size, keys are still created, just not cached.
+     */
+    private static final int MAX_CACHED_KEYS = 4096;
+
+    /**
+     * Namespaced keys by owning plugin name and key name. Item tag reads run on hot paths
+     * (inventory clicks, per-item checks), and constructing a key validates and lowercases both
+     * parts every time, so each distinct key is built once.
+     */
+    private static final Map<String, NamespacedKey> KEYS = new ConcurrentHashMap<>();
+
+    /**
+     * Returns the namespaced key owned by the given plugin.
      *
      * @param plugin the owning plugin
      * @param key    the key name
      * @return the namespaced key
      */
     public static NamespacedKey key(JavaPlugin plugin, String key) {
-        return new NamespacedKey(plugin, key);
+        String cacheKey = plugin.getName() + '\0' + key;
+        NamespacedKey cached = KEYS.get(cacheKey);
+        if (cached != null) return cached;
+
+        NamespacedKey created = new NamespacedKey(plugin, key);
+        if (KEYS.size() < MAX_CACHED_KEYS) KEYS.putIfAbsent(cacheKey, created);
+        return created;
     }
 
     /**

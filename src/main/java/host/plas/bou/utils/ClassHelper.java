@@ -58,8 +58,19 @@ public class ClassHelper {
      * @return true if the server is running Folia
      */
     public static boolean isFolia() {
-        return hasClass("io.papermc.paper.threadedregions.RegionizedServer");
+        Boolean folia = isFolia;
+        if (folia == null) {
+            folia = hasClass("io.papermc.paper.threadedregions.RegionizedServer");
+            isFolia = folia;
+        }
+        return folia;
     }
+
+    /**
+     * Cached result of {@link #isFolia()}. The server platform cannot change at runtime, and the check
+     * sits on per-entity and per-task paths, so it is resolved once instead of per call.
+     */
+    private static volatile Boolean isFolia;
 
     /**
      * Checks whether the server is running Paper by looking for the Paper-specific class.
