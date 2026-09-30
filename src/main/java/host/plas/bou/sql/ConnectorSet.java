@@ -122,7 +122,7 @@ public class ConnectorSet {
         if (type == null) return "";
         switch (type) {
             case MYSQL:
-                return appendMysqlParams(getUri());
+                return appendMysqlParams(getUri(), isLoopbackHost(host));
             case SQLITE:
                 if (sqliteFolder == null || sqliteFileName == null || sqliteFileName.isBlank()) {
                     return type.getUrlPrefix();
@@ -155,7 +155,27 @@ public class ConnectorSet {
         return type == DatabaseType.SQLITE && sqliteFileName != null && !sqliteFileName.isBlank();
     }
 
-    private static String appendMysqlParams(String jdbcUrl) {
+    /**
+     * Whether the host is this machine, where traffic cannot be intercepted on the network.
+     *
+     * @param host the configured host
+     * @return true for localhost and loopback addresses
+     */
+    public static boolean isLoopbackHost(@Nullable String host) {
+        if (host == null) return false;
+        String h = host.trim().toLowerCase(java.util.Locale.ROOT);
+        if (h.startsWith("[") && h.endsWith("]")) h = h.substring(1, h.length() - 1);
+        return h.equals("localhost") || h.startsWith("127.") || h.equals("::1") || h.equals("0:0:0:0:0:0:0:1");
+    }
+
+    /**
+     * Adds connection defaults unless the URL already sets them. SSL is left to the driver's
+     * default ({@code sslMode=PREFERRED}: encrypted when the server supports it). Public key
+     * retrieval sends the server's RSA key over a possibly unencrypted connection, so it is only
+     * enabled for loopback hosts; remote servers using {@code caching_sha2_password} without SSL
+     * need {@code allowPublicKeyRetrieval=true} in the database name/URL parameters to opt in.
+     */
+    private static String appendMysqlParams(String jdbcUrl, boolean loopback) {
         if (jdbcUrl == null || jdbcUrl.isBlank()) return "";
         StringBuilder url = new StringBuilder(jdbcUrl);
         if (!jdbcUrl.contains("?")) {
@@ -166,11 +186,7 @@ public class ConnectorSet {
         if (!jdbcUrl.contains("autoReconnect=")) {
             url.append("autoReconnect=true&");
         }
-        if (!jdbcUrl.contains("useSSL=")) {
-            // Keep older MySQL drivers happy without forcing SSL for local/plugin use.
-            url.append("useSSL=false&");
-        }
-        if (!jdbcUrl.contains("allowPublicKeyRetrieval=")) {
+        if (loopback && !jdbcUrl.contains("allowPublicKeyRetrieval=")) {
             url.append("allowPublicKeyRetrieval=true&");
         }
         // Trim trailing separator
