@@ -361,18 +361,39 @@ public class EntityUtils {
      * @return a map of entity UUID strings to weak entity references
      */
     public static ConcurrentSkipListMap<String, WeakReference<Entity>> getEntities(boolean isInSync) {
-        ConcurrentSkipListMap<String, WeakReference<Entity>> entities = new ConcurrentSkipListMap<>();
-        if (ClassHelper.isFolia()) {
-            entities.putAll(getCachedEntities().asMap());
-        } else {
-            if (isInSync) {
-                entities.putAll(getEntitiesBukkit());
-            } else {
-                entities.putAll(getCachedEntities().asMap());
+        if (! ClassHelper.isFolia() && isInSync) return getEntitiesBukkit();
+
+        return new ConcurrentSkipListMap<>(getCachedEntities().asMap());
+    }
+
+    /**
+     * Visits every entity in every loaded world directly, without building an intermediate map.
+     * Must be called from the main thread on a non-Folia server. Each visit is isolated, so an
+     * exception thrown for one entity is logged and does not stop the remaining entities.
+     *
+     * @param consumer the consumer to apply to each entity
+     */
+    private static void forEachEntityInSync(Consumer<Entity> consumer) {
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                acceptIsolated(consumer, entity);
             }
         }
+    }
 
-        return entities;
+    /**
+     * Applies the consumer to the entity, logging rather than propagating any exception it throws.
+     *
+     * @param consumer the consumer to apply
+     * @param entity   the entity to pass to the consumer
+     * @param <E>      the entity type
+     */
+    private static <E extends Entity> void acceptIsolated(Consumer<E> consumer, E entity) {
+        try {
+            consumer.accept(entity);
+        } catch (Throwable e) {
+            BukkitOfUtils.getInstance().logWarning("An error occurred while processing an entity.", e);
+        }
     }
 
     /**
@@ -391,6 +412,13 @@ public class EntityUtils {
      */
     public static void collectEntitiesThenDo(Consumer<Entity> consumer) {
         runWhenEntitiesReadable(() -> {
+            // Off Folia this already runs on the main thread, which owns every entity, so each
+            // entity is visited inline rather than through a scheduled task of its own.
+            if (! ClassHelper.isFolia()) {
+                forEachEntityInSync(consumer);
+                return;
+            }
+
             getEntities(true).forEach((s, entity) -> {
                 Entity e = entity.get();
                 if (e == null) return;
@@ -406,6 +434,15 @@ public class EntityUtils {
      */
     public static void collectEntitiesThenDoSet(Consumer<Collection<Entity>> consumer) {
         runWhenEntitiesReadable(() -> {
+            if (! ClassHelper.isFolia()) {
+                List<Entity> entities = new ArrayList<>();
+                for (World world : Bukkit.getWorlds()) {
+                    entities.addAll(world.getEntities());
+                }
+                consumer.accept(entities);
+                return;
+            }
+
             consumer.accept(getEntities(true).values().stream()
                     .map(WeakReference::get)
                     .filter(Objects::nonNull)
@@ -420,6 +457,15 @@ public class EntityUtils {
      */
     public static void collectLivingEntitiesThenDo(Consumer<LivingEntity> consumer) {
         runWhenEntitiesReadable(() -> {
+            if (! ClassHelper.isFolia()) {
+                for (World world : Bukkit.getWorlds()) {
+                    for (LivingEntity entity : world.getLivingEntities()) {
+                        acceptIsolated(consumer, entity);
+                    }
+                }
+                return;
+            }
+
             getEntities(true).forEach((s, entity) -> {
                 Entity e = entity.get();
                 if (! (e instanceof LivingEntity)) return;
@@ -436,6 +482,15 @@ public class EntityUtils {
      */
     public static void collectEntitiesInWorldThenDoSet(String worldName, Consumer<Collection<Entity>> consumer) {
         runWhenEntitiesReadable(() -> {
+            if (! ClassHelper.isFolia()) {
+                List<Entity> entities = new ArrayList<>();
+                for (World world : Bukkit.getWorlds()) {
+                    if (world.getName().equalsIgnoreCase(worldName)) entities.addAll(world.getEntities());
+                }
+                consumer.accept(entities);
+                return;
+            }
+
             consumer.accept(getEntities(true).values().stream()
                     .map(WeakReference::get)
                     .filter(Objects::nonNull)
@@ -524,7 +579,8 @@ public class EntityUtils {
                 }
 
                 tickCache();
-                if (getPeriod() != BaseManager.getBaseConfig().getEntityCollectionFrequency()) setPeriod(BaseManager.getBaseConfig().getEntityCollectionFrequency());
+                long frequency = BaseManager.getBaseConfig().getEntityCollectionFrequency();
+                if (getPeriod() != frequency) setPeriod(frequency);
             } catch (Exception e) {
                 BukkitOfUtils.getInstance().logWarning("An error occurred while ticking the entity cache.", e);
             }
