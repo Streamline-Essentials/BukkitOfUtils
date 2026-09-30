@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import host.plas.bou.BetterPlugin;
 import host.plas.bou.instances.BaseManager;
 import host.plas.bou.utils.DatabaseUtils;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -36,8 +37,14 @@ import java.util.function.Consumer;
 @Getter
 @Setter
 public abstract class DBOperator implements Comparable<DBOperator> {
-    /** The cooldown period in milliseconds between shutdown checks (2 seconds). */
+    /** The cooldown period in milliseconds used by {@link #awaitShutdown(Consumer)} (2 seconds). */
     public static final long COOLDOWN_MILLIS = 1000L * 2;
+
+    /**
+     * The longest {@link #shutdown()} waits for borrowed connections to be returned before the pool
+     * closes them. It only waits while connections are actually in use.
+     */
+    public static final long SHUTDOWN_ACTIVE_WAIT_MILLIS = 1000L * 5;
 
     private static final Consumer<PreparedStatement> NO_PARAMS = stmt -> {
     };
@@ -108,6 +115,15 @@ public abstract class DBOperator implements Comparable<DBOperator> {
     private Date lastConnection;
 
     /**
+     * Whether {@link #shutdown()} has run. A shut-down operator never reopens its pool on its own;
+     * only an explicit {@link #buildDataSource()} or {@link #ensureUsable()} reopens it.
+     *
+     * @return true if this operator has been shut down
+     */
+    @Setter(AccessLevel.NONE)
+    private volatile boolean shutDown;
+
+    /**
      * Constructs a new DBOperator with the given connector set and plugin.
      * Automatically builds the data source and registers with DatabaseUtils.
      *
@@ -160,12 +176,27 @@ public abstract class DBOperator implements Comparable<DBOperator> {
     }
 
     /**
-     * Builds and configures a HikariCP data source based on the connector set configuration.
-     * Configures connection pooling, timeouts, and driver settings for the appropriate database type.
+     * Builds and configures a HikariCP data source based on the connector set configuration,
+     * replacing (and closing) any pool this operator already had. Reopens an operator that was
+     * shut down and registers it again, so the next plugin disable closes the new pool too.
      *
      * @return the configured HikariDataSource, or {@code null} if construction fails
      */
-    public HikariDataSource buildDataSource() {
+    public synchronized HikariDataSource buildDataSource() {
+        if (shutDown) {
+            shutDown = false;
+            register();
+        }
+
+        HikariDataSource previous = this.dataSource;
+        HikariDataSource built = createDataSource();
+        if (previous != null && previous != built && ! previous.isClosed()) {
+            closeQuietly(previous);
+        }
+        return built;
+    }
+
+    private HikariDataSource createDataSource() {
         if (connectorSet == null || connectorSet.getType() == null) {
             setUnusable();
             if (pluginUser != null) {
@@ -211,6 +242,7 @@ public abstract class DBOperator implements Comparable<DBOperator> {
             setUnusable();
             if (pluginUser != null) {
                 pluginUser.logSevereWithInfo("Failed to build data source for " + getPrettyName() + "!", t);
+                logPublicKeyRetrievalHint(t);
             }
             return null;
         }
@@ -247,7 +279,8 @@ public abstract class DBOperator implements Comparable<DBOperator> {
     }
 
     /**
-     * Borrows a database connection from the pool.
+     * Borrows a database connection from the pool, rebuilding the pool if it has failed or been
+     * closed. Returns null once this operator has been shut down.
      *
      * <p>Callers <strong>must</strong> close the returned connection (try-with-resources).</p>
      *
@@ -255,21 +288,55 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      */
     public Connection getConnection() {
         try {
-            if (!isPoolOpen()) {
-                dataSource = buildDataSource();
-            }
-            if (dataSource == null || dataSource.isClosed()) {
+            HikariDataSource source = openPool();
+            if (source == null) {
                 return null;
             }
 
-            Connection connection = dataSource.getConnection();
+            Connection connection = source.getConnection();
             updateLastConnection();
             return connection;
         } catch (Exception e) {
             if (pluginUser != null) {
                 pluginUser.logSevereWithInfo("Failed to get connection!", e);
+                logPublicKeyRetrievalHint(e);
             }
             return null;
+        }
+    }
+
+    /**
+     * Returns the open pool, rebuilding it when it is missing or closed. Never reopens a pool
+     * after {@link #shutdown()}, and never lets two threads build a pool at the same time.
+     *
+     * @return the open data source, or null if it is shut down or cannot be built
+     */
+    private HikariDataSource openPool() {
+        if (isPoolOpen()) return dataSource;
+
+        synchronized (this) {
+            if (shutDown) return null;
+            if (isPoolOpen()) return dataSource;
+
+            HikariDataSource built = buildDataSource();
+            return built == null || built.isClosed() ? null : built;
+        }
+    }
+
+    /**
+     * Explains how to opt in when a remote MySQL server rejects the login because public key
+     * retrieval is off (only enabled automatically for loopback hosts).
+     */
+    private void logPublicKeyRetrievalHint(Throwable error) {
+        if (pluginUser == null) return;
+        for (Throwable t = error; t != null; t = t.getCause()) {
+            String message = t.getMessage();
+            if (message != null && message.contains("Public Key Retrieval is not allowed")) {
+                pluginUser.logWarning("The MySQL server requires public key retrieval, which is only enabled automatically for "
+                        + "localhost. Enable SSL on the server, or append '?allowPublicKeyRetrieval=true' to the database "
+                        + "name if the network between this server and MySQL is trusted.");
+                return;
+            }
         }
     }
 
@@ -297,11 +364,12 @@ public abstract class DBOperator implements Comparable<DBOperator> {
     }
 
     /**
-     * Shuts down this database operator by waiting for the cooldown period to elapse
-     * and then performing the threaded shutdown procedure.
+     * Shuts down this database operator: stops the pool from being rebuilt, waits up to
+     * {@link #SHUTDOWN_ACTIVE_WAIT_MILLIS} only while connections are still borrowed, then closes
+     * the pool and unregisters the operator.
      */
     public void shutdown() {
-        awaitShutdown(DBOperator::threadedShutdown).join().accept(this);
+        threadedShutdown(this);
     }
 
     /**
@@ -328,21 +396,29 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      * @param operator the DBOperator to shut down
      */
     public static void threadedShutdown(DBOperator operator) {
-        if (operator == null || !operator.isUsable()) return;
+        if (operator == null) return;
+
+        HikariDataSource source;
+        synchronized (operator) {
+            if (operator.shutDown) return;
+            operator.shutDown = true;
+            source = operator.getDataSource();
+        }
+
+        if (source == null && ! operator.isUsable()) {
+            operator.unregister();
+            return;
+        }
 
         BetterPlugin plugin = operator.getPluginUser();
         if (plugin != null) {
             plugin.logInfo("Shutting down database connection (" + operator.getPrettyName() + ")...");
         }
 
-        try {
-            operator.forceCommit();
-        } catch (Throwable ignored) {
-            // Best-effort only.
-        }
+        operator.setUnusable();
 
-        HikariDataSource source = operator.getDataSource();
         if (source != null) {
+            awaitReturnedConnections(source, SHUTDOWN_ACTIVE_WAIT_MILLIS);
             try {
                 if (!source.isClosed()) {
                     source.close();
@@ -361,6 +437,25 @@ public abstract class DBOperator implements Comparable<DBOperator> {
 
         if (plugin != null) {
             plugin.logInfo("Database connection (" + operator.getPrettyName() + ") has been shut down.");
+        }
+    }
+
+    /**
+     * Waits until no connections are borrowed from the pool, or until the timeout passes.
+     * Returns immediately when nothing is in use.
+     */
+    private static void awaitReturnedConnections(HikariDataSource source, long timeoutMillis) {
+        long deadline = System.currentTimeMillis() + timeoutMillis;
+        try {
+            while (! source.isClosed() && source.getHikariPoolMXBean() != null
+                    && source.getHikariPoolMXBean().getActiveConnections() > 0
+                    && System.currentTimeMillis() < deadline) {
+                Thread.sleep(25L);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Throwable ignored) {
+            // Pool statistics are best-effort; close() handles whatever is left.
         }
     }
 
@@ -436,7 +531,7 @@ public abstract class DBOperator implements Comparable<DBOperator> {
     public ExecutionResult executeSingle(String statement, Consumer<PreparedStatement> statementBuilder, boolean ignoreErrors) {
         AtomicReference<ExecutionResult> result = new AtomicReference<>(ExecutionResult.ERROR);
 
-        if (!isPoolOpen() && buildDataSource() == null) {
+        if (openPool() == null) {
             return ExecutionResult.ERROR;
         }
 
@@ -522,7 +617,7 @@ public abstract class DBOperator implements Comparable<DBOperator> {
     public void executeQuery(String statement, Consumer<PreparedStatement> statementBuilder, DBAction action, boolean ignoreErrors) {
         if (action == null) return;
 
-        if (!isPoolOpen() && buildDataSource() == null) {
+        if (openPool() == null) {
             return;
         }
 
@@ -625,8 +720,8 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      */
     public void ensureUsable() {
         this.ensureFile();
-        if (!isPoolOpen()) {
-            this.dataSource = buildDataSource();
+        if (shutDown || !isPoolOpen()) {
+            buildDataSource();
         }
         this.ensureDatabase();
         this.ensureTables();
