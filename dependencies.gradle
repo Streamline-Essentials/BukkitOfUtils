@@ -1,8 +1,11 @@
 ext {
-    // Framework deps compiled against; shaded with transitive=false (see build.gradle).
-    // Not on Maven Central — cannot use Spigot libraries: for these.
+    // Libraries behind the bundled TheBase code (src/main/java/gg/drak/thebase). Shaded with
+    // transitive=false and relocated under gg.drak.thebase.lib.* (see build.gradle): dependent
+    // plugins import those relocated names directly, so they cannot come from Spigot libraries:.
     FRAMEWORK = [
-            'gg.drak:TheBase:1.1.0',
+            'gg.drak:SimplixStorage:3.4.0',
+            'net.objecthunter:exp4j:0.4.8',
+            'com.google.re2j:re2j:1.7',
     ]
 
     // Declared in plugin.yml and downloaded by Spigot (modern) or RuntimeLibraryLoader (legacy).
@@ -35,6 +38,7 @@ ext {
     COMP_ONLY = [
             'org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT',
             'net.kyori:adventure-api:4.13.1',
+            'org.jetbrains:annotations:24.0.1',
     ]
     FILES = [
     ]

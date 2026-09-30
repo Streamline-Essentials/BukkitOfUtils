@@ -241,7 +241,7 @@ public class TaskManager {
         PLUGIN_SCHEDULERS.clear();
 
         try {
-            AsyncUtils.getQueuedTasks().forEach(AsyncTask::remove);
+            AsyncUtils.shutdown();
         } catch (Throwable t) {
             BukkitOfUtils.getInstance().logWarning("Failed to clear async tasks during stop.", t);
         }

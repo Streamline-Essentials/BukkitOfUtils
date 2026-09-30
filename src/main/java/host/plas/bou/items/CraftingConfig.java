@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.inventory.Recipe;
 import gg.drak.thebase.objects.Identified;
-import gg.drak.thebase.lib.leonhard.storage.sections.FlatFileSection;
+import de.leonhard.storage.sections.FlatFileSection;
 
 import java.util.concurrent.ConcurrentSkipListMap;
 
