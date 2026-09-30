@@ -47,5 +47,6 @@ commands:
   item-factory:
     description: Create items using the Item Factory.
     aliases:
+      - itemfactory
       - itf
     permission: bou.command.item-factory
