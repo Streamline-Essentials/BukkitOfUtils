@@ -69,6 +69,16 @@ repositories {
 // do not exist in the Spigot 1.16.5 API the rest of this project targets, and putting
 // folia-api on the main compile classpath would silently expose every Bukkit 1.17-1.20
 // method to code that must still run on 1.8.x.
+// Libraries merged into the shaded jar. Deliberately not shadow's `shadow` configuration, whose
+// contents shadow publishes as POM dependencies.
+configurations {
+    bundle {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+}
+
 sourceSets {
     foliaCompat {
         java.srcDirs = ['src/foliaCompat/java']
@@ -93,10 +103,10 @@ dependencies {
     // plugin.yml libraries: + RuntimeLibraryLoader.
     FRAMEWORK.each { coord ->
         compileOnly(coord) { transitive = false }
-        shadow(coord) { transitive = false }
+        bundle(coord) { transitive = false }
     }
     // Unrelocated, as BOU has always shipped them; dependent plugins compile against this jar.
-    shadow('org.jetbrains:annotations:24.0.1') { transitive = false }
+    bundle('org.jetbrains:annotations:24.0.1') { transitive = false }
 
     // OblivateInvs is NOT a dependency any more. Its published classes are Java 21
     // (class file 65.0) and crash on the Java 11 runtimes BOU supports, and only one
@@ -157,6 +167,11 @@ tasks.named('javadoc') {
     classpath += sourceSets.foliaCompat.compileClasspath
 }
 
+// The unshaded jar is only an intermediate; the shaded jar owns the plain file name.
+tasks.named('jar') {
+    archiveClassifier.set('plain')
+}
+
 shadowJar {
     archiveClassifier.set('')
     archiveFileName = "${project.name}-${project.version}.jar"
@@ -164,8 +179,8 @@ shadowJar {
     // Vendored UniversalScheduler is its own source set; include its output.
     from sourceSets.foliaCompat.output
 
-    // Only package the shadow configuration (framework libraries), not the wider runtime classpath.
-    configurations = [project.configurations.shadow]
+    // Only package the bundle configuration (framework libraries), not the wider runtime classpath.
+    configurations = [project.configurations.bundle]
 
     // The bundled TheBase code (gg.drak.thebase) sees its libraries under these names. They are
     // public API: dependent plugins import gg.drak.thebase.lib.re2j / .leonhard directly, so the
@@ -237,7 +252,12 @@ publishing {
             artifactId "$project.name"
             version project.version
 
-            from components.java
+            // The shaded jar is the API dependent plugins compile against: it carries the bundled
+            // libraries relocated, so the POM declares no dependencies. Publishing artifacts
+            // directly (not components.java) keeps the thin jar and the shaded libraries out.
+            artifact shadowJar
+            artifact sourcesJar
+            artifact javadocJar
         }
     }
 
