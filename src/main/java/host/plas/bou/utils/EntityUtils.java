@@ -110,14 +110,27 @@ public class EntityUtils {
      * something actually reads it.
      *
      * <p>A read that starts the timer sees whatever the cache holds at that moment (usually nothing);
-     * the first refresh is scheduled immediately and lands shortly after.</p>
+     * a refresh is started immediately and lands within a tick or so. Use the {@code collect...ThenDo}
+     * methods to have a cold cache filled before the consumer runs.</p>
      *
      * @return the entity cache
      */
     public static Cache<String, WeakReference<Entity>> getCachedEntities() {
-        lastCacheRead = System.currentTimeMillis();
-        ensureLookupTimer();
+        touchCache();
         return cachedEntities;
+    }
+
+    /**
+     * Marks the cache as read and starts the lookup timer if it is not running.
+     *
+     * @return true if the cache was cold, meaning this call started the timer and a refresh
+     */
+    private static boolean touchCache() {
+        lastCacheRead = System.currentTimeMillis();
+        boolean started = ensureLookupTimer();
+        // The timer's first run is a full period away, so a cold cache is refreshed right away.
+        if (started) tickCache();
+        return started;
     }
 
     /**
@@ -131,16 +144,40 @@ public class EntityUtils {
 
     /**
      * Starts the lookup timer if it is enabled and not already running.
+     *
+     * @return true if this call started the timer
      */
-    private static void ensureLookupTimer() {
+    private static boolean ensureLookupTimer() {
         EntityLookupTimer timer = lookupTimer;
-        if (timer != null && ! timer.isCancelled()) return;
+        if (timer != null && ! timer.isCancelled()) return false;
 
         synchronized (TIMER_LOCK) {
-            if (! enabled) return;
-            if (lookupTimer != null && ! lookupTimer.isCancelled()) return;
+            if (! enabled) return false;
+            if (lookupTimer != null && ! lookupTimer.isCancelled()) return false;
 
             lookupTimer = new EntityLookupTimer();
+            return true;
+        }
+    }
+
+    /**
+     * How many ticks a cache-backed collection waits after warming a cold cache, giving the
+     * per-chunk refresh tasks on Folia time to run before the cache is read.
+     */
+    private static final long COLD_CACHE_WAIT_TICKS = 5L;
+
+    /**
+     * Runs the given action on the main/global thread once entities can be read through
+     * {@link #getEntities(boolean) getEntities(true)}. On Folia that read is cache-backed, so a cold
+     * cache is warmed first and the action is delayed until the refresh has had time to land.
+     *
+     * @param action the action to run
+     */
+    private static void runWhenEntitiesReadable(Runnable action) {
+        if (ClassHelper.isFolia() && touchCache()) {
+            TaskManager.runTaskLater(action, COLD_CACHE_WAIT_TICKS);
+        } else {
+            TaskManager.runTask(action);
         }
     }
 
@@ -353,7 +390,7 @@ public class EntityUtils {
      * @param consumer the consumer to apply to each entity
      */
     public static void collectEntitiesThenDo(Consumer<Entity> consumer) {
-        TaskManager.runTask(() -> {
+        runWhenEntitiesReadable(() -> {
             getEntities(true).forEach((s, entity) -> {
                 Entity e = entity.get();
                 if (e == null) return;
@@ -368,7 +405,7 @@ public class EntityUtils {
      * @param consumer the consumer to apply to the collection of entities
      */
     public static void collectEntitiesThenDoSet(Consumer<Collection<Entity>> consumer) {
-        TaskManager.runTask(() -> {
+        runWhenEntitiesReadable(() -> {
             consumer.accept(getEntities(true).values().stream()
                     .map(WeakReference::get)
                     .filter(Objects::nonNull)
@@ -382,7 +419,7 @@ public class EntityUtils {
      * @param consumer the consumer to apply to each living entity
      */
     public static void collectLivingEntitiesThenDo(Consumer<LivingEntity> consumer) {
-        TaskManager.runTask(() -> {
+        runWhenEntitiesReadable(() -> {
             getEntities(true).forEach((s, entity) -> {
                 Entity e = entity.get();
                 if (! (e instanceof LivingEntity)) return;
@@ -398,7 +435,7 @@ public class EntityUtils {
      * @param consumer  the consumer to apply to the filtered collection of entities
      */
     public static void collectEntitiesInWorldThenDoSet(String worldName, Consumer<Collection<Entity>> consumer) {
-        TaskManager.runTask(() -> {
+        runWhenEntitiesReadable(() -> {
             consumer.accept(getEntities(true).values().stream()
                     .map(WeakReference::get)
                     .filter(Objects::nonNull)

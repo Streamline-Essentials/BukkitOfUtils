@@ -34,7 +34,7 @@ public class GetItemCMD extends SimplifiedCommand {
     public static final int MAX_COUNT = 36 * 64;
 
     /**
-     * Constructs the /item-factory command and registers it with the BukkitOfUtils plugin.
+     * Constructs the /itemfactory command and registers it with the BukkitOfUtils plugin.
      */
     public GetItemCMD() {
         super("item-factory", BukkitOfUtils.getInstance());
