@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -115,13 +116,11 @@ public abstract class DBOperator implements Comparable<DBOperator> {
     private Date lastConnection;
 
     /**
-     * Whether {@link #shutdown()} has run. A shut-down operator never reopens its pool on its own;
-     * only an explicit {@link #buildDataSource()} or {@link #ensureUsable()} reopens it.
-     *
-     * @return true if this operator has been shut down
+     * Set by {@link #shutdown()}. Read and flipped without holding this operator's monitor, so a
+     * shutdown on the server thread never waits behind a pool rebuild that is stuck connecting.
      */
-    @Setter(AccessLevel.NONE)
-    private volatile boolean shutDown;
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+    private final AtomicBoolean shutDownState = new AtomicBoolean(false);
 
     /**
      * Constructs a new DBOperator with the given connector set and plugin.
@@ -182,12 +181,25 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      *
      * @return the configured HikariDataSource, or {@code null} if construction fails
      */
-    public synchronized HikariDataSource buildDataSource() {
-        if (shutDown) {
-            shutDown = false;
+    public HikariDataSource buildDataSource() {
+        if (shutDownState.compareAndSet(true, false)) {
             register();
         }
 
+        return rebuildDataSource();
+    }
+
+    /**
+     * Whether {@link #shutdown()} has run. A shut-down operator never reopens its pool on its own;
+     * only an explicit {@link #buildDataSource()} or {@link #ensureUsable()} reopens it.
+     *
+     * @return true if this operator has been shut down
+     */
+    public boolean isShutDown() {
+        return shutDownState.get();
+    }
+
+    private synchronized HikariDataSource rebuildDataSource() {
         HikariDataSource previous = this.dataSource;
         HikariDataSource built = createDataSource();
         if (previous != null && previous != built && ! previous.isClosed()) {
@@ -315,17 +327,24 @@ public abstract class DBOperator implements Comparable<DBOperator> {
         if (isPoolOpen()) return dataSource;
 
         synchronized (this) {
-            if (shutDown) return null;
+            if (isShutDown()) return null;
             if (isPoolOpen()) return dataSource;
 
-            HikariDataSource built = buildDataSource();
+            HikariDataSource built = rebuildDataSource();
+            if (built != null && isShutDown()) {
+                // Shut down while this pool was being built; nothing else will close it.
+                closeQuietly(built);
+                setUnusable();
+                return null;
+            }
             return built == null || built.isClosed() ? null : built;
         }
     }
 
     /**
-     * Explains how to opt in when a remote MySQL server rejects the login because public key
-     * retrieval is off (only enabled automatically for loopback hosts).
+     * Explains how to opt in to the older connection settings when a MySQL login fails because
+     * public key retrieval is off (only enabled automatically for loopback hosts), or because
+     * the server only offers TLS versions the driver and JVM no longer accept.
      */
     private void logPublicKeyRetrievalHint(Throwable error) {
         if (pluginUser == null) return;
@@ -335,6 +354,13 @@ public abstract class DBOperator implements Comparable<DBOperator> {
                 pluginUser.logWarning("The MySQL server requires public key retrieval, which is only enabled automatically for "
                         + "localhost. Enable SSL on the server, or append '?allowPublicKeyRetrieval=true' to the database "
                         + "name if the network between this server and MySQL is trusted.");
+                return;
+            }
+            if (t instanceof javax.net.ssl.SSLException
+                    || (message != null && message.contains("No appropriate protocol"))) {
+                pluginUser.logWarning("The TLS handshake with the MySQL server failed; it may only support TLS versions "
+                        + "this JVM no longer allows. Upgrade the server's TLS support, or append '?sslMode=DISABLED' to the "
+                        + "database name to connect without encryption if the network is trusted.");
                 return;
             }
         }
@@ -398,12 +424,8 @@ public abstract class DBOperator implements Comparable<DBOperator> {
     public static void threadedShutdown(DBOperator operator) {
         if (operator == null) return;
 
-        HikariDataSource source;
-        synchronized (operator) {
-            if (operator.shutDown) return;
-            operator.shutDown = true;
-            source = operator.getDataSource();
-        }
+        if (! operator.shutDownState.compareAndSet(false, true)) return;
+        HikariDataSource source = operator.getDataSource();
 
         if (source == null && ! operator.isUsable()) {
             operator.unregister();
@@ -720,7 +742,7 @@ public abstract class DBOperator implements Comparable<DBOperator> {
      */
     public void ensureUsable() {
         this.ensureFile();
-        if (shutDown || !isPoolOpen()) {
+        if (isShutDown() || !isPoolOpen()) {
             buildDataSource();
         }
         this.ensureDatabase();

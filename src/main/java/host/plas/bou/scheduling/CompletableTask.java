@@ -110,7 +110,7 @@ public class CompletableTask {
         this.cancelled = false;
         this.completionRunnables = new ConcurrentSkipListMap<>();
         this.future = new CompletableFuture<>();
-        this.owningPlugin = TaskManager.findOwner(ownerSource(injectedRunnable));
+        this.owningPlugin = resolveOwner(task, injectedRunnable);
 
         injectedRunnable.setOnFinish(this::settle);
         injectedRunnable.setOnRetire(this::cancel);
@@ -334,6 +334,7 @@ public class CompletableTask {
         if (runnable == null) return this;
 
         synchronized (settleLock) {
+            if (cancelled) return this;
             if (! settled) {
                 getCompletionRunnables().put(nextCompletionKey.getAndIncrement(), runnable);
                 return this;
@@ -381,8 +382,30 @@ public class CompletableTask {
         }
         PENDING.remove(this);
 
+        if (cancelled) {
+            future.complete(null);
+            return;
+        }
+
         CompletableFuture.runAsync(this::runCompletion)
                 .whenComplete((ignored, error) -> future.complete(null));
+    }
+
+    /**
+     * The plugin the task is actually registered under. It differs from the plugin that wrote the
+     * runnable when that plugin was not enabled at scheduling time (for example, work scheduled
+     * from its own disable logic), in which case BukkitOfUtils owns and runs it.
+     */
+    private static Plugin resolveOwner(MyScheduledTask task, InjectedRunnable runnable) {
+        if (task != null) {
+            try {
+                Plugin owner = task.getOwningPlugin();
+                if (owner != null) return owner;
+            } catch (Throwable ignored) {
+                // Fall back to the plugin that provides the runnable.
+            }
+        }
+        return TaskManager.findOwner(ownerSource(runnable));
     }
 
     private static void runCallback(Runnable runnable) {
