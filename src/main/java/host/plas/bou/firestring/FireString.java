@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import gg.drak.thebase.objects.Identifiable;
 import gg.drak.thebase.objects.SingleSet;
-import gg.drak.thebase.lib.re2j.Matcher;
+import com.google.re2j.Matcher;
 import gg.drak.thebase.utils.MatcherUtils;
 
 import java.util.List;

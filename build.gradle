@@ -88,12 +88,15 @@ dependencies {
         attributes { attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 21) }
     }
 
-    // Framework: compile against full graph; shade only non-Central artifacts (no transitives).
-    // Hikari / JDBC / Gson / etc. come from plugin.yml libraries: + RuntimeLibraryLoader.
-    implementation(FRAMEWORK)
+    // Framework libraries: compiled against and shaded (no transitives), never published as
+    // dependencies — the jar carries them relocated. Hikari / JDBC / Gson / etc. come from
+    // plugin.yml libraries: + RuntimeLibraryLoader.
     FRAMEWORK.each { coord ->
+        compileOnly(coord) { transitive = false }
         shadow(coord) { transitive = false }
     }
+    // Unrelocated, as BOU has always shipped them; dependent plugins compile against this jar.
+    shadow('org.jetbrains:annotations:24.0.1') { transitive = false }
 
     // OblivateInvs is NOT a dependency any more. Its published classes are Java 21
     // (class file 65.0) and crash on the Java 11 runtimes BOU supports, and only one
@@ -161,8 +164,15 @@ shadowJar {
     // Vendored UniversalScheduler is its own source set; include its output.
     from sourceSets.foliaCompat.output
 
-    // Only package the shadow configuration (framework + Oblivate), not the wider runtime classpath.
+    // Only package the shadow configuration (framework libraries), not the wider runtime classpath.
     configurations = [project.configurations.shadow]
+
+    // The bundled TheBase code (gg.drak.thebase) sees its libraries under these names. They are
+    // public API: dependent plugins import gg.drak.thebase.lib.re2j / .leonhard directly, so the
+    // targets must not change.
+    relocate 'de.leonhard', 'gg.drak.thebase.lib.leonhard'
+    relocate 'net.objecthunter.exp4j', 'gg.drak.thebase.lib.exp4j'
+    relocate 'com.google.re2j', 'gg.drak.thebase.lib.re2j'
 
 
     // mc.obliviate:core is a fat jar with UniversalScheduler baked in, so a Gradle
@@ -175,8 +185,10 @@ shadowJar {
     // so this only strips copies baked into other fat jars.
     exclude 'mc/obliviate/util/**'
 
-    // TheBase is published as a fat artifact. Strip anything Spigot `libraries:` /
-    // RuntimeLibraryLoader already provides, plus unused fat-jar junk (junit/protobuf).
+    // SimplixStorage is published as a fat artifact carrying test and annotation jars. Strip
+    // those, plus anything Spigot `libraries:` / RuntimeLibraryLoader already provides.
+    exclude 'org/opentest4j/**'
+    exclude 'org/intellij/**'
     exclude 'org/sqlite/**'
     exclude 'sqlite-jdbc.properties'
     exclude 'com/mysql/**'
@@ -193,11 +205,6 @@ shadowJar {
     exclude 'com/google/protobuf/**'
     exclude 'google/protobuf/**'
     exclude 'com/esotericsoftware/yamlbeans/**'
-
-    // TheBase relocates JDBC stack under gg.drak.thebase.lib — drop those copies too.
-    exclude 'gg/drak/thebase/lib/mysql/**'
-    exclude 'gg/drak/thebase/lib/hikari/**'
-    exclude 'gg/drak/thebase/lib/sqlite/**'
 
     exclude 'META-INF/maven/org.junit.*/**'
     exclude 'META-INF/maven/com.zaxxer/HikariCP/**'
