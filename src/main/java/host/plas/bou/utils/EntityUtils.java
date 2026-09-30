@@ -361,18 +361,63 @@ public class EntityUtils {
      * @return a map of entity UUID strings to weak entity references
      */
     public static ConcurrentSkipListMap<String, WeakReference<Entity>> getEntities(boolean isInSync) {
-        ConcurrentSkipListMap<String, WeakReference<Entity>> entities = new ConcurrentSkipListMap<>();
-        if (ClassHelper.isFolia()) {
-            entities.putAll(getCachedEntities().asMap());
-        } else {
-            if (isInSync) {
-                entities.putAll(getEntitiesBukkit());
-            } else {
-                entities.putAll(getCachedEntities().asMap());
-            }
+        if (! ClassHelper.isFolia() && isInSync) {
+            // getEntitiesBukkit() already returns a fresh map; copying it again into a second
+            // skip list only doubled the per-entity UUID and insertion cost.
+            return getEntitiesBukkit();
         }
 
+        ConcurrentSkipListMap<String, WeakReference<Entity>> entities = new ConcurrentSkipListMap<>();
+        entities.putAll(getCachedEntities().asMap());
         return entities;
+    }
+
+    /**
+     * Every entity the calling thread may touch: all loaded-world entities on a standard server
+     * (call from the main thread), the cached entities on Folia. Unlike
+     * {@link #getEntities(boolean)} this builds a plain list, with no per-entity UUID string or
+     * sorted-map insertion, for callers that only iterate.
+     *
+     * @return a new list of live entities
+     */
+    public static List<Entity> snapshotEntities() {
+        List<Entity> result = new ArrayList<>();
+        if (ClassHelper.isFolia()) {
+            for (WeakReference<Entity> reference : getCachedEntities().asMap().values()) {
+                Entity entity = reference.get();
+                if (entity != null) {
+                    result.add(entity);
+                }
+            }
+            return result;
+        }
+
+        try {
+            for (World world : Bukkit.getWorlds()) {
+                result.addAll(world.getEntities());
+            }
+        } catch (Exception e) {
+            BukkitOfUtils.getInstance().logWarning("An error occurred while polling entities.", e);
+        }
+        return result;
+    }
+
+    /**
+     * Runs {@code task} for {@code entity} on the thread that owns it. On a standard server that
+     * is the main thread the caller is already on, so it runs inline instead of scheduling one
+     * task per entity; a failing task is logged without stopping the ones after it.
+     */
+    private static void dispatchToEntity(Entity entity, Runnable task) {
+        if (ClassHelper.isFolia()) {
+            TaskManager.runTask(entity, task);
+            return;
+        }
+
+        try {
+            task.run();
+        } catch (Throwable e) {
+            BukkitOfUtils.getInstance().logWarning("An error occurred while processing an entity.", e);
+        }
     }
 
     /**
@@ -391,11 +436,9 @@ public class EntityUtils {
      */
     public static void collectEntitiesThenDo(Consumer<Entity> consumer) {
         runWhenEntitiesReadable(() -> {
-            getEntities(true).forEach((s, entity) -> {
-                Entity e = entity.get();
-                if (e == null) return;
-                TaskManager.runTask(e, () -> consumer.accept(e));
-            });
+            for (Entity e : snapshotEntities()) {
+                dispatchToEntity(e, () -> consumer.accept(e));
+            }
         });
     }
 
@@ -405,12 +448,7 @@ public class EntityUtils {
      * @param consumer the consumer to apply to the collection of entities
      */
     public static void collectEntitiesThenDoSet(Consumer<Collection<Entity>> consumer) {
-        runWhenEntitiesReadable(() -> {
-            consumer.accept(getEntities(true).values().stream()
-                    .map(WeakReference::get)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList()));
-        });
+        runWhenEntitiesReadable(() -> consumer.accept(snapshotEntities()));
     }
 
     /**
@@ -420,11 +458,11 @@ public class EntityUtils {
      */
     public static void collectLivingEntitiesThenDo(Consumer<LivingEntity> consumer) {
         runWhenEntitiesReadable(() -> {
-            getEntities(true).forEach((s, entity) -> {
-                Entity e = entity.get();
-                if (! (e instanceof LivingEntity)) return;
-                TaskManager.runTask(e, () -> consumer.accept((LivingEntity) e));
-            });
+            for (Entity e : snapshotEntities()) {
+                if (e instanceof LivingEntity) {
+                    dispatchToEntity(e, () -> consumer.accept((LivingEntity) e));
+                }
+            }
         });
     }
 
@@ -436,9 +474,7 @@ public class EntityUtils {
      */
     public static void collectEntitiesInWorldThenDoSet(String worldName, Consumer<Collection<Entity>> consumer) {
         runWhenEntitiesReadable(() -> {
-            consumer.accept(getEntities(true).values().stream()
-                    .map(WeakReference::get)
-                    .filter(Objects::nonNull)
+            consumer.accept(snapshotEntities().stream()
                     .filter(entity -> entity.getWorld().getName().equalsIgnoreCase(worldName))
                     .collect(Collectors.toList()));
         });
