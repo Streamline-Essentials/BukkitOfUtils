@@ -78,6 +78,17 @@ public class FlatFileResource<T extends FlatFile> extends StorageResource<T> {
         }
     }
 
+    /**
+     * Returns the underlying Simplix file, first reloading it if it changed on disk (see
+     * {@link #refreshIfChanged()}), so callers reading through it directly see file edits too.
+     *
+     * @return the underlying Simplix file
+     */
+    public T getResource() {
+        refreshIfChanged();
+        return this.resource;
+    }
+
     @Override
     public <O> O get(String key, Class<O> def) {
         refreshIfChanged();
