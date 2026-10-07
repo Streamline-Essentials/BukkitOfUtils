@@ -48,6 +48,15 @@ public class BaseConfig extends SimpleConfiguration {
         // OneMenu.
         isOneMenuEnabled();
         getOneMenuCommandAlias();
+
+        // Player lookups.
+        isPlayerLookupWebEnabled();
+        getPlayerLookupTimeoutMillis();
+        getPlayerLookupFoundCacheMinutes();
+        getPlayerLookupMissingCacheMinutes();
+        getPlayerLookupFailedCacheMinutes();
+        getPlayerLookupMaxBackoffMinutes();
+        getBedrockPrefixFallback();
     }
 
     /**
@@ -221,5 +230,85 @@ public class BaseConfig extends SimpleConfiguration {
         reloadResource();
 
         return getOrSetDefault("timers.entity-collection.frequency", 10L);
+    }
+
+    /**
+     * Whether player lookups may contact web APIs (Geyser global API, PlayerDB, MineTools).
+     * When disabled, lookups only use data already on the server. Mojang is never contacted.
+     *
+     * @return true if web lookups are enabled
+     */
+    public boolean isPlayerLookupWebEnabled() {
+        reloadResource();
+
+        return getOrSetDefault("player-lookups.web.enabled", true);
+    }
+
+    /**
+     * Connect and read timeout for each web lookup request, in milliseconds.
+     *
+     * @return the timeout in milliseconds
+     */
+    public int getPlayerLookupTimeoutMillis() {
+        reloadResource();
+
+        return getOrSetDefault("player-lookups.web.timeout-millis", 4000);
+    }
+
+    /**
+     * How long a successful lookup is cached, in minutes.
+     *
+     * @return the cache duration in minutes
+     */
+    public long getPlayerLookupFoundCacheMinutes() {
+        reloadResource();
+
+        return getOrSetDefault("player-lookups.cache.found-minutes", 360L);
+    }
+
+    /**
+     * How long a "no such player" answer is cached, in minutes.
+     *
+     * @return the cache duration in minutes
+     */
+    public long getPlayerLookupMissingCacheMinutes() {
+        reloadResource();
+
+        return getOrSetDefault("player-lookups.cache.missing-minutes", 30L);
+    }
+
+    /**
+     * How long an incomplete or failed lookup is cached before it is retried, in minutes.
+     *
+     * @return the cache duration in minutes
+     */
+    public long getPlayerLookupFailedCacheMinutes() {
+        reloadResource();
+
+        return getOrSetDefault("player-lookups.cache.failed-minutes", 5L);
+    }
+
+    /**
+     * The longest a web provider is skipped after repeated failures (timeouts, rate limits,
+     * outages), in minutes. Backoff starts at 30 seconds and doubles per consecutive failure.
+     *
+     * @return the maximum backoff in minutes
+     */
+    public long getPlayerLookupMaxBackoffMinutes() {
+        reloadResource();
+
+        return getOrSetDefault("player-lookups.backoff.max-minutes", 30L);
+    }
+
+    /**
+     * The Bedrock username prefix to assume when Floodgate is not installed on this server
+     * (for example when it only runs on the proxy). Floodgate's own value wins when present.
+     *
+     * @return the prefix
+     */
+    public String getBedrockPrefixFallback() {
+        reloadResource();
+
+        return getOrSetDefault("player-lookups.bedrock.prefix", ".");
     }
 }

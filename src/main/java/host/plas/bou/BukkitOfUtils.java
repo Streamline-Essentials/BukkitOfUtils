@@ -4,6 +4,7 @@ import host.plas.bou.bstats.BStats;
 import host.plas.bou.commands.CommandBuilder;
 import host.plas.bou.commands.CommandResult;
 import host.plas.bou.compat.CompatManager;
+import host.plas.bou.profiles.PlayerLookup;
 import host.plas.bou.drakapi.VersionCheckResult;
 import host.plas.bou.drakapi.VersionChecker;
 import host.plas.bou.firestring.FireStringManager;
@@ -154,6 +155,8 @@ public class BukkitOfUtils extends BetterPlugin implements HelpfulPlugin {
         } catch (Throwable t) {
             logWarning("Failed to shut down bStats.", t);
         }
+
+        PlayerLookup.shutdown();
 
         BaseManager.stop();
     }

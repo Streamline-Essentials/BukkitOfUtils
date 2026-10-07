@@ -1,136 +1,64 @@
 package host.plas.bou.utils;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import host.plas.bou.profiles.LookupResult;
+import host.plas.bou.profiles.PlayerLookup;
+import host.plas.bou.profiles.ProfileData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.UUID;
 
 /**
- * Utility class for fetching Minecraft player UUIDs and names from the PlayerDB API.
+ * Blocking player name/UUID lookups, backed by {@link PlayerLookup}.
+ * <p>
+ * Results come from the server's own data first, then the Geyser global API (Bedrock players),
+ * PlayerDB, and MineTools; Mojang is never queried. Calls are cached and bounded by
+ * {@link #TIMEOUT_MILLIS}, so offline-mode and no-internet servers get a fast answer. Prefer the
+ * asynchronous {@link PlayerLookup} methods in new code.
  */
 public class UUIDFetcher {
     /** Private constructor to prevent instantiation of this utility class. */
     private UUIDFetcher() {}
 
-    /** The PlayerDB API URL template for fetching Minecraft player data. */
-    private static final String API_URL = "https://playerdb.co/api/player/minecraft/%s";
+    /** The longest a blocking lookup waits before returning null. */
+    public static final long TIMEOUT_MILLIS = 10_000L;
 
     /**
-     * Fetches the UUID of a Minecraft player by their username using the PlayerDB API.
+     * Fetches the UUID of a player by name. On offline-mode servers (not behind a proxy) this is
+     * the offline-mode UUID the server assigns to that name.
      *
      * @param name the player's username
-     * @return the player's UUID, or null if the player is not found or an error occurs
+     * @return the player's UUID, or null if the player is not found or no source could be reached
      */
     @Nullable
     public static UUID getUUID(@NotNull String name) {
-        name = name.toLowerCase(); // Had some issues with upper-case letters in the username, so I added this to make sure that doesn't happen.
-
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(String.format(API_URL, name)).openConnection();
-
-            connection.setUseCaches(false);
-            connection.setDefaultUseCaches(false);
-            connection.addRequestProperty("User-Agent", "Mozilla/5.0");
-            connection.addRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
-            connection.addRequestProperty("Pragma", "no-cache");
-            connection.setReadTimeout(5000);
-
-            // These connection parameters need to be set or the API won't accept the connection.
-
-            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                StringBuilder response = new StringBuilder();
-                String line;
-
-                while ((line = bufferedReader.readLine()) != null) response.append(line);
-
-                final JsonElement parsed = new JsonParser().parse(response.toString());
-
-                if (parsed == null || !parsed.isJsonObject()) {
-                    return null;
-                }
-
-                JsonObject data = parsed.getAsJsonObject(); // Read the returned JSON data.
-
-                return UUID.fromString(
-                                data.get("data")
-                                                .getAsJsonObject()
-                                                .get("player")
-                                                .getAsJsonObject()
-                                                .get("id") // Grab the UUID.
-                                                .getAsString()
-                );
-            }
-        } catch (Exception ignored) {
-            // Ignoring exception since this is usually caused by non-existent usernames.
-        }
-
-        return null;
+        LookupResult result = PlayerLookup.resolveBlocking(name, TIMEOUT_MILLIS);
+        return result.getProfile().map(ProfileData::getUuid).orElse(null);
     }
 
     /**
-     * Fetches the username of a Minecraft player by their UUID string using the PlayerDB API.
+     * Fetches the username of a player by their UUID string.
      *
      * @param uuid the player's UUID as a string
      * @return the player's username, or null if the player is not found or an error occurs
      */
     @Nullable
     public static String getName(@NotNull String uuid) {
-        uuid = uuid.toLowerCase(); // Had some issues with upper-case letters in the username, so I added this to make sure that doesn't happen.
-
         try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(String.format(API_URL, uuid)).openConnection();
-
-            connection.setUseCaches(false);
-            connection.setDefaultUseCaches(false);
-            connection.addRequestProperty("User-Agent", "Mozilla/5.0");
-            connection.addRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
-            connection.addRequestProperty("Pragma", "no-cache");
-            connection.setReadTimeout(5000);
-
-            // These connection parameters need to be set or the API won't accept the connection.
-
-            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                StringBuilder response = new StringBuilder();
-                String line;
-
-                while ((line = bufferedReader.readLine()) != null) response.append(line);
-
-                final JsonElement parsed = new JsonParser().parse(response.toString());
-
-                if (parsed == null || !parsed.isJsonObject()) {
-                    return null;
-                }
-
-                JsonObject data = parsed.getAsJsonObject(); // Read the returned JSON data.
-
-                return data.get("data")
-                                .getAsJsonObject()
-                                .get("player")
-                                .getAsJsonObject()
-                                .get("username") // Grab the UUID.
-                                .getAsString();
-            }
-        } catch (Exception ignored) {
-            // Ignoring exception since this is usually caused by non-existent usernames.
+            return getName(UUID.fromString(uuid.trim()));
+        } catch (IllegalArgumentException e) {
+            return null;
         }
-
-        return null;
     }
 
     /**
-     * Fetches the username of a Minecraft player by their UUID using the PlayerDB API.
+     * Fetches the username of a player by their UUID.
      *
      * @param uuid the player's UUID
      * @return the player's username, or null if the player is not found or an error occurs
      */
     public static String getName(UUID uuid) {
-        return getName(uuid.toString());
+        LookupResult result = PlayerLookup.resolveBlocking(uuid, TIMEOUT_MILLIS);
+        return result.getProfile().map(ProfileData::getName).orElse(null);
     }
 }

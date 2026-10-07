@@ -1,7 +1,9 @@
 package host.plas.bou.utils;
 
 import host.plas.bou.instances.BaseManager;
-import org.bukkit.Bukkit;
+import host.plas.bou.profiles.LookupResult;
+import host.plas.bou.profiles.PlayerLookup;
+import host.plas.bou.profiles.UuidType;
 import org.bukkit.OfflinePlayer;
 
 import java.util.UUID;
@@ -124,11 +126,10 @@ public class UuidUtils {
 
         if (isOfflineMode()) return true;
 
-        try {
-            return UUIDFetcher.getUUID(playerName) != null;
-        } catch (Throwable e) {
-            return false; // If the player is not found or has no valid profile
-        }
+        // Only a definite "no such player" fails validation; when lookups are disabled or
+        // unreachable the name cannot be disproven, so it is accepted.
+        LookupResult result = PlayerLookup.resolveBlocking(playerName, UUIDFetcher.TIMEOUT_MILLIS);
+        return result.getStatus() != LookupResult.Status.NOT_FOUND;
     }
 
     /**
@@ -144,19 +145,27 @@ public class UuidUtils {
 
         if (isOfflineMode()) return true;
 
+        UUID parsed;
         try {
-            return UUIDFetcher.getName(uuid) != null;
-        } catch (Throwable e) {
-            return false; // If the player is not found or has no valid profile
+            parsed = UUID.fromString(uuid.trim());
+        } catch (IllegalArgumentException e) {
+            return false;
         }
+        // Bedrock players have no Java profile to check; their UUID is valid by construction.
+        if (UuidType.of(parsed) == UuidType.BEDROCK) return true;
+
+        LookupResult result = PlayerLookup.resolveBlocking(parsed, UUIDFetcher.TIMEOUT_MILLIS);
+        return result.getStatus() != LookupResult.Status.NOT_FOUND;
     }
 
     /**
-     * Checks whether the server is running in offline (cracked) mode.
+     * Checks whether the server is running in offline (cracked) mode, meaning players have
+     * offline-mode UUIDs. Servers behind a UUID-forwarding proxy are not offline mode here,
+     * even though they set {@code online-mode=false}.
      *
      * @return true if the server is in offline mode
      */
     public static boolean isOfflineMode() {
-        return ! Bukkit.getOnlineMode();
+        return ! PlayerLookup.usesAccountUuids();
     }
 }

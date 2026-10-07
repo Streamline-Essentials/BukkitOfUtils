@@ -4,6 +4,8 @@ main: '${main}'
 api-version: '1.13'
 folia-supported: true
 authors: [ Drak ]
+# Load after these so their APIs are ready when BOU's Bedrock support looks them up.
+softdepend: [ floodgate, Geyser-Spigot ]
 # Spigot native Maven Central library loader (supported on modern Spigot/Paper).
 # Older servers ignore this and RuntimeLibraryLoader downloads the same artifacts.
 libraries:
