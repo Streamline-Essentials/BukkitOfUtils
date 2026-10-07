@@ -6,6 +6,7 @@ import host.plas.bou.profiles.ProfileData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -32,6 +33,11 @@ public class UUIDFetcher {
      */
     @Nullable
     public static UUID getUUID(@NotNull String name) {
+        // Identity answers never wait on the network when the server already knows (or can
+        // derive) them; only skins need the web.
+        Optional<UUID> known = PlayerLookup.getUuidWithoutLookup(name);
+        if (known.isPresent()) return known.get();
+
         LookupResult result = PlayerLookup.resolveBlocking(name, TIMEOUT_MILLIS);
         return result.getProfile().map(ProfileData::getUuid).orElse(null);
     }
@@ -58,6 +64,9 @@ public class UUIDFetcher {
      * @return the player's username, or null if the player is not found or an error occurs
      */
     public static String getName(UUID uuid) {
+        Optional<String> known = PlayerLookup.getNameWithoutLookup(uuid);
+        if (known.isPresent()) return known.get();
+
         LookupResult result = PlayerLookup.resolveBlocking(uuid, TIMEOUT_MILLIS);
         return result.getProfile().map(ProfileData::getName).orElse(null);
     }

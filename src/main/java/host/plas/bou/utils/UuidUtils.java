@@ -4,6 +4,7 @@ import host.plas.bou.instances.BaseManager;
 import host.plas.bou.profiles.LookupResult;
 import host.plas.bou.profiles.PlayerLookup;
 import host.plas.bou.profiles.UuidType;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import java.util.UUID;
@@ -125,6 +126,7 @@ public class UuidUtils {
         if (playerName.isBlank()) return false;
 
         if (isOfflineMode()) return true;
+        if (PlayerLookup.getUuidWithoutLookup(playerName).isPresent()) return true;
 
         // Only a definite "no such player" fails validation; when lookups are disabled or
         // unreachable the name cannot be disproven, so it is accepted.
@@ -153,19 +155,20 @@ public class UuidUtils {
         }
         // Bedrock players have no Java profile to check; their UUID is valid by construction.
         if (UuidType.of(parsed) == UuidType.BEDROCK) return true;
+        if (PlayerLookup.getNameWithoutLookup(parsed).isPresent()) return true;
 
         LookupResult result = PlayerLookup.resolveBlocking(parsed, UUIDFetcher.TIMEOUT_MILLIS);
         return result.getStatus() != LookupResult.Status.NOT_FOUND;
     }
 
     /**
-     * Checks whether the server is running in offline (cracked) mode, meaning players have
-     * offline-mode UUIDs. Servers behind a UUID-forwarding proxy are not offline mode here,
-     * even though they set {@code online-mode=false}.
+     * Checks whether the server is running in offline mode ({@code online-mode=false}). This is
+     * also true behind a UUID-forwarding proxy; use {@link PlayerLookup#usesAccountUuids()} to
+     * tell whether players have real account UUIDs.
      *
      * @return true if the server is in offline mode
      */
     public static boolean isOfflineMode() {
-        return ! PlayerLookup.usesAccountUuids();
+        return ! Bukkit.getOnlineMode();
     }
 }

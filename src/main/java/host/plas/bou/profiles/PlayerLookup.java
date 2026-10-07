@@ -349,6 +349,43 @@ public final class PlayerLookup {
     }
 
     /**
+     * Returns a player's UUID when it is known or derivable without a network request: cached,
+     * online, in the server's user cache, or (on offline-mode servers) the offline-mode UUID.
+     *
+     * @param name the player's name
+     * @return the UUID, or empty when only a web lookup could tell
+     */
+    public static Optional<UUID> getUuidWithoutLookup(String name) {
+        if (name == null || name.isBlank()) return Optional.empty();
+
+        Optional<UUID> cached = getCached(name).map(ProfileData::getUuid);
+        if (cached.isPresent()) return cached;
+
+        ProfileData local = localByName(name);
+        if (local != null && local.getUuid() != null) return Optional.of(local.getUuid());
+
+        if (!usesAccountUuids() && !hasBedrockPrefix(name)) return Optional.of(UuidType.offlineUuid(name));
+        return Optional.empty();
+    }
+
+    /**
+     * Returns a player's name when it is known without a network request: cached, online, or in
+     * the server's player data.
+     *
+     * @param uuid the player's UUID
+     * @return the name, or empty when only a web lookup could tell
+     */
+    public static Optional<String> getNameWithoutLookup(UUID uuid) {
+        if (uuid == null) return Optional.empty();
+
+        Optional<String> cached = getCached(uuid).map(ProfileData::getName);
+        if (cached.isPresent()) return cached;
+
+        ProfileData local = localByUuid(uuid);
+        return local == null ? Optional.empty() : Optional.ofNullable(local.getName());
+    }
+
+    /**
      * Returns what the server itself knows about a UUID: the online player (with their live skin),
      * or the name from the server's player data. Never makes a network request.
      *
