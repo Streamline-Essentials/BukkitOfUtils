@@ -3,6 +3,11 @@ package host.plas.bou.utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.GameProfile;
+import host.plas.bou.profiles.HeadUtils;
+import host.plas.bou.profiles.LookupSource;
+import host.plas.bou.profiles.PlayerLookup;
+import host.plas.bou.profiles.ProfileData;
+import host.plas.bou.profiles.UuidType;
 import host.plas.bou.BukkitOfUtils;
 import host.plas.bou.commands.CommandHandler;
 import host.plas.bou.utils.obj.Versioning;
@@ -26,6 +31,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -213,9 +219,31 @@ public class VersionTool {
                         if (profileMap != null) {
                             String ownerId = (String) profileMap.get("id");
                             String ownerName = (String) profileMap.get("name");
+                            String textures = texturesFromProfileMap(profileMap);
 
-                            if (ownerId != null) {
-                                skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(ownerId)));
+                            // A serialized skin is applied as-is; an owner without textures makes
+                            // the server resolve the head through Mojang, which fails for Bedrock UUIDs.
+                            UUID ownerUuid = null;
+                            try {
+                                if (ownerId != null) ownerUuid = UUID.fromString(ownerId);
+                            } catch (IllegalArgumentException ignored) {
+                                // Leave the owner unset.
+                            }
+                            boolean applied = textures != null && HeadUtils.applyProfile(skullMeta,
+                                    new ProfileData(ownerUuid, ownerName, textures, null, LookupSource.DERIVED));
+
+                            if (applied) {
+                                return meta;
+                            }
+                            if (ownerUuid != null && !UuidType.of(ownerUuid).isJavaResolvable()) {
+                                // Bedrock/offline owners: only a cached skin is usable here; the
+                                // lookup fills the cache for the next time this item is built.
+                                Optional<ProfileData> cached = PlayerLookup.getCached(ownerUuid);
+                                if (!cached.isPresent() || !HeadUtils.applyProfile(skullMeta, cached.get())) {
+                                    PlayerLookup.lookup(ownerUuid);
+                                }
+                            } else if (ownerUuid != null) {
+                                skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(ownerUuid));
                             } else if (ownerName != null) {
                                 skullMeta.setOwner(ownerName);
                             }
@@ -230,6 +258,37 @@ public class VersionTool {
         }
 
         return meta;
+    }
+
+    /**
+     * Reads the {@code textures} property value from a serialized skull profile map, accepting
+     * both the list form ({@code [{name, value, signature}]}) and the map form ({@code {textures: ...}}).
+     *
+     * @param profileMap the serialized profile
+     * @return the base64 texture value, or null if absent
+     */
+    @SuppressWarnings("unchecked")
+    private static String texturesFromProfileMap(Map<String, Object> profileMap) {
+        Object properties = profileMap.get("properties");
+        try {
+            if (properties instanceof List) {
+                for (Object entry : (List<Object>) properties) {
+                    if (!(entry instanceof Map)) continue;
+                    Map<String, Object> property = (Map<String, Object>) entry;
+                    if ("textures".equals(property.get("name")) && property.get("value") != null) {
+                        return property.get("value").toString();
+                    }
+                }
+            } else if (properties instanceof Map) {
+                Object textures = ((Map<String, Object>) properties).get("textures");
+                if (textures instanceof List && !((List<?>) textures).isEmpty()) textures = ((List<?>) textures).get(0);
+                if (textures instanceof Map) textures = ((Map<String, Object>) textures).get("value");
+                if (textures instanceof String) return (String) textures;
+            }
+        } catch (Throwable ignored) {
+            // Unrecognised shape: no textures.
+        }
+        return null;
     }
 
     /**

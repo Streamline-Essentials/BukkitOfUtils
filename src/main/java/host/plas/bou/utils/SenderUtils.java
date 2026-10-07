@@ -2,6 +2,7 @@ package host.plas.bou.utils;
 
 import host.plas.bou.commands.Sender;
 import host.plas.bou.instances.BaseManager;
+import host.plas.bou.profiles.PlayerLookup;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -38,7 +39,11 @@ public class SenderUtils {
         if (name.equals(BaseManager.getBaseConfig().getConsoleUUID())) {
             return BaseManager.getBaseConfig().getConsoleUUID();
         } else {
-            return Bukkit.getOfflinePlayer(name).getUniqueId().toString();
+            // Bukkit.getOfflinePlayer(String) blocks on a Mojang request for names the server has
+            // never seen; it is only the fallback for names nothing local can answer.
+            return PlayerLookup.getUuidWithoutLookup(name)
+                    .orElseGet(() -> Bukkit.getOfflinePlayer(name).getUniqueId())
+                    .toString();
         }
     }
 

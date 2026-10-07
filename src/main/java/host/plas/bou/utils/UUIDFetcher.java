@@ -25,20 +25,23 @@ public class UUIDFetcher {
     public static final long TIMEOUT_MILLIS = 10_000L;
 
     /**
-     * Fetches the UUID of a player by name. On offline-mode servers (not behind a proxy) this is
-     * the offline-mode UUID the server assigns to that name.
+     * Fetches the account UUID behind a name: the Mojang account UUID for Java names, or the
+     * Floodgate UUID for prefixed Bedrock names. On offline-mode servers this is still the real
+     * account, not the offline-mode UUID the server assigns; use {@link PlayerLookup#resolve(String)}
+     * for the server-side UUID.
      *
      * @param name the player's username
-     * @return the player's UUID, or null if the player is not found or no source could be reached
+     * @return the account UUID, or null if the player is not found or no source could be reached
      */
     @Nullable
     public static UUID getUUID(@NotNull String name) {
-        // Identity answers never wait on the network when the server already knows (or can
-        // derive) them; only skins need the web.
-        Optional<UUID> known = PlayerLookup.getUuidWithoutLookup(name);
-        if (known.isPresent()) return known.get();
+        if (PlayerLookup.usesAccountUuids()) {
+            // The server's own identities are accounts here, so known names need no request.
+            Optional<UUID> known = PlayerLookup.getUuidWithoutLookup(name);
+            if (known.isPresent()) return known.get();
+        }
 
-        LookupResult result = PlayerLookup.resolveBlocking(name, TIMEOUT_MILLIS);
+        LookupResult result = PlayerLookup.resolveAccountBlocking(name, TIMEOUT_MILLIS);
         return result.getProfile().map(ProfileData::getUuid).orElse(null);
     }
 

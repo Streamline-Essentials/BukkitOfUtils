@@ -54,6 +54,8 @@ public final class PlayerLookup {
 
     private static final Map<UUID, CacheEntry> BY_UUID = new ConcurrentHashMap<>();
     private static final Map<String, CacheEntry> BY_NAME = new ConcurrentHashMap<>();
+    /** Account lookups on offline-mode servers, kept apart because their UUIDs differ from the server's. */
+    private static final Map<String, CacheEntry> ACCOUNTS = new ConcurrentHashMap<>();
     private static final Map<String, CompletableFuture<LookupResult>> IN_FLIGHT = new ConcurrentHashMap<>();
 
     private static final Object EXECUTOR_LOCK = new Object();
@@ -276,10 +278,52 @@ public final class PlayerLookup {
 
         return submit("n:" + key, () -> {
             Settings settings = Settings.read();
-            LookupResult result = resolveNameNow(name, settings);
+            LookupResult result = resolveNameNow(name, settings, false);
             store(result, null, name, settings);
             return result;
         });
+    }
+
+    /**
+     * Resolves the account behind a name, asynchronously: the Mojang account UUID for Java names,
+     * the Floodgate UUID for prefixed Bedrock names. Unlike {@link #resolve(String)}, offline-mode
+     * servers get the real account rather than the offline-mode UUID the server would assign,
+     * which is what skin lookups by name need.
+     *
+     * @param name the player's name
+     * @return a future with the lookup result; never completes exceptionally
+     */
+    public static CompletableFuture<LookupResult> resolveAccount(String name) {
+        if (name == null || name.isBlank()) return CompletableFuture.completedFuture(LookupResult.notFound());
+        // With account UUIDs the server's own identities are the accounts.
+        if (usesAccountUuids()) return resolve(name);
+
+        String key = name.toLowerCase(Locale.ROOT);
+        CacheEntry entry = ACCOUNTS.get(key);
+        if (entry != null && entry.isValid()) return CompletableFuture.completedFuture(entry.result);
+
+        return submit("a:" + key, () -> {
+            Settings settings = Settings.read();
+            LookupResult result = resolveNameNow(name, settings, true);
+            long ttl = settings.ttlFor(result);
+            if (ttl > 0) {
+                if (ACCOUNTS.size() > MAX_CACHE_ENTRIES) ACCOUNTS.clear();
+                ACCOUNTS.put(key, new CacheEntry(result, System.currentTimeMillis() + ttl));
+            }
+            return result;
+        });
+    }
+
+    /**
+     * Resolves the account behind a name, blocking for at most the given time.
+     *
+     * @param name          the player's name
+     * @param timeoutMillis the longest to wait
+     * @return the result, or {@link LookupResult.Status#UNAVAILABLE} on timeout
+     * @see #resolveAccount(String)
+     */
+    public static LookupResult resolveAccountBlocking(String name, long timeoutMillis) {
+        return await(resolveAccount(name), timeoutMillis);
     }
 
     /**
@@ -439,6 +483,7 @@ public final class PlayerLookup {
     public static void clearCache() {
         BY_UUID.clear();
         BY_NAME.clear();
+        ACCOUNTS.clear();
         LookupProviders.GEYSER.reset();
         LookupProviders.PLAYERDB.reset();
         LookupProviders.MINETOOLS.reset();
@@ -780,8 +825,10 @@ public final class PlayerLookup {
         return answered ? LookupResult.notFound() : LookupResult.unavailable();
     }
 
-    private static LookupResult resolveNameNow(String name, Settings settings) {
-        ProfileData local = localByName(name);
+    private static LookupResult resolveNameNow(String name, Settings settings, boolean accountOnly) {
+        // On offline-mode servers local data carries offline-mode UUIDs, which are not accounts.
+        boolean localIsAccount = !accountOnly || usesAccountUuids();
+        ProfileData local = localIsAccount ? localByName(name) : null;
         if (local != null) {
             if (local.hasTextures()) return LookupResult.found(local, true);
             LookupResult byUuid = resolveUuidNow(local.getUuid(), settings);
@@ -808,7 +855,7 @@ public final class PlayerLookup {
             }
         }
 
-        if (!usesAccountUuids()) {
+        if (!accountOnly && !usesAccountUuids()) {
             // Offline mode: the server will give this name its offline-mode UUID, whatever any
             // service says. Any account with that name only contributes a skin.
             UUID uuid = UuidType.offlineUuid(name);
