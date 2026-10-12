@@ -100,6 +100,16 @@ _`<...>` is required, `(...)` is optional._
 * `/boutitle <player> <title>\n<subtitle> (-fadeIn=<fade in ticks>) (-stay=<stay ticks>) (-fadeOut=<fade out ticks>)` — alias: `bout`
     * Send a title to a player with the plugin's color support.
     * Permission: `bou.command.boutitle`
+* `/bouversion` — alias: `bouv`
+    * Shows `BukkitOfUtils` versioning information, including the server's version.
+    * Checks Modrinth for updates and links the download if you are behind.
+* `/bouplugins <list|enable|disable|info|reload|unload|load|menu> (plugin)` — alias: `boup`
+    * List and manage loaded BOU plugins, or open the plugins menu.
+    * Permission: `bou.plugins`
+* `/onemenu` — alias: `menu` (configurable)
+    * Opens the configurable OneMenu GUI.
+    * Off by default; enable it with `one-menu.enabled` in the config.
+    * Permission: `bou.onemenu`
 * `/runfirestring <firestring>` — aliases: `rfs`, `firestring`, `fstring`
     * Runs a `FireString`.
     * Permission: `bou.command.runfirestring`
