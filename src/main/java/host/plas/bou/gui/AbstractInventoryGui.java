@@ -1,5 +1,6 @@
 package host.plas.bou.gui;
 
+import host.plas.bou.scheduling.TaskManager;
 import host.plas.bou.utils.ColorUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -44,8 +45,10 @@ public abstract class AbstractInventoryGui implements InventoryHolder {
     }
 
     protected void finishAndOpen(ItemStack[] contents) {
-        this.inventory.setContents(contents);
-        this.player.openInventory(this.inventory);
+        TaskManager.runTask(getPlayer(), () -> {
+            this.inventory.setContents(contents);
+            this.player.openInventory(this.inventory);
+        });
     }
 
     protected int resolveBackSlot(int size) {
